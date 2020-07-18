@@ -1,0 +1,32 @@
+const emojis = {
+  checkmark: '✔️',
+  error: '❌',
+  settings: '⚙️',
+  playing: '▶',
+  pause: '⏸️',
+  greeting: '👋',
+  farewell: '👋',
+  mute: '🔇',
+  unmute: '🔊',
+  skip: '⏩',
+  stop: '🛑',
+  queue: '⌛',
+  rabbit: '🐰',
+  search: '🔎',
+  dice: '🎲',
+  heads: '😐',
+  tails: '🐕',
+  trash: '🗑',
+  unknown: '😕',
+  confused: '🤔',
+  sad: '😔',
+  angry: '😡',
+  weird: '😒',
+  annoyed: '☹️',
+  neutral: '😐',
+  content: '🙂',
+  happy: '😊',
+  joyful: '😄'
+}
+
+module.exports = emojis

@@ -1,0 +1,6 @@
+# Be sure to ignore all dependency packages, or the repository will blow up!
+# There is a patch I applied to ytdl-core-discord which will have to be
+#  manually written in for now.
+node_modules
+.VS*
+.DS*

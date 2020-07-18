@@ -1,0 +1,26 @@
+{
+  "name": "discordtest",
+  "version": "1.0.0",
+  "description": "Testing with discordjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jonathan Zhao",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/opus": "^0.3.2",
+    "@keyv/sqlite": "^2.0.2",
+    "defaults": "^1.0.3",
+    "discord.js": "^12.2.0",
+    "ffmpeg-static": "^4.2.5",
+    "html-entities": "^1.3.1",
+    "keyv": "^4.0.1",
+    "node-libsamplerate": "github:nanokina/node-libsamplerate#master",
+    "snowboy": "^1.3.1-alpha.1",
+    "speaker": "^0.5.2",
+    "youtube-node": "^1.3.3",
+    "ytdl-core": "^3.1.2",
+    "ytdl-core-discord": "^1.2.1"
+  }
+}
