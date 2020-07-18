@@ -244,7 +244,8 @@ botClient.on('voiceStateUpdate', (oldPresence, newPresence) => {
   const guildClient = botClient.guildClients.get(newPresence.guild.id)
   const userId = newPresence.id
 
-  if (guildClient && guildClient.voiceChannel && oldPresence.channelID === guildClient.voiceChannel.id) {
+  if (guildClient && guildClient.voiceChannel && oldPresence.channelID === guildClient.voiceChannel.id &&
+    (!newPresence.channelID || newPresence.channelID !== guildClient.voiceChannel.id)) {
     if (guildClient.members.get(userId)) {
       const snowClient = guildClient.members.get(userId).snowClient
       if (snowClient) {
@@ -259,7 +260,7 @@ botClient.on('voiceStateUpdate', (oldPresence, newPresence) => {
       }
 
       console.log('Disconnected!')
-      Commands.restrictedCommandMap.get('leave')(guildClient)
+      Commands.restrictedCommands.get('leave')(guildClient)
     }
 
     if (userId === botClient.user.id && guildClient.delete) {
@@ -284,8 +285,9 @@ botClient.on('guildCreate', guild => {
   '**Please note that I\'m still in testing, so I \\*may\\* shut down frequently!**')
 })
 
-botClient.on('error', () => {
+botClient.on('error', error => {
   botClient.guildClients.forEach(guildClient => {
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Fatal error, shutting down Snowboy***`, guildClient)
   })
+  console.error(error)
 })
