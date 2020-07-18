@@ -1,1 +1,26 @@
-$ Snowboy
+# SnowBoy
+Welcome to the Snowboy Discord bot repository!
+If you were not invited, please kindly leave, it's a private repo!
+
+## About
+Snowboy is a voice-activated Discord bot built with discord.js.
+The speech-recognition capabilities come from Wit.ai and Snowboy (hence the name, since that was their most popular hotword detection).
+It also utilizes a few Google Cloud APIs such as Youtube's data API and Google's search API to accomplish a few features.
+It is NOT verified, so it cannot be invited to more than 100 servers.
+
+## Usage
+To install every package, navigate to the directory and run the following command:
+```bash
+npm install
+```
+
+Afterwards, simply run:
+```bash
+node index.js
+```
+
+This should run the bot. There are a few environmental variables/keys/tokens which need to be set.
+Please contact me directly and I will share details privately with you.
+
+## Contributing
+Just read CONTRIBUTING.md real quick. Right now, it's private, so again, if I didn't invite you, kindly leave.
