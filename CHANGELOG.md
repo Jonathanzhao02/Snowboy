@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.1
+Bug fix
+* Fixed bug in `replaceMentions` due to syntax error, `guild` was passed in incorrectly.
+
 ## v0.2.0
 Many changes and bug fixes.
 * Moved all value constants to Config.
