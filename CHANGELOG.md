@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.3 (PR #13)
+Bug fixes and refactoring
+* Removed redundant if statement in `leave`
+* Removed `.connection.disconnect()` in `cleanupGuildClient` since that would be handled by the `leave` method
+* Reordered parameters in `cleanupGuildClient` from `(botClient, guildClient)` to `(guildClient, botClient)`
+
 ## v0.2.2 (PR #12)
 More documentation and bug fixes
 * Reordered order of functions when removing all listeners or unpiping to better manage resources, especially in `snowboy.js`.
