@@ -11,9 +11,6 @@ const youtube = new YouTube()
 youtube.setKey(process.env.GOOGLE_API_TOKEN)
 Gsearch.setKey(process.env.GOOGLE_API_TOKEN)
 
-// Plays silence frames, necessary for 'speaking' event to continue working
-const SILENCE = new Streams.Silence()
-
 var botClient
 var keyv
 
@@ -42,8 +39,13 @@ function setDb (db) {
  * @param {Object} guildClient The guildClient associated with the server of the connection.
  */
 function connectionHandler (connection, guildClient) {
+  const silence = new Streams.Silence()
   guildClient.connection = connection
-  connection.play(SILENCE, { type: 'opus' })
+  connection.play(silence, { type: 'opus' })
+  connection.dispatcher.on('finish', () => {
+    silence.destroy()
+    guildClient.connection.dispatcher.destroy()
+  })
   console.log('Connected!')
 }
 
@@ -58,7 +60,12 @@ function queuedPlay (video, guildClient) {
   if (!video) {
     // End current dispatcher
     if (guildClient.playing) guildClient.connection.dispatcher.end()
-    guildClient.connection.play(SILENCE, { type: 'opus' })
+    const silence = new Streams.Silence()
+    guildClient.connection.play(silence, { type: 'opus' })
+    guildClient.connection.dispatcher.on('finish', () => {
+      silence.destroy()
+      guildClient.connection.dispatcher.destroy()
+    })
     guildClient.playing = false
     guildClient.lastCalled = Date.now()
     setTimeout(() => {
@@ -99,6 +106,7 @@ function queuedPlay (video, guildClient) {
       .on('finish', () => {
         // Goes to next song in queue
         var queue = guildClient.songQueue
+        guildClient.connection.dispatcher.destroy()
         guildClient.playing = false
         stream.destroy()
 
@@ -194,8 +202,13 @@ function stop (guildClient, userId, args) {
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Nothing currently playing!***`, guildClient)
     return
   }
+  const silence = new Streams.Silence()
   guildClient.connection.dispatcher.end()
-  guildClient.connection.play(SILENCE, { type: 'opus' })
+  guildClient.connection.play(silence, { type: 'opus' })
+  guildClient.connection.dispatcher.on('finish', () => {
+    silence.destroy()
+    guildClient.connection.dispatcher.destroy()
+  })
   guildClient.playing = false
   guildClient.songQueue = []
   Functions.sendMsg(guildClient.textChannel, `${Emojis.stop} ***Stopped the music***`, guildClient)
@@ -270,13 +283,16 @@ function leave (guildClient, userId, args) {
       guildClient)
   }
 
+  if (guildClient.connection) {
+    guildClient.connection.disconnect()
+    guildClient.connection.removeAllListeners()
+    if (guildClient.connection.dispatcher) {
+      guildClient.connection.dispatcher.end()
+      guildClient.connection.dispatcher.destroy()
+    }
+  }
   guildClient.members.forEach(member => { if (member.snowClient) member.snowClient.stop() })
   guildClient.members.clear()
-  if (guildClient.connection) {
-    guildClient.connection.removeAllListeners()
-    guildClient.connection.disconnect()
-    if (guildClient.connection.dispatcher) guildClient.connection.dispatcher.end()
-  }
   guildClient.voiceChannel.leave()
   guildClient.voiceChannel = undefined
   guildClient.connection = undefined
