@@ -310,7 +310,7 @@ function replaceMentions (msg, guild) {
  */
 async function sendMsg (textChannel, msg, guildClient, opts) {
   if (!textChannel) return undefined
-  if (guildClient && guildClient.settings.mentions === 'false') msg = replaceMentions(msg, guildClient.guild)
+  if (guildClient && !guildClient.settings.mentions) msg = replaceMentions(msg, guildClient.guild)
   let msgs
   if (opts) msgs = await textChannel.send(msg, opts)
   else msgs = await textChannel.send(msg)

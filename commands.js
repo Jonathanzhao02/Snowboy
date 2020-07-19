@@ -54,10 +54,10 @@ function connectionHandler (connection, guildClient) {
  * @param {Object} guildClient The guildClient associated with the server of the playback.
  */
 function queuedPlay (video, guildClient) {
-  // End current dispatcher
-  if (guildClient.playing) guildClient.connection.dispatcher.end()
   // If no video, clean up connection and begin expiration timeout
   if (!video) {
+    // End current dispatcher
+    if (guildClient.playing) guildClient.connection.dispatcher.end()
     guildClient.connection.play(SILENCE, { type: 'opus' })
     guildClient.playing = false
     guildClient.lastCalled = Date.now()
