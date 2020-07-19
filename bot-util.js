@@ -1,7 +1,15 @@
 const Entities = require('html-entities').Html5Entities
 const Discord = require('discord.js')
 const Emojis = require('./emojis')
+const Config = require('./config')
 
+/**
+ * Creates an embed for a video.
+ *
+ * @param {Object} vid The JSON object representing the video, returned by Youtube Data API.
+ * @param {String} username The username of the video requester.
+ * @returns {Discord.MessageEmbed} Returns a message embed detailing the video.
+ */
 function createVideoEmbed (vid, username) {
   return new Discord.MessageEmbed()
     .setColor('#0099ff')
@@ -13,6 +21,13 @@ function createVideoEmbed (vid, username) {
     .setURL(`http://www.youtube.com/watch?v=${vid.id.videoId}`)
 }
 
+/**
+ * Creates an embed for a search result.
+ *
+ * @param {Object} result The JSON object representing the search result, returned by Custom Search API.
+ * @param {String} username The username of the search requester.
+ * @returns {Discord.MessageEmbed} Returns a message embed detailing the search result.
+ */
 function createSearchEmbed (result, username) {
   return new Discord.MessageEmbed()
     .setColor('#32cd32')
@@ -23,6 +38,12 @@ function createSearchEmbed (result, username) {
     .setFooter(`Requested by ${username}`)
 }
 
+/**
+ * Creates an embed detailing the bot.
+ *
+ * @param {Discord.Client} botClient The Client of the bot.
+ * @returns {Discord.MessageEmbed} Returns a message embed detailing the bot.
+ */
 function createAboutEmbed (botClient) {
   return new Discord.MessageEmbed()
     .setColor('#fffafa')
@@ -38,6 +59,12 @@ function createAboutEmbed (botClient) {
     .setImage(botClient.user.displayAvatarURL({ size: 2048, format: 'png' }))
 }
 
+/**
+ * Creates an embed detailing the settings.
+ *
+ * @param {Settings} settings The Settings object to be used in displaying values.
+ * @returns {Discord.MessageEmbed} Returns a message embed detailing the Settings values and properties.
+ */
 function createSettingsEmbed (settings) {
   return new Discord.MessageEmbed()
     .setTitle(`${Emojis.settings} __**Settings**__`)
@@ -49,11 +76,18 @@ function createSettingsEmbed (settings) {
     .addField('sensitivity', `\`${settings.sensitivity}\``)
 }
 
+/**
+ * Generates a random integer between [0, bound - 1]
+ *
+ * @param {Number} bound The upper bound of the random number.
+ * @returns {Number} Returns the random number.
+ */
 function random (bound) {
   var num = Math.floor(Math.random() * Math.floor(bound))
   return (num < bound) ? num : bound
 }
 
+// The list of greetings used for when the bot joins
 const greetings = [
   'Hey there',
   'Hi',
@@ -74,6 +108,7 @@ const greetings = [
   'Great seeing you'
 ]
 
+// The list of farewells used for when the bot leaves
 const farewells = [
   'Goodbye',
   'See ya',
@@ -93,15 +128,7 @@ const farewells = [
   'I\'ll always be here for you'
 ]
 
-// Descending order, <= and > previous threshold
-const HATE_THRESHOLD = -66
-const DISLIKE_THRESHOLD = -30
-const SLIGHT_DISLIKE_THRESHOLD = -10
-const NEUTRAL_THRESHOLD = 10
-const SLIGHT_LIKE_THRESHOLD = 30
-const LIKE_THRESHOLD = 66
-const LOVE_THRESHOLD = 100
-
+// The list of replies used for when a hotword is triggered, ordered by likability
 const hotwordReplies = [
   ['What?'],
   ['Huh?', 'Hmm?'],
@@ -112,6 +139,7 @@ const hotwordReplies = [
   ['What\'s up, {0}?', 'Yeah, {0}?']
 ]
 
+// The list of emojis used for when a hotword is triggered, ordered by likability
 const hotwordEmojis = [
   ' ',
   ' ',
@@ -122,6 +150,7 @@ const hotwordEmojis = [
   Emojis.happy
 ]
 
+// The list of replies used for when the bot is asked for its impression of somebody, ordered by likability
 const impressionReplies = [
   ['Shut up.', 'I don\'t care.', 'Screw you.'],
   ['I don\'t like you, {0}.', 'You\'re a bit of a jerk, {0}.', 'My mother always told me if I don\'t have anything nice to say, don\'t say anything at all.'],
@@ -132,6 +161,7 @@ const impressionReplies = [
   ['Let\'s just say you could have intercourse with my romantic partner, {0}.', 'Man, I love you, {0}!', 'I wish I could hang out with you {0} but, you know, I\'m digital and all.']
 ]
 
+// The list of emojis used for when the bot is asked for its impression of somebody, ordered by likability
 const impressionEmojis = [
   Emojis.angry,
   Emojis.weird,
@@ -142,14 +172,17 @@ const impressionEmojis = [
   Emojis.joyful
 ]
 
+// The response strings
 const replies = new Map()
 replies.set('hotword', hotwordReplies)
 replies.set('impression', impressionReplies)
 
+// The response emojis
 const replyEmojis = new Map()
 replyEmojis.set('hotword', hotwordEmojis)
 replyEmojis.set('impression', impressionEmojis)
 
+// Enumeration representing each likability level
 const Relation = {
   HATE: 0,
   DISLIKE: 1,
@@ -160,16 +193,31 @@ const Relation = {
   LOVE: 6
 }
 
+/**
+ * Converts an impression level to a likability level.
+ *
+ * @param {Number} impression The impression level.
+ * @returns {Number} Returns the index of the likability level.
+ */
 function convertToRelation (impression) {
-  if (impression <= HATE_THRESHOLD) return Relation.HATE
-  if (impression <= DISLIKE_THRESHOLD) return Relation.DISLIKE
-  if (impression <= SLIGHT_DISLIKE_THRESHOLD) return Relation.SLIGHT_DISLIKE
-  if (impression <= NEUTRAL_THRESHOLD) return Relation.NEUTRAL
-  if (impression <= SLIGHT_LIKE_THRESHOLD) return Relation.SLIGHT_LIKE
-  if (impression <= LIKE_THRESHOLD) return Relation.LIKE
-  if (impression <= LOVE_THRESHOLD) return Relation.LOVE
+  if (impression <= Config.ImpressionThresholds.HATE_THRESHOLD) return Relation.HATE
+  if (impression <= Config.ImpressionThresholds.DISLIKE_THRESHOLD) return Relation.DISLIKE
+  if (impression <= Config.ImpressionThresholds.SLIGHT_DISLIKE_THRESHOLD) return Relation.SLIGHT_DISLIKE
+  if (impression <= Config.ImpressionThresholds.NEUTRAL_THRESHOLD) return Relation.NEUTRAL
+  if (impression <= Config.ImpressionThresholds.SLIGHT_LIKE_THRESHOLD) return Relation.SLIGHT_LIKE
+  if (impression <= Config.ImpressionThresholds.LIKE_THRESHOLD) return Relation.LIKE
+  if (impression <= Config.ImpressionThresholds.LOVE_THRESHOLD) return Relation.LOVE
 }
 
+/**
+ * Replaces each {#} in a string with each argument supplied, in order.
+ *
+ * Copies functionality of Java's String.format() method.
+ *
+ * @param {String} msg The string to format.
+ * @param {String[]} args The arguments to replace each index with.
+ * @returns {String} Returns the formatted string.
+ */
 function format (msg, args) {
   for (var i = 0; i < args.length; i++) {
     msg = msg.replace(`{${i}}`, args[i])
@@ -178,6 +226,15 @@ function format (msg, args) {
   return msg
 }
 
+/**
+ * Gets the response to a function according to the impression level.
+ *
+ * @param {String} func The name of the function being called.
+ * @param {Number} impression The impression level.
+ * @param {String[]} args The arguments to format the string with.
+ * @param {boolean} useImpressions Whether impressions are active or not.
+ * @returns {String} Returns the formatted response.
+ */
 function getResponse (func, impression, args, useImpressions) {
   const relation = convertToRelation(useImpressions ? impression : 0)
   if (!replies.get(func)) console.error(`No replies for ${func}!`)
@@ -188,17 +245,30 @@ function getResponse (func, impression, args, useImpressions) {
   return replyEmoji + ' ' + format(replyCands[random(replyCands.length)], args)
 }
 
-const MAX_IMPRESSION = 100
-const MIN_IMPRESSION = -100
-
+/**
+ * Updates the impression level of a user in a server.
+ *
+ * @param {Keyv} keyv The database to save to.
+ * @param {Object} guildClient The guildClient associated with the server.
+ * @param {String} userId The ID of the user to be updated.
+ * @param {Number} value The change in the user's impression level.
+ * @param {boolean} useImpressions Whether impressions are active or not.
+ */
 function updateImpression (keyv, guildClient, userId, value, useImpressions) {
   if (!useImpressions) return
   const member = guildClient.members.get(userId)
-  if (member.impression + value > MAX_IMPRESSION || member.impression + value < MIN_IMPRESSION) return
+  if (member.impression + value > Config.ImpressionThresholds.MAX_IMPRESSION || member.impression + value < Config.ImpressionThresholds.MIN_IMPRESSION) return
   member.impression += value
   keyv.set(`${guildClient.guild.id}:${userId}`, value)
 }
 
+/**
+ * Finds the GuildMember object associated with an identifier of some sort within a Guild.
+ *
+ * @param {String} str The identifier. Could be nickname, username, mention.
+ * @param {Discord.Guild} guild The Guild whose members cache is to be searched.
+ * @returns {Discord.GuildMember} Returns the first GuildMember associated with that identifier.
+ */
 function findMember (str, guild) {
   const mentionId = str.match(/^<@!?(\d+)>$/)
   let id
@@ -211,6 +281,13 @@ function findMember (str, guild) {
     (id && u.id === id))
 }
 
+/**
+ * Replaces the mentions in a message with their display name.
+ *
+ * @param {String} msg The message to be formatted.
+ * @param {Discord.Guild} guild The Guild whose members cache is to be searched for display names.
+ * @returns {String} Returns the formatted string.
+ */
 function replaceMentions (msg, guild) {
   const regex = /<@!?(\d+)>/
 
@@ -222,13 +299,48 @@ function replaceMentions (msg, guild) {
   return msg
 }
 
+/**
+ * Sends a message through the text channel.
+ *
+ * @param {Discord.TextChannel} textChannel The TextChannel to send the message to.
+ * @param {String|Discord.MessageEmbed} msg The message to be sent.
+ * @param {Object?} guildClient The guildClient associated with the TextChannel server.
+ * @param {Object?} opts Any additional options to send the message with.
+ * @returns {Discord.Message|Discord.Message[]} Returns the message(s) sent.
+ */
 async function sendMsg (textChannel, msg, guildClient, opts) {
   if (!textChannel) return undefined
-  if (guildClient && guildClient.settings.mentions === 'false') msg = replaceMentions(msg, guildClient.guild)
+  if (guildClient && !guildClient.settings.mentions) msg = replaceMentions(msg, guildClient.guild)
   let msgs
   if (opts) msgs = await textChannel.send(msg, opts)
   else msgs = await textChannel.send(msg)
   return msgs
+}
+
+/**
+ * Deletes a guildClient if it has been inactive for a certain amount of time.
+ *
+ * If the guildClient has an active voice connection, notify through the TextChannel and mark the guildClient
+ * for deletion to be handled by the voiceStateUpdate event before leaving the voice channel.
+ *
+ * @param {Object} guildClient The guildClient to be checked for expiration.
+ * @param {Discord.Client} botClient The Client of the active bot.
+ */
+function cleanupGuildClient (botClient, guildClient) {
+  if (Date.now() - guildClient.lastCalled >= Config.TIMEOUT) {
+    // If the guild is currently connected, is not playing music, and has an active TextChannel,
+    // notify, mark the guildClient for deletion, and leave
+    if (guildClient.textChannel && guildClient.connection && !guildClient.playing) {
+      sendMsg(guildClient.textChannel,
+        `${Emojis.happy} **It seems nobody needs me right now, so I'll be headed out. Call me when you do!**`,
+        guildClient)
+      guildClient.delete = true
+      guildClient.connection.disconnect()
+      guildClient.voiceChannel.leave()
+    } else {
+      botClient.guildClients.delete(guildClient.guild.id)
+    }
+  }
 }
 
 module.exports = {
@@ -247,6 +359,7 @@ module.exports = {
     random: random,
     updateImpression: updateImpression,
     findMember: findMember,
-    sendMsg: sendMsg
+    sendMsg: sendMsg,
+    cleanupGuildClient: cleanupGuildClient
   }
 }

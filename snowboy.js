@@ -47,7 +47,6 @@ class SnowClient {
     if (this.triggered) {
       if (new Date().getTime() - this.timeSinceLastChunk < SILENCE_QUERY_TIME) {
         this.timeSinceLastChunk = new Date().getTime()
-        // this.bufs.push(chunk)
       }
     }
   }

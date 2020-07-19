@@ -1,13 +1,78 @@
+// Default bot prefix is '%'
 const DEFAULT_BOT_PREFIX = '%'
-const DEFAULT_IMPRESSIONS = 'true'
-const DEFAULT_VOICE = 'true'
-const DEFAULT_MENTIONS = 'true'
+
+// Default impression system active
+const DEFAULT_IMPRESSIONS = true
+
+// Default voice commands active
+const DEFAULT_VOICE = true
+
+// Default mentions active
+const DEFAULT_MENTIONS = true
+
+// Default sensitivity for Snowboy
 const DEFAULT_SENSITIVITY = '0.45'
 
+// Time before Snowboy automatically disconnects due to inactivity
+const TIMEOUT = 1800000
+
+// Time before Snowboy automatically disconnects from a channel after being alone
+const ALONE_TIMEOUT = 10000
+
+// Threshold of how confident Snowboy should be in an intent before accepting it
+const CONFIDENCE_THRESHOLD = 0.7
+
+// User IDs of users who are able to use debug commands, feel free to add your's
+const DEBUG_IDS = ['290237225596092416']
+
+// Impression value changes for each action
+const HAPPY_VALUE = +2
+const GREET_VALUE = +1
+const NEVERMIND_VALUE = -1
+const SAD_VALUE = -3
+const GROSS_VALUE = -5
+
+// The thresholds for each likability level
+// Descending order, <= and > previous threshold
+const HATE_THRESHOLD = -66
+const DISLIKE_THRESHOLD = -30
+const SLIGHT_DISLIKE_THRESHOLD = -10
+const NEUTRAL_THRESHOLD = 10
+const SLIGHT_LIKE_THRESHOLD = 30
+const LIKE_THRESHOLD = 66
+const LOVE_THRESHOLD = 100
+
+const MAX_IMPRESSION = 100
+const MIN_IMPRESSION = -100
+
 module.exports = {
-  DEFAULT_BOT_PREFIX: DEFAULT_BOT_PREFIX,
-  DEFAULT_IMPRESSIONS: DEFAULT_IMPRESSIONS,
-  DEFAULT_VOICE: DEFAULT_VOICE,
-  DEFAULT_MENTIONS: DEFAULT_MENTIONS,
-  DEFAULT_SENSITIVITY: DEFAULT_SENSITIVITY
+  TIMEOUT: TIMEOUT,
+  ALONE_TIMEOUT: ALONE_TIMEOUT,
+  CONFIDENCE_THRESHOLD: CONFIDENCE_THRESHOLD,
+  DEBUG_IDS: DEBUG_IDS,
+  SettingsValues: {
+    DEFAULT_BOT_PREFIX: DEFAULT_BOT_PREFIX,
+    DEFAULT_IMPRESSIONS: DEFAULT_IMPRESSIONS,
+    DEFAULT_VOICE: DEFAULT_VOICE,
+    DEFAULT_MENTIONS: DEFAULT_MENTIONS,
+    DEFAULT_SENSITIVITY: DEFAULT_SENSITIVITY
+  },
+  ImpressionValues: {
+    HAPPY_VALUE: HAPPY_VALUE,
+    GREET_VALUE: GREET_VALUE,
+    NEVERMIND_VALUE: NEVERMIND_VALUE,
+    SAD_VALUE: SAD_VALUE,
+    GROSS_VALUE: GROSS_VALUE
+  },
+  ImpressionThresholds: {
+    HATE_THRESHOLD: HATE_THRESHOLD,
+    DISLIKE_THRESHOLD: DISLIKE_THRESHOLD,
+    SLIGHT_DISLIKE_THRESHOLD: SLIGHT_DISLIKE_THRESHOLD,
+    NEUTRAL_THRESHOLD: NEUTRAL_THRESHOLD,
+    SLIGHT_LIKE_THRESHOLD: SLIGHT_LIKE_THRESHOLD,
+    LIKE_THRESHOLD: LIKE_THRESHOLD,
+    LOVE_THRESHOLD: LOVE_THRESHOLD,
+    MAX_IMPRESSION: MAX_IMPRESSION,
+    MIN_IMPRESSION: MIN_IMPRESSION
+  }
 }
