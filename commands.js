@@ -283,13 +283,11 @@ function leave (guildClient, userId, args) {
       guildClient)
   }
 
-  if (guildClient.connection) {
-    guildClient.connection.disconnect()
-    guildClient.connection.removeAllListeners()
-    if (guildClient.connection.dispatcher) {
-      guildClient.connection.dispatcher.end()
-      guildClient.connection.dispatcher.destroy()
-    }
+  guildClient.connection.disconnect()
+  guildClient.connection.removeAllListeners()
+  if (guildClient.connection.dispatcher) {
+    guildClient.connection.dispatcher.end()
+    guildClient.connection.dispatcher.destroy()
   }
   guildClient.members.forEach(member => { if (member.snowClient) member.snowClient.stop() })
   guildClient.members.clear()

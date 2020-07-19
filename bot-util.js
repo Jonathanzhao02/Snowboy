@@ -326,7 +326,7 @@ async function sendMsg (textChannel, msg, guildClient, opts) {
  * @param {Object} guildClient The guildClient to be checked for expiration.
  * @param {Discord.Client} botClient The Client of the active bot.
  */
-function cleanupGuildClient (botClient, guildClient) {
+function cleanupGuildClient (guildClient, botClient) {
   if (Date.now() - guildClient.lastCalled >= Config.TIMEOUT) {
     // If the guild is currently connected, is not playing music, and has an active TextChannel,
     // notify, mark the guildClient for deletion, and leave
@@ -335,7 +335,6 @@ function cleanupGuildClient (botClient, guildClient) {
         `${Emojis.happy} **It seems nobody needs me right now, so I'll be headed out. Call me when you do!**`,
         guildClient)
       guildClient.delete = true
-      guildClient.connection.disconnect()
       guildClient.voiceChannel.leave()
     } else {
       botClient.guildClients.delete(guildClient.guild.id)
