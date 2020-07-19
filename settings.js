@@ -3,6 +3,8 @@ const Emojis = require('./emojis')
 const Config = require('./config')
 
 /**
+ * Contains all available Settings options for a guildClient.
+ *
  * @property {String} prefix The prefix for commands.
  * @property {boolean} impressions Whether the impression system is being used.
  * @property {boolean} voice Whether voice commands are enabled.

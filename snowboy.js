@@ -6,7 +6,25 @@ const wit = require('./wit')
 const MAX_QUERY_TIME = 8000
 const SILENCE_QUERY_TIME = 2500
 
+/**
+ * Uses Snowboy for hotword detection, triggering a callback.
+ *
+ * @property {ReadableStream} stream The stream to be piped to the detector.
+ * @property {boolean} triggered Whether the client is triggered by a hotword currently.
+ * @property {Object} guildClient The guildClient of the server the SnowClient's user is in.
+ * @property {String} userId The ID of the SnowClient's user.
+ * @property {EventEmitter} events The EventEmitter used for callbacks.
+ * @property {Detector} detector The Detector used for Snowboy.
+ * @property {Number} timeSinceLastChunk The time since the last chunk of data was read from the stream.
+ */
 class SnowClient {
+  /**
+   * Initializes the Snowboy detection.
+   *
+   * @param {Object} gldClnt The guildClient of the server the SnowClient's user is in.
+   * @param {String} usrId The ID of the SnowClient's user.
+   * @param {String} sensitivity The sensitivity of the model.
+   */
   constructor (gldClnt, usrId, sensitivity) {
     this.stream = null
     this.triggered = false
@@ -43,7 +61,13 @@ class SnowClient {
     this.detector.on('hotword', (index, hotword, buffer) => { this.hotword(index, hotword, buffer) })
   }
 
-  fillBuffer (chunk) {
+  /**
+   * Updates the timeSinceLastChunk property whenever data is received.
+   *
+   * @private
+   * @param {Buffer} chunk The data received from the stream.
+   */
+  checkBuffer (chunk) {
     if (this.triggered) {
       if (new Date().getTime() - this.timeSinceLastChunk < SILENCE_QUERY_TIME) {
         this.timeSinceLastChunk = new Date().getTime()
@@ -51,16 +75,26 @@ class SnowClient {
     }
   }
 
+  /**
+   * Triggered whenever a hotword is detected.
+   *
+   * @param {Number} index The index of the hotword within the model. Always '0'.
+   * @param {String} hotword The hotword detected. Always 'Snowboy'.
+   * @param {Buffer} buffer Unused parameter.
+   */
   hotword (index, hotword, buffer) {
+    // If already triggered, emit the 'busy' event
     if (this.triggered) {
       this.events.emit('busy', this.guildClient, this.userId)
       return
     }
+    // Emit the 'hotword' event and set the timeSinceLastChunk and initialTime values
     this.events.emit('hotword', index, hotword, this.guildClient, this.userId)
     this.timeSinceLastChunk = new Date().getTime()
     const initialTime = this.timeSinceLastChunk
 
     const flag = new Events.EventEmitter()
+    // Get the text of the audio stream from Wit.ai
     wit.getStreamText(this.stream, flag, (finalResult) => {
       this.triggered = false
       this.events.emit('result', finalResult, this.guildClient, this.userId)
@@ -70,6 +104,7 @@ class SnowClient {
       this.events.emit('error', error, this.guildClient, this.userId)
     })
 
+    // Every 50ms, check if the query time has been exceeded, and finish if it has
     const intervalID = setInterval(() => {
       if (new Date().getTime() - this.timeSinceLastChunk > SILENCE_QUERY_TIME || new Date().getTime() - initialTime > MAX_QUERY_TIME) {
         clearInterval(intervalID)
@@ -81,29 +116,42 @@ class SnowClient {
       }
     }, 50)
 
-    this.stream.on('data', chunk => this.fillBuffer(chunk))
+    this.stream.on('data', chunk => this.checkBuffer(chunk))
     this.triggered = true
   }
 
+  /**
+   * Adds a callback for an event.
+   *
+   * @param {String} event The event to add the callback to.
+   * @param {Function} callback The function to be called whenever that event is emitted.
+   */
   on (event, callback) {
     this.events.on(event, callback)
   }
 
+  /**
+   * Starts detection, reading from the passed stream
+   *
+   * @param {ReadableStream} strm The stream to read from for audio.
+   */
   start (strm) {
     this.stream = strm
     console.log(`SNOWBOY: Listening to ${this.userId}...`)
     this.stream.pipe(this.detector)
   }
 
+  /**
+   * Shuts down the stream and cleans up all resources.
+   */
   stop () {
     console.log(`SNOWBOY: Shutting down ${this.userId}...`)
-
     if (!this.stream) return
-
+    this.stream.end()
     this.stream.unpipe(this.detector)
     this.stream.removeAllListeners()
-    this.stream.end()
     this.stream.destroy()
+    this.stream = undefined
   }
 }
 
