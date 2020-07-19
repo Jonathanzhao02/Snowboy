@@ -10,7 +10,7 @@ Read up on semantic versioning (vx.x.x) to figure out how to properly version yo
 Maybe small bug fixes or changes do not have to be too detailed, but it is incredibly important refactorings and renamings are detailed extensively.
 
 For the sake of being able to match PRs to versions easily, please include the PR number in the version in CHANGELOG.md (i.e. v0.6.9 (PR #420)).
-If you forget a few small fixes and make multile pull requests that are all accepted, go ahead and simply add all relevant PR versions to the version number.
+If you forget a few small fixes and make multiple pull requests that are all accepted, go ahead and simply add all relevant PR versions to the version number.
 
 Even if you have the power to, try not to commit directly to the repository and always open a pull request so that we can always track and review changes.
 To do this without forking the repo, you can create another branch called 'dev' or something and commit there, then open a pull request when it is ready to merge.
