@@ -7,8 +7,11 @@ If you are unfamiliar with the Github workflow, please feel free to contact me d
 ## Pull Requests
 Be sure to detail any changes in the CHANGELOG.md so that we can keep all our code maintained and mergeable with each other.
 Read up on semantic versioning (vx.x.x) to figure out how to properly version your change. <b>For now, since we're in pre-alpha, it will remain at version 0.x.x.</b>
-Maybe small bug fixes or changes do not have to be too detailed, but it is incredibly important refactorings and renamings are detailed extensively
-Even if you have the power to, try not to commit directly to the repository and always open a pull request so that we can track and review changes.
+Maybe small bug fixes or changes do not have to be too detailed, but it is incredibly important refactorings and renamings are detailed extensively.
+
+For the sake of being able to match PRs to versions easily, please include the PR number in the version in CHANGELOG.md (i.e. v0.6.9 (PR #420)).
+
+Even if you have the power to, try not to commit directly to the repository and always open a pull request so that we can always track and review changes.
 To do this without forking the repo, you can create another branch called 'dev' or something and commit there, then open a pull request when it is ready to merge.
 
 ## Running the Bot
