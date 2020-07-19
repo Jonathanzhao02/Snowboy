@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.2.2 (PR #12)
+More documentation and bug fixes
+* Reordered order of functions when removing all listeners or unpiping to better manage resources, especially in `snowboy.js`.
+* Added documentation to `streams.js`, `snowboy.js`, and added a line of documentation in `settings.js`.
+
 ## v0.2.1 (PR #10, #11)
 Bug fixes
 * Fixed bug in `replaceMentions` due to syntax error, `guild` was passed in incorrectly.
