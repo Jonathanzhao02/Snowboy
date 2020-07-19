@@ -293,7 +293,7 @@ function replaceMentions (msg, guild) {
 
   while (msg.match(regex)) {
     const group = msg.match(regex)
-    msg = msg.replace(group[0], findMember(group[0]).displayName, guild)
+    msg = msg.replace(group[0], findMember(group[0], guild).displayName)
   }
 
   return msg
