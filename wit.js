@@ -2,10 +2,25 @@ const http = require('https')
 
 var accessToken
 
+/**
+ * Sets the access key to the Wit.ai API.
+ *
+ * @param {String} key The access key to the Wit.ai API.
+ */
 function setKey (key) {
   accessToken = key
 }
 
+/**
+ * Gets the text and intents from raw audio.
+ *
+ * Audio must be little-endian 16-bit signed integers at 16Hz.
+ * Makes an HTTP request to the Wit.ai API.
+ *
+ * @param {Buffer} pcmData The Buffer containing raw audio.
+ * @param {Function} callback The callback that receives the text after it is returned.
+ * @param {Function} handler The handler for if the HTTP request errors.
+ */
 function getText (pcmData, callback, handler) {
   if (!handler) handler = console.log
   if (!callback) callback = console.log
@@ -46,6 +61,17 @@ function getText (pcmData, callback, handler) {
   req.end()
 }
 
+/**
+ * Gets the text and intents from an audio stream.
+ *
+ * Audio must be little-endian 16-bit signed integers at 16Hz.
+ * Makes an HTTP request to the Wit.ai API.
+ *
+ * @param {ReadableStream} pcmData The ReadableStream containing raw audio.
+ * @param {EventEmitter} flag The emitter that signifies when to stop reading from the stream.
+ * @param {Function} callback The callback that receives the text after it is returned.
+ * @param {Function} handler The handler for if the HTTP request errors.
+ */
 function getStreamText (stream, flag, callback, handler) {
   if (!handler) handler = console.log
   if (!callback) callback = console.log

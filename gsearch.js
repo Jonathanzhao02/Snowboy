@@ -2,10 +2,21 @@ const http = require('https')
 
 var accessToken
 
+/**
+ * Sets the API key.
+ *
+ * @param {String} key The API key.
+ */
 function setKey (key) {
   accessToken = key
 }
 
+/**
+ * Searches up a query and returns the result in a callback.
+ *
+ * @param {String} qry The search query.
+ * @param {Function} callback The callback function where the result is returned.
+ */
 function search (qry, callback) {
   var method = 'GET'
   var host = 'www.googleapis.com'
@@ -18,6 +29,7 @@ function search (qry, callback) {
     method: method
   }
 
+  // Makes HTTP request to Custom Search API
   var req = http.request(options, resp => {
     resp.setEncoding('utf8')
     var message = ''

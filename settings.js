@@ -2,32 +2,58 @@ const Defaults = require('defaults')
 const Emojis = require('./emojis')
 const Config = require('./config')
 
+/**
+ * @property {String} prefix The prefix for commands.
+ * @property {boolean} impressions Whether the impression system is being used.
+ * @property {boolean} voice Whether voice commands are enabled.
+ * @property {boolean} mentions Whether mentions are enabled.
+ * @property {String} sensitivity The sensitivity of voice commands.
+ */
 class Settings {
+  /**
+   * Initializes all Settings values from defaults or from the options.
+   *
+   * @param {String} gldId The ID of the guild these Settings are applied to.
+   * @param {Object} options The properties to pass in to the Settings object.
+   */
   constructor (gldId, options) {
     this.guildId = gldId
     options = Defaults(options, {
-      prefix: Config.DEFAULT_BOT_PREFIX,
-      impressions: Config.DEFAULT_IMPRESSIONS,
-      voice: Config.DEFAULT_VOICE,
-      mentions: Config.DEFAULT_MENTIONS,
-      sensitivity: Config.DEFAULT_SENSITIVITY
+      prefix: Config.SettingsValues.DEFAULT_BOT_PREFIX,
+      impressions: Config.SettingsValues.DEFAULT_IMPRESSIONS,
+      voice: Config.SettingsValues.DEFAULT_VOICE,
+      mentions: Config.SettingsValues.DEFAULT_MENTIONS,
+      sensitivity: Config.SettingsValues.DEFAULT_SENSITIVITY
     })
 
-    this.prefix = options.prefix
-    this.impressions = options.impressions
-    this.voice = options.voice
-    this.mentions = options.mentions
-    this.sensitivity = options.sensitivity
+    Object.assign(this, options)
   }
 
+  /**
+   * Saves this Settings object to the Keyv database as a JSON object.
+   *
+   * @param {Keyv} db The Keyv database to save to.
+   */
   save (db) {
     db.set(`${this.guildId}:settings`, JSON.stringify(this))
   }
 
+  /**
+   * Sets the value of a property in this Settings object and returns a response.
+   *
+   * Checks that all values are valid before assigning them.
+   *
+   * @param {Keyv} db The Keyv database to save to.
+   * @param {String} name The name of the property being set.
+   * @param {String} value The new value of the property.
+   * @returns {String} Returns the response to the Settings change.
+   */
   set (db, name, value) {
+    let oldVal
     switch (name) {
       case 'prefix':
         if (value.length < 10) {
+          oldVal = this.prefix
           this.prefix = value
         } else {
           return `${Emojis.error} ***Please keep prefix length to below 10 characters!***`
@@ -35,27 +61,31 @@ class Settings {
         break
       case 'impressions':
         if (value === 'true' || value === 'false') {
-          this.impressions = value
+          oldVal = this.impressions
+          this.impressions = value === 'true'
         } else {
           return `${Emojis.error} ***Value can only be \`true\` or \`false\`!***`
         }
         break
       case 'voice':
         if (value === 'true' || value === 'false') {
-          this.voice = value
+          oldVal = this.voice
+          this.voice = value === 'true'
         } else {
           return `${Emojis.error} ***Value can only be \`true\` or \`false\`!***`
         }
         break
       case 'mentions':
         if (value === 'true' || value === 'false') {
-          this.mentions = value
+          oldVal = this.mentions
+          this.mentions = value === 'true'
         } else {
           return `${Emojis.error} ***Value can only be \`true\` or \`false\`!***`
         }
         break
       case 'sensitivity':
         if (!isNaN(value) && value >= 0 && value <= 1) {
+          oldVal = this.sensitivity
           this.sensitivity = value
         } else {
           return `${Emojis.error} ***Value must be a number between 0 and 1!***`
@@ -65,9 +95,17 @@ class Settings {
         return `${Emojis.error} ***\`${name}\` is not an option!***`
     }
     this.save(db)
-    return `${Emojis.checkmark} **Set \`${name}\` to \`${value}\`**\n*Please note some changes (i.e. sensitivity, voice commands) require Snowboy to rejoin to take effect!*`
+    return `${Emojis.checkmark} **Changed \`${name}\` from \`${oldVal}\` to \`${value}\`**\n*Please note some changes (i.e. sensitivity) require Snowboy to rejoin to take effect!*`
   }
 
+  /**
+   * Loads and returns a Settings object from the database.
+   *
+   * @static
+   * @param {Keyv} db The Keyv database to load from.
+   * @param {String} gldId The guild ID of the Settings object.
+   * @returns {Settings} Returns the Settings or undefined if the guild is not found.
+   */
   static async load (db, gldId) {
     const obj = await db.get(`${gldId}:settings`)
     return obj ? Object.assign(new Settings(gldId), JSON.parse(obj)) : obj
