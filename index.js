@@ -33,7 +33,7 @@ Commands.setDb(keyv)
 async function onSpeaking (member, speaking) {
   if (!member || speaking.equals(0) || member.id === botClient.user.id) return
   const guildClient = botClient.guildClients.get(member.guild.id)
-  if (!guildClient || member.voice.channel !== guildClient.voiceChannel || guildClient.settings.voice) return
+  if (!guildClient || member.voice.channel !== guildClient.voiceChannel || !guildClient.settings.voice) return
   let mmbr = guildClient.members.get(member.id)
   let newClient = null
 
