@@ -1,10 +1,12 @@
 # Changelog
 
-## v0.2.1
-Bug fix
+## v0.2.1 (PR #10, #11)
+Bug fixes
 * Fixed bug in `replaceMentions` due to syntax error, `guild` was passed in incorrectly.
+* Removed `Silence` streams refactoring due to memory leak
+* Fixed `VoiceConnectionUDPClient` memory leak due to listener removal
 
-## v0.2.0
+## v0.2.0 (PR #9)
 Many changes and bug fixes.
 * Moved all value constants to Config.
 * Added documentation and comments to all functions and classes.
@@ -26,7 +28,7 @@ Many changes and bug fixes.
 * Added more conditions to the `setImpression` debug command.
 * Fixed `clearDb` to send messages to guild before exiting.
 
-## v0.1.1
+## v0.1.1 (PR #7)
 Various bug fixes.
 * Fixed Snowboy ignoring users who deafened/muted themselves.
 * Fixed crash on leaving a channel due to using the wrong variable name. (restrictedCommandMap => restrictedCommands)
