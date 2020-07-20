@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.4 (PR #14)
+Organization, debugging, and package updates
+* Added error logging
+* Reorganized `commands.js`
+* Updated ytdl-core-discord to personal fork patch (Jonathanzhao02/ytdl-core-discord)
+
 ## v0.2.3 (PR #13)
 Bug fixes and refactoring
 * Removed redundant if statement in `leave`
