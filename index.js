@@ -12,6 +12,9 @@ const Functions = require('./bot-util').Functions
 const Responses = require('./bot-util').Responses
 const Config = require('./config')
 
+// Logging
+const Heapdump = require('heapdump')
+
 const botClient = new Discord.Client()
 botClient.guildClients = new Map() // to keep track of individual active guilds
 botClient.userClients = new Map() // to keep track of individual user bug reports
@@ -345,10 +348,48 @@ botClient.on('guildCreate', guild => {
   '**Please note that I\'m still in testing, so I \\*may\\* shut down frequently!**')
 })
 
-// Shuts down all guildClients and prints the error in console
+// Error logging and exit handling
 botClient.on('error', error => {
-  botClient.guildClients.forEach(guildClient => {
-    Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Fatal error, shutting down Snowboy***`, guildClient)
+  const promise = new Promise((resolve, reject) => {
+    Array.from(botClient.guildClients).forEach((guildClient, index, array) => {
+      Functions.sendMsg(guildClient[1].textChannel, `${Emojis.error} ***Sorry, I ran into some fatal error. Hopefully I come back soon!***`).then(() => {
+        if (index === array.length - 1) resolve()
+      })
+    })
   })
-  console.error(error)
+
+  promise.then(() => Heapdump.writeSnapshot(`./logs/${Date.now()}_CLI.heapdump`, () => {
+    console.log('Client Exception:', error)
+    process.exit(1)
+  }))
+})
+
+process.on('uncaughtException', err => {
+  console.log('Uncaught Exception:', err)
+  Heapdump.writeSnapshot(`./logs/${Date.now()}_ERR.heapdump`, () => process.exit(1))
+})
+
+process.on('unhandledRejection', (err, promise) => {
+  console.log('Unhandled Rejection:', promise, 'Reason:', err)
+  Heapdump.writeSnapshot(`./logs/${Date.now()}_REJ.heapdump`, () => process.exit(1))
+})
+
+process.on('SIGTERM', signal => {
+  console.log(`Process ${process.pid} received a SIGTERM signal`)
+  process.exit(0)
+})
+
+process.on('SIGINT', signal => {
+  console.log(`Process ${process.pid} has been interrupted`)
+  const promise = new Promise((resolve, reject) => {
+    Array.from(botClient.guildClients).forEach((guildClient, index, array) => {
+      Functions.sendMsg(guildClient[1].textChannel, `${Emojis.error} ***Sorry, I'm going down for updates and maintenance! See you soon!***`).then(() => {
+        if (index === array.length - 1) resolve()
+      })
+    })
+  })
+
+  promise.then(() => {
+    process.exit(0)
+  })
 })

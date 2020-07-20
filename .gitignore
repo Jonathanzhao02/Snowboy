@@ -6,3 +6,4 @@ node_modules
 .DS*
 db
 bug_reports
+logs
