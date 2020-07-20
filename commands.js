@@ -139,6 +139,103 @@ function setDeafen (guildClient, userId, bool) {
 }
 
 /**
+ * Deafens a user.
+ *
+ * @param {Object} guildClient The guildClient of the server the user is in.
+ * @param {String} userId The ID of the user who requested to deafen.
+ * @param {String[]} args Unused parameter.
+ */
+function deafen (guildClient, userId, args) {
+  setDeafen(guildClient, userId, true)
+}
+
+/**
+ * Undeafens a user.
+ *
+ * @param {Object} guildClient The guildClient of the server the user is in.
+ * @param {String} userId The ID of the user who requested to undeafen.
+ * @param {String[]} args Unused parameter.
+ */
+function undeafen (guildClient, userId, args) {
+  setDeafen(guildClient, userId, false)
+}
+
+/**
+ * Searches up and prints the top result of a search query.
+ *
+ * @param {Object} guildClient The guildClient of the server the user is in.
+ * @param {String} userId The ID of the user who requested the search.
+ * @param {String[]} args The search query.
+ */
+function search (guildClient, userId, args) {
+  if (!args || args.length === 0) {
+    Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***I need something to search up!***`, guildClient)
+    return
+  }
+
+  Functions.sendMsg(guildClient.textChannel, `${Emojis.search} ***Searching*** \`${args.join(' ')}\``, guildClient)
+
+  Gsearch.search(args.join(' '), result => {
+    guildClient.guild.members.fetch(userId)
+      .then(user => {
+        Functions.sendMsg(guildClient.textChannel, Embeds.createSearchEmbed(result, user.username), guildClient)
+      })
+  })
+}
+
+/**
+ * Prints Snowboy's impression of a user.
+ *
+ * @param {Object} guildClient The guildClient of the server the user is in.
+ * @param {String} userId The ID of the user who requested the command.
+ * @param {String[]} args Unused parameter.
+ */
+function impression (guildClient, userId, args) {
+  Functions.sendMsg(guildClient.textChannel,
+    Responses.getResponse('impression', guildClient.members.get(userId).impression, [`<@${userId}>`], guildClient.settings.impressions),
+    guildClient)
+}
+
+/**
+ * No description needed.
+ *
+ * @param {Object} guildClient The guildClient of the server the user is in.
+ * @param {String} userId Unused parameter
+ * @param {String[]} args Unused parameter
+ */
+function chungus (guildClient, userId, args) {
+  Functions.sendMsg(guildClient.textChannel, `${Emojis.rabbit} ***B I G   C H U N G U S*** ${Emojis.rabbit}`, guildClient, {
+    files: [`./resources/chungus/chungus${Functions.random(6)}.jpg`]
+  })
+}
+
+/**
+ * Rolls a six-sided die.
+ *
+ * @param {Object} guildClient The guildClient of the server the user is in.
+ * @param {String} userId The ID of the user who requested the command.
+ * @param {String[]} args Unused parameter.
+ */
+function roll (guildClient, userId, args) {
+  Functions.sendMsg(guildClient.textChannel, `${Emojis.dice} **I rolled a \`${Functions.random(6) + 1}\`, <@${userId}>!**`, guildClient)
+}
+
+/**
+ * Flips a two-sided coin.
+ *
+ * @param {Object} guildClient The guildClient of the server the user is in.
+ * @param {String} userId The ID of the user who requested the command.
+ * @param {String[]} args Unused parameter.
+ */
+function flip (guildClient, userId, args) {
+  const result = Functions.random(2)
+  Functions.sendMsg(guildClient.textChannel,
+    `${result === 0 ? Emojis.heads : Emojis.tails} **I flipped \`${result === 0 ? 'heads' : 'tails'}\`, <@${userId}>!**`,
+    guildClient)
+}
+
+/**   RESTRICTED COMMANDS   */
+/**
  * Plays or queues a song.
  *
  * @param {Object} guildClient The guildClient of the user's server.
@@ -294,102 +391,6 @@ function leave (guildClient, userId, args) {
   guildClient.voiceChannel.leave()
   guildClient.voiceChannel = undefined
   guildClient.connection = undefined
-}
-
-/**
- * Deafens a user.
- *
- * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {String} userId The ID of the user who requested to deafen.
- * @param {String[]} args Unused parameter.
- */
-function deafen (guildClient, userId, args) {
-  setDeafen(guildClient, userId, true)
-}
-
-/**
- * Undeafens a user.
- *
- * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {String} userId The ID of the user who requested to undeafen.
- * @param {String[]} args Unused parameter.
- */
-function undeafen (guildClient, userId, args) {
-  setDeafen(guildClient, userId, false)
-}
-
-/**
- * Searches up and prints the top result of a search query.
- *
- * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {String} userId The ID of the user who requested the search.
- * @param {String[]} args The search query.
- */
-function search (guildClient, userId, args) {
-  if (!args || args.length === 0) {
-    Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***I need something to search up!***`, guildClient)
-    return
-  }
-
-  Functions.sendMsg(guildClient.textChannel, `${Emojis.search} ***Searching*** \`${args.join(' ')}\``, guildClient)
-
-  Gsearch.search(args.join(' '), result => {
-    guildClient.guild.members.fetch(userId)
-      .then(user => {
-        Functions.sendMsg(guildClient.textChannel, Embeds.createSearchEmbed(result, user.username), guildClient)
-      })
-  })
-}
-
-/**
- * Prints Snowboy's impression of a user.
- *
- * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {String} userId The ID of the user who requested the command.
- * @param {String[]} args Unused parameter.
- */
-function impression (guildClient, userId, args) {
-  Functions.sendMsg(guildClient.textChannel,
-    Responses.getResponse('impression', guildClient.members.get(userId).impression, [`<@${userId}>`], guildClient.settings.impressions),
-    guildClient)
-}
-
-/**
- * No description needed.
- *
- * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {String} userId Unused parameter
- * @param {String[]} args Unused parameter
- */
-function chungus (guildClient, userId, args) {
-  Functions.sendMsg(guildClient.textChannel, `${Emojis.rabbit} ***B I G   C H U N G U S*** ${Emojis.rabbit}`, guildClient, {
-    files: [`./resources/chungus/chungus${Functions.random(6)}.jpg`]
-  })
-}
-
-/**
- * Rolls a six-sided die.
- *
- * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {String} userId The ID of the user who requested the command.
- * @param {String[]} args Unused parameter.
- */
-function roll (guildClient, userId, args) {
-  Functions.sendMsg(guildClient.textChannel, `${Emojis.dice} **I rolled a \`${Functions.random(6) + 1}\`, <@${userId}>!**`, guildClient)
-}
-
-/**
- * Flips a two-sided coin.
- *
- * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {String} userId The ID of the user who requested the command.
- * @param {String[]} args Unused parameter.
- */
-function flip (guildClient, userId, args) {
-  const result = Functions.random(2)
-  Functions.sendMsg(guildClient.textChannel,
-    `${result === 0 ? Emojis.heads : Emojis.tails} **I flipped \`${result === 0 ? 'heads' : 'tails'}\`, <@${userId}>!**`,
-    guildClient)
 }
 
 /**   VOICE-ONLY COMMANDS   */
