@@ -11,6 +11,9 @@ const Settings = require('./settings')
 const Functions = require('./bot-util').Functions
 const Responses = require('./bot-util').Responses
 const Config = require('./config')
+const Env = require('dotenv').config()
+
+if (Env.error) throw Env.error
 
 // Logging
 const Heapdump = require('heapdump')
@@ -136,7 +139,7 @@ async function onMessage (msg) {
 
   // If it is in Snowboy's DMs, log a new bug report and start the 24 hour cooldown.
   if (msg.channel instanceof Discord.DMChannel) {
-    logger.info('Received message in DM', msg)
+    logger.info(`Received message in DM: ${msg}`)
     if (!botClient.userClients.get(msg.author.id)) {
       logger.info(`Creating user construct for ${msg.author.username}`)
       const userConstruct = {
@@ -356,13 +359,6 @@ botClient.on('voiceStateUpdate', (oldPresence, newPresence) => {
   }
 })
 
-// Switch between testing bot and (future) production bot
-if (process.argv.includes('-t') || process.argv.includes('--test')) {
-  botClient.login(process.env.TEST_BOT_TOKEN)
-} else {
-  botClient.login(process.env.SNOWBOY_BOT_TOKEN)
-}
-
 // Logs that the client is ready in console
 botClient.on('ready', () => {
   logger.info(`Logged in as ${botClient.user.tag}`)
@@ -385,7 +381,7 @@ botClient.on('error', error => {
   const promise = new Promise((resolve, reject) => {
     const guilds = Array.from(botClient.guildClients)
     guilds.forEach((guildClient, index, array) => {
-      guildClient.logger.trace('Sending error message')
+      guildClient[1].logger.trace('Sending error message')
       Functions.sendMsg(guildClient[1].textChannel, `${Emojis.error} ***Sorry, I ran into some fatal error. Hopefully I come back soon!***`).then(() => {
         if (index === array.length - 1) resolve()
       })
@@ -395,7 +391,7 @@ botClient.on('error', error => {
   })
 
   promise.then(() => Heapdump.writeSnapshot(`./logs/${Date.now()}_CLI.heapdump`, (err, filename) => {
-    logger.fatal('Client Exception:', error)
+    logger.error(`Client Exception: ${error}`)
     if (err) process.exit(1)
     logger.info(`Heapdump written to ${filename}`)
     process.exit(1)
@@ -403,9 +399,8 @@ botClient.on('error', error => {
 })
 
 process.on('uncaughtException', error => {
-  logger.fatal('Uncaught Exception:', error)
   Heapdump.writeSnapshot(`./logs/${Date.now()}_ERR.heapdump`, (err, filename) => {
-    logger.fatal('Uncaught Exception:', error)
+    logger.error(`Uncaught Exception: ${error}`)
     if (err) process.exit(1)
     logger.info(`Heapdump written to ${filename}`)
     process.exit(1)
@@ -413,10 +408,9 @@ process.on('uncaughtException', error => {
 })
 
 process.on('unhandledRejection', (error, promise) => {
-  logger.fatal('Unhandled Rejection:', promise, 'Reason:', error)
   Heapdump.writeSnapshot(`./logs/${Date.now()}_REJ.heapdump`, (err, filename) => {
-    logger.fatal('Unhandled Rejection:', error)
-    logger.fatal('At Promise:', promise)
+    logger.error(`Unhandled Rejection: ${promise}`)
+    logger.error(`Reason: ${error}`)
     if (err) process.exit(1)
     logger.info(`Heapdump written to ${filename}`)
     process.exit(1)
@@ -433,7 +427,7 @@ process.on('SIGINT', signal => {
   const promise = new Promise((resolve, reject) => {
     const guilds = Array.from(botClient.guildClients)
     guilds.forEach((guildClient, index, array) => {
-      guildClient.logger.trace('Sending interrupt message')
+      if (guildClient[1]) guildClient[1].logger.trace('Sending interrupt message')
       Functions.sendMsg(guildClient[1].textChannel, `${Emojis.error} ***Sorry, I'm going down for updates and maintenance! See you soon!***`).then(() => {
         if (index === array.length - 1) resolve()
       })
@@ -446,3 +440,10 @@ process.on('SIGINT', signal => {
     process.exit(0)
   })
 })
+
+// Switch between testing bot and (future) production bot
+if (process.argv.includes('-t') || process.argv.includes('--test')) {
+  botClient.login(process.env.TEST_BOT_TOKEN)
+} else {
+  botClient.login(process.env.SNOWBOY_BOT_TOKEN)
+}

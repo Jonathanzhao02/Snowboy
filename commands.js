@@ -944,5 +944,6 @@ module.exports = {
   textOnlyCommands: textCommandMap,
   debugCommands: debugCommandMap,
   setClient: setClient,
-  setDb: setDb
+  setDb: setDb,
+  setLogger: setLogger
 }
