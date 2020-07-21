@@ -13,7 +13,7 @@ For the sake of being able to match PRs to versions easily, please include the P
 If you forget a few small fixes and make multiple pull requests that are all accepted, go ahead and simply add all relevant PR versions to the version number.
 
 Even if you have the power to, try not to commit directly to the repository and always open a pull request so that we can always track and review changes.
-To do this without forking the repo, you can create another branch called 'dev' or something and commit there, then open a pull request when it is ready to merge.
+To do this without forking the repo, you can create another branch and commit there, then open a pull request when it is ready to merge.
 
 ## Running the Bot
 Running the bot requires a variety of different keys. Most notably, a <b>Youtube API key</b>, a <b>Google Search API key</b>, a <b>Wit.ai API key</b>, and a <b>Discord bot token</b>.
