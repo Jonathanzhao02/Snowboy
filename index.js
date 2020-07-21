@@ -446,6 +446,24 @@ process.on('SIGINT', signal => {
   })
 })
 
+if (process.argv.includes('trace')) {
+  logger.level = 'trace'
+} else if (process.argv.includes('debug')) {
+  logger.level = 'debug'
+} else if (process.argv.includes('info')) {
+  logger.level = 'info'
+} else if (process.argv.includes('warn')) {
+  logger.level = 'warn'
+} else if (process.argv.includes('error')) {
+  logger.level = 'error'
+} else if (process.argv.includes('fatal')) {
+  logger.level = 'fatal'
+} else if (process.argv.includes('silent')) {
+  logger.level = 'silent'
+} else {
+  logger.level = 'info'
+}
+
 // Switch between testing bot and (future) production bot
 if (process.argv.includes('-t') || process.argv.includes('--test')) {
   botClient.login(process.env.TEST_BOT_TOKEN)
