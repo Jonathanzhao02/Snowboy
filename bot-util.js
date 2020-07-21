@@ -306,8 +306,10 @@ function replaceMentions (msg, guild) {
  * @returns {Discord.Message|Discord.Message[]} Returns the message(s) sent.
  */
 async function sendMsg (textChannel, msg, guildClient, opts) {
-  guildClient.logger.info('Attempting to send message')
-  guildClient.logger.debug(msg)
+  if (guildClient) {
+    guildClient.logger.info('Attempting to send message')
+    guildClient.logger.debug(msg)
+  }
   if (!textChannel) return undefined
   if (guildClient && !guildClient.settings.mentions) msg = replaceMentions(msg, guildClient.guild)
   let msgs

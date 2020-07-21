@@ -101,7 +101,7 @@ class SnowClient {
     },
     (error) => {
       if (this.logger) this.logger.trace('Emitted error event')
-      if (this.logger) this.logger.error('Wit.ai failed with error:', error)
+      if (this.logger) this.logger.error(`Wit.ai failed: ${error}`)
       this.triggered = false
       this.events.emit('error', error, this.guildClient, this.userId)
     })

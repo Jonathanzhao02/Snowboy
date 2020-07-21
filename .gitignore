@@ -7,3 +7,5 @@ node_modules
 db
 bug_reports
 logs
+.env
+
