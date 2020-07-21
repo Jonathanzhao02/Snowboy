@@ -13,6 +13,7 @@ Gsearch.setKey(process.env.GOOGLE_API_TOKEN)
 
 var botClient
 var keyv
+var logger
 
 /**
  * Sets the bot client used for commands.
@@ -33,20 +34,42 @@ function setDb (db) {
 }
 
 /**
+ * Sets the logger used for non-guild-specific functions.
+ *
+ * @param {Any} lgr The logger to use.
+ */
+function setLogger (lgr) {
+  logger = lgr
+}
+
+/**
+ * Plays silence frames in a voice channel.
+ *
+ * Necessary for 'speaking' event to continue functioning.
+ *
+ * @param {Object} guildClient The guildClient associated with the voice channel's server.
+ */
+function playSilence (guildClient) {
+  guildClient.logger.debug('Playing silence')
+  const silence = new Streams.Silence()
+  const dispatcher = guildClient.connection.play(silence, { type: 'opus' })
+  dispatcher.on('finish', () => {
+    silence.destroy()
+    dispatcher.destroy()
+    guildClient.logger.debug('Destroyed silence stream')
+  })
+}
+
+/**
  * Handles all setup associated with the connection.
  *
  * @param {Discord.VoiceConnection} connection The VoiceConnection from the VoiceChannel.
  * @param {Object} guildClient The guildClient associated with the server of the connection.
  */
 function connectionHandler (connection, guildClient) {
-  const silence = new Streams.Silence()
+  guildClient.logger.info('Successfully connected')
   guildClient.connection = connection
-  connection.play(silence, { type: 'opus' })
-  connection.dispatcher.on('finish', () => {
-    silence.destroy()
-    guildClient.connection.dispatcher.destroy()
-  })
-  console.log('Connected!')
+  playSilence(guildClient)
 }
 
 /**
@@ -58,16 +81,13 @@ function connectionHandler (connection, guildClient) {
 function queuedPlay (video, guildClient) {
   // If no video, clean up connection and begin expiration timeout
   if (!video) {
+    guildClient.logger.info('Reached end of current song queue')
     // End current dispatcher
     if (guildClient.playing) guildClient.connection.dispatcher.end()
-    const silence = new Streams.Silence()
-    const dispatcher = guildClient.connection.play(silence, { type: 'opus' })
-    dispatcher.on('finish', () => {
-      silence.destroy()
-      dispatcher.destroy()
-    })
+    playSilence(guildClient)
     guildClient.playing = false
     guildClient.lastCalled = Date.now()
+    guildClient.logger.info('Starting expiration timer')
     setTimeout(() => {
       Functions.cleanupGuildClient(guildClient, botClient)
     }, Config.TIMEOUT + 500)
@@ -97,6 +117,7 @@ function queuedPlay (video, guildClient) {
     }) */
 
   // Uses ytdl-core-discord
+  guildClient.logger.info(`Attempting to download from ID ${video.id.videoId}`)
   Ytdl(`http://www.youtube.com/watch?v=${video.id.videoId}`).then(stream => {
     guildClient.playing = true
     const dispatcher = guildClient.connection.play(stream, {
@@ -105,19 +126,21 @@ function queuedPlay (video, guildClient) {
     })
       .on('finish', () => {
         // Goes to next song in queue
+        guildClient.logger.info('Finished song')
         var queue = guildClient.songQueue
-        dispatcher.destroy()
         guildClient.playing = false
+        dispatcher.destroy()
         stream.destroy()
 
         if (guildClient.connection) {
+          guildClient.logger.info('Moving to next song in queue')
           queue.shift()
           queuedPlay(queue[0], guildClient)
         }
       })
   }).catch('error', error => {
     // Uh oh
-    console.log('Youtube error:', error)
+    guildClient.logger.error('Youtube error:', error)
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Sorry, an error occurred on playback!***`, guildClient)
   })
 }
@@ -130,6 +153,7 @@ function queuedPlay (video, guildClient) {
  * @param {boolean} bool Whether to deafen or undeafen the user.
  */
 function setDeafen (guildClient, userId, bool) {
+  guildClient.logger.info(`Setting deafen state of ${userId} to ${bool}`)
   const voiceStates = guildClient.textChannel.guild.voiceStates.cache
   const userVoiceState = voiceStates.find(state => state.id === userId)
   if (userVoiceState) userVoiceState.setDeaf(bool)
@@ -168,14 +192,18 @@ function undeafen (guildClient, userId, args) {
  * @param {String[]} args The search query.
  */
 function search (guildClient, userId, args) {
+  guildClient.logger.info('Received search command')
   if (!args || args.length === 0) {
+    guildClient.logger.trace('No query found')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***I need something to search up!***`, guildClient)
     return
   }
 
   Functions.sendMsg(guildClient.textChannel, `${Emojis.search} ***Searching*** \`${args.join(' ')}\``, guildClient)
 
+  guildClient.logger.trace(`Searching up ${args.join(' ')}`)
   Gsearch.search(args.join(' '), result => {
+    guildClient.logger.trace('Received result:', result)
     guildClient.guild.members.fetch(userId)
       .then(user => {
         Functions.sendMsg(guildClient.textChannel, Embeds.createSearchEmbed(result, user.username), guildClient)
@@ -191,6 +219,7 @@ function search (guildClient, userId, args) {
  * @param {String[]} args Unused parameter.
  */
 function impression (guildClient, userId, args) {
+  guildClient.logger.info('Received impression command')
   Functions.sendMsg(guildClient.textChannel,
     Responses.getResponse('impression', guildClient.members.get(userId).impression, [`<@${userId}>`], guildClient.settings.impressions),
     guildClient)
@@ -204,6 +233,7 @@ function impression (guildClient, userId, args) {
  * @param {String[]} args Unused parameter
  */
 function chungus (guildClient, userId, args) {
+  guildClient.logger.info('Received chungus command')
   Functions.sendMsg(guildClient.textChannel, `${Emojis.rabbit} ***B I G   C H U N G U S*** ${Emojis.rabbit}`, guildClient, {
     files: [`./resources/chungus/chungus${Functions.random(6)}.jpg`]
   })
@@ -217,6 +247,7 @@ function chungus (guildClient, userId, args) {
  * @param {String[]} args Unused parameter.
  */
 function roll (guildClient, userId, args) {
+  guildClient.logger.info('Received roll command')
   Functions.sendMsg(guildClient.textChannel, `${Emojis.dice} **I rolled a \`${Functions.random(6) + 1}\`, <@${userId}>!**`, guildClient)
 }
 
@@ -228,6 +259,7 @@ function roll (guildClient, userId, args) {
  * @param {String[]} args Unused parameter.
  */
 function flip (guildClient, userId, args) {
+  guildClient.logger.info('Received flip command')
   const result = Functions.random(2)
   Functions.sendMsg(guildClient.textChannel,
     `${result === 0 ? Emojis.heads : Emojis.tails} **I flipped \`${result === 0 ? 'heads' : 'tails'}\`, <@${userId}>!**`,
@@ -243,27 +275,32 @@ function flip (guildClient, userId, args) {
  * @param {String[]} args The search query for the song.
  */
 function play (guildClient, userId, args) {
+  guildClient.logger.info('Received play command')
   // If not connected, notify and return
   if (!guildClient.connection) {
+    guildClient.logger.trace('Not connected to a voice channel')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***I am not in a voice channel!***`, guildClient)
     return
   }
 
   // If no query, notify and return
   if (!args || args.length === 0) {
+    guildClient.logger.trace('No query found')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***I need something to play!***`, guildClient)
     return
   }
 
-  const result = args.join(' ')
-  Functions.sendMsg(guildClient.textChannel, `${Emojis.search} ***Searching for*** \`${result}\``, guildClient)
+  const query = args.join(' ')
+  guildClient.logger.trace(`Searching up ${query}`)
+  Functions.sendMsg(guildClient.textChannel, `${Emojis.search} ***Searching for*** \`${query}\``, guildClient)
 
   // Search for the video using the Youtube Data API
-  youtube.search(result, 1, function (error, result) {
+  youtube.search(query, 1, function (error, result) {
     if (error) {
-      console.log(error, '\nYOUTUBE ERROR!')
+      guildClient.logger.error('Error while searching YouTube:', error)
     } else {
       if (!result.items) {
+        guildClient.logger.trace(`No results found for ${query}`)
         Functions.sendMsg(guildClient.textChannel, `${Emojis.sad} ***Could not find results for \`${result}\`***`, guildClient)
         return
       }
@@ -274,11 +311,13 @@ function play (guildClient, userId, args) {
 
       // If not playing anything, play this song
       if (!guildClient.playing) {
+        guildClient.logger.trace(`Playing ${result.items[0]}`)
         queuedPlay(result.items[0], guildClient)
       // If playing something, just say it's queued
       } else {
         guildClient.guild.members.fetch(userId)
           .then(member => {
+            guildClient.logger.trace(`Queued ${result.items[0]}`)
             Functions.sendMsg(guildClient.textChannel, `${Emojis.queue} **Queued:**`, guildClient)
             Functions.sendMsg(guildClient.textChannel, Embeds.createVideoEmbed(result.items[0], member.displayName), guildClient)
           })
@@ -295,17 +334,15 @@ function play (guildClient, userId, args) {
  * @param {String[]} args Unused parameter.
  */
 function stop (guildClient, userId, args) {
+  guildClient.logger.info('Received stop command')
   if (!guildClient.playing) {
+    guildClient.logger.trace('Not playing anything')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Nothing currently playing!***`, guildClient)
     return
   }
-  const silence = new Streams.Silence()
+  guildClient.logger.trace('Stopping music')
   guildClient.connection.dispatcher.end()
-  const dispatcher = guildClient.connection.play(silence, { type: 'opus' })
-  dispatcher.on('finish', () => {
-    silence.destroy()
-    dispatcher.destroy()
-  })
+  playSilence(guildClient)
   guildClient.playing = false
   guildClient.songQueue = []
   Functions.sendMsg(guildClient.textChannel, `${Emojis.stop} ***Stopped the music***`, guildClient)
@@ -319,10 +356,13 @@ function stop (guildClient, userId, args) {
  * @param {String[]} args Unused parameter.
  */
 function skip (guildClient, userId, args) {
+  guildClient.logger.info('Received skip command')
   if (!guildClient.playing) {
+    guildClient.logger.trace('Not playing anything')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Nothing currently playing!***`, guildClient)
     return
   }
+  guildClient.logger.trace('Skipping music')
   Functions.sendMsg(guildClient.textChannel, `${Emojis.skip} ***Skipping the current song***`, guildClient)
   guildClient.connection.dispatcher.end()
 }
@@ -335,10 +375,13 @@ function skip (guildClient, userId, args) {
  * @param {String[]} args Unused parameter.
  */
 function pause (guildClient, userId, args) {
+  guildClient.logger.info('Received pause command')
   if (!guildClient.playing) {
+    guildClient.logger.trace('Not playing anything')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Nothing currently playing!***`, guildClient)
     return
   }
+  guildClient.logger.trace('Pausing music')
   guildClient.connection.dispatcher.pause()
   Functions.sendMsg(guildClient.textChannel, `${Emojis.pause} ***Paused the music***`, guildClient)
 }
@@ -351,10 +394,13 @@ function pause (guildClient, userId, args) {
  * @param {String[]} args Unused parameter.
  */
 function resume (guildClient, userId, args) {
+  guildClient.logger.info('Received resume command')
   if (!guildClient.playing) {
+    guildClient.logger.trace('Not playing anything')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Nothing currently playing!***`, guildClient)
     return
   }
+  guildClient.logger.info('Resuming music')
   guildClient.connection.dispatcher.resume()
   Functions.sendMsg(guildClient.textChannel, `${Emojis.playing} **Resuming!**`, guildClient)
 }
@@ -367,9 +413,14 @@ function resume (guildClient, userId, args) {
  * @param {String[]} args Unused parameter.
  */
 function leave (guildClient, userId, args) {
-  if (!guildClient) return
+  if (!guildClient) {
+    logger.warn('Attempted to leave, but no guildClient found')
+    return
+  }
+  guildClient.logger.info('Received leave command')
 
   if (!guildClient.connection) {
+    guildClient.logger.trace('Not connected')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***I am not connected to a voice channel!***`, guildClient)
     return
   }
@@ -380,14 +431,18 @@ function leave (guildClient, userId, args) {
       guildClient)
   }
 
+  guildClient.logger.trace('Disconnecting')
   guildClient.connection.disconnect()
   guildClient.connection.removeAllListeners()
   if (guildClient.connection.dispatcher) {
+    guildClient.logger.trace('Ending dispatcher')
     guildClient.connection.dispatcher.end()
     guildClient.connection.dispatcher.destroy()
   }
+  guildClient.logger.trace('Cleaning up members')
   guildClient.members.forEach(member => { if (member.snowClient) member.snowClient.stop() })
   guildClient.members.clear()
+  guildClient.logger.trace('Leaving channel')
   guildClient.voiceChannel.leave()
   guildClient.voiceChannel = undefined
   guildClient.connection = undefined
@@ -403,6 +458,7 @@ function leave (guildClient, userId, args) {
  * @param {String[]} args Unused parameter.
  */
 function farewell (guildClient, userId, args) {
+  guildClient.logger.info('Received farewell command')
   const voiceStates = guildClient.textChannel.guild.voiceStates.cache
   const userVoiceState = voiceStates.find(state => state.id === userId)
   if (userVoiceState) userVoiceState.setChannel(null)
@@ -410,11 +466,12 @@ function farewell (guildClient, userId, args) {
   if (guildClient && guildClient.members.get(userId)) {
     guildClient.members.get(userId).snowClient.stop()
     guildClient.members.delete(userId)
+    Functions.sendMsg(guildClient.textChannel,
+      `${Emojis.farewell} **${Responses.farewells[Functions.random(Responses.farewells.length)]},** <@${userId}>!`,
+      guildClient)
+  } else {
+    guildClient.logger.warn(`No member construct found for ${userId}`)
   }
-
-  Functions.sendMsg(guildClient.textChannel,
-    `${Emojis.farewell} **${Responses.farewells[Functions.random(Responses.farewells.length)]},** <@${userId}>!`,
-    guildClient)
 }
 
 /**
@@ -425,6 +482,7 @@ function farewell (guildClient, userId, args) {
  * @param {String[]} args Unused parameter.
  */
 function greet (guildClient, userId, args) {
+  guildClient.logger.info('Received greet command')
   Functions.sendMsg(guildClient.textChannel,
     `${Emojis.greeting} **${Responses.greetings[Functions.random(Responses.greetings.length)]},** <@${userId}>!`,
     guildClient)
@@ -439,6 +497,7 @@ function greet (guildClient, userId, args) {
  * @param {String[]} args Unused parameter.
  */
 function sad (guildClient, userId, args) {
+  guildClient.logger.info('Received sad command')
   Functions.sendMsg(guildClient.textChannel, `${Emojis.sad} *Okay...*`, guildClient)
   Functions.updateImpression(keyv, guildClient, userId, Config.ImpressionValues.SAD_VALUE, guildClient.settings.impressions)
 }
@@ -451,6 +510,7 @@ function sad (guildClient, userId, args) {
  * @param {String[]} args Unused parameter.
  */
 function happy (guildClient, userId, args) {
+  guildClient.logger.info('Received happy command')
   Functions.sendMsg(guildClient.textChannel, `${Emojis.happy} **Thank you!**`)
   Functions.updateImpression(keyv, guildClient, userId, Config.ImpressionValues.HAPPY_VALUE, guildClient.settings.impressions)
 }
@@ -463,6 +523,7 @@ function happy (guildClient, userId, args) {
  * @param {String[]} args Unused parameter.
  */
 function nevermind (guildClient, userId, args) {
+  guildClient.logger.info('Received nevermind command')
   Functions.sendMsg(guildClient.textChannel, `${Emojis.angry} **Call me only when you need me, <@${userId}>!**`, guildClient)
   Functions.updateImpression(keyv, guildClient, userId, Config.ImpressionValues.NEVERMIND_VALUE, guildClient.settings.impressions)
 }
@@ -475,6 +536,7 @@ function nevermind (guildClient, userId, args) {
  * @param {String[]} args Unused parameter.
  */
 function gross (guildClient, userId, args) {
+  guildClient.logger.info('Received gross command')
   Functions.sendMsg(guildClient.textChannel, `${Emojis.weird} **Not much I can do for you, <@${userId}>**`, guildClient)
   Functions.updateImpression(keyv, guildClient, userId, Config.ImpressionValues.GROSS_VALUE, guildClient.settings.impressions)
 }
@@ -490,8 +552,10 @@ function gross (guildClient, userId, args) {
  * @param {Discord.Message} msg The Message the user sent.
  */
 function join (guildClient, userId, args, msg) {
+  guildClient.logger.info('Received join command')
   // If the user is not connected to a VoiceChannel, notify and return
   if (!msg.member.voice.channel) {
+    guildClient.logger.trace('Member not connected')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***You are not connected to a voice channel!***`, guildClient)
     return
   // Otherwise, set the guildClient VoiceChannel to the member's
@@ -501,6 +565,7 @@ function join (guildClient, userId, args, msg) {
 
   // If already connected, notify and return
   if (guildClient.connection) {
+    guildClient.logger.trace('Already connected')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***I'm already connected to a voice channel!***`, guildClient)
     return
   }
@@ -511,6 +576,7 @@ function join (guildClient, userId, args, msg) {
     guildClient)
 
   // Attempt to join and handle the connection, or error
+  guildClient.logger.trace('Attempting to join')
   guildClient.voiceChannel.join().then(connection => connectionHandler(connection, guildClient)).catch(e => {
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Could not connect! \\;(***`, guildClient)
     console.log(e)
@@ -526,6 +592,7 @@ function join (guildClient, userId, args, msg) {
  * @param {Discord.Message} msg The Message the user sent.
  */
 function ping (guildClient, userId, args, msg) {
+  guildClient.logger.info('Received ping command')
   const latency = Date.now() - msg.createdAt.getTime()
   Functions.sendMsg(guildClient.textChannel, `Current ping: \`${latency}ms\``, guildClient)
 }
@@ -546,10 +613,17 @@ function ping (guildClient, userId, args, msg) {
  */
 function purge (guildClient, userId, args, msg, total, snowflake) {
   // On the first recursion, return if the purging command is already active
-  if (guildClient.purging && !total) return
-  if (!total) total = 0
+  if (guildClient.purging && !total) {
+    guildClient.logger.trace('Already purging')
+    return
+  }
+  if (!total) {
+    guildClient.logger.info('Received purge command, first recursion')
+    total = 0
+  }
   let filter = m => m.author.id === botClient.user.id
   let mmbr
+  guildClient.logger.debug('Received args:', args)
 
   if (args[0]) {
     switch (args[0]) {
@@ -590,17 +664,19 @@ function purge (guildClient, userId, args, msg, total, snowflake) {
 
   // Fetch 100 messages before the snowflake
   guildClient.textChannel.messages.fetch({ limit: 100, before: snowflake }).then(messages => {
+    guildClient.logger.trace('Fetched messages')
     // Bulk delete all fetched messages that pass through the filter
     guildClient.textChannel.bulkDelete(messages.filter(filter)).then(deletedMessages => {
+      guildClient.logger.trace('Deleting fetches messages')
       total += deletedMessages.size
 
       // If deleted messages, continue deleting recursively
       if (deletedMessages.size > 0) {
-        console.log('recurring', total)
+        guildClient.logger.trace('Recursively purging', total)
         purge(guildClient, userId, args, msg, total, deletedMessages.last().id)
       // If no messages deleted, purge command has finished all it can, return
       } else {
-        console.log('finished', total)
+        guildClient.logger.trace('Finished purging', total)
         guildClient.purging = false
         Functions.sendMsg(guildClient.textChannel,
           `${Emojis.trash} **Deleted \`${total}\` messages ${mmbr ? `from user \`${mmbr.displayName}\`` : ''}!**`,
@@ -619,6 +695,7 @@ function purge (guildClient, userId, args, msg, total, snowflake) {
  * @param {Discord.Message} msg Unused parameter.
  */
 function stats (guildClient, userId, args, msg) {
+  guildClient.logger.info('Received stats command')
   Functions.sendMsg(guildClient.textChannel, `**I am currently in \`${botClient.guilds.cache.size}\` servers!**`, guildClient)
 }
 
@@ -631,6 +708,7 @@ function stats (guildClient, userId, args, msg) {
  * @param {Discord.Message} msg Unused parameter.
  */
 function about (guildClient, userId, args, msg) {
+  guildClient.logger.info('Received about command')
   Functions.sendMsg(guildClient.textChannel, Embeds.createAboutEmbed(botClient), guildClient)
 }
 
@@ -646,25 +724,31 @@ function about (guildClient, userId, args, msg) {
  * @param {Discord.Message} msg Unused parameter.
  */
 function settings (guildClient, userId, args, msg) {
+  guildClient.logger.info('Received settings command')
+  guildClient.logger.debug('Received args', args)
   // SHOULD BE MADE ADMIN ONLY
   // If no arguments, print the settings embed with all values
   if (args.length === 0) {
+    guildClient.logger.trace('Printing settings')
     Functions.sendMsg(guildClient.textChannel, Embeds.createSettingsEmbed(guildClient.settings), guildClient)
     return
   }
   const settingName = args.shift().toLowerCase()
   // If no option named what the user passed in, notify and return
   if (!Settings.descriptions[settingName]) {
+    guildClient.logger.trace(`No setting found for ${settingName}`)
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Could not find option named \`${settingName}\`***`)
     return
   }
   // If only passed in an option name, return information about that option
   if (args.length === 0) {
+    guildClient.logger.trace(`Printing info about ${settingName}`)
     Functions.sendMsg(guildClient.textChannel, Settings.descriptions[settingName](guildClient.settings), guildClient)
     return
   }
   // Modify the value of an option
   const val = args.join()
+  guildClient.logger.trace(`Attempting to set ${settingName} to ${val}`)
   Functions.sendMsg(guildClient.textChannel, guildClient.settings.set(keyv, settingName, val), guildClient)
 }
 
@@ -678,6 +762,7 @@ function settings (guildClient, userId, args, msg) {
  * @param {String[]} args The arguments passed with the command.
  */
 function rawImpression (guildClient, userId, args) {
+  guildClient.logger.info('Received raw impression command')
   let member = guildClient.members.get(userId).member
 
   // Finds the member mentioned in the arguments
@@ -707,6 +792,7 @@ function rawImpression (guildClient, userId, args) {
  * @param {String[]} args Unused parameter.
  */
 function rawImpressions (guildClient, userId, args) {
+  guildClient.logger.info('Received raw impressions command')
   const response = ['Raw impressions:']
   guildClient.members.forEach(mmbr => {
     response.push(`    **${mmbr.member.displayName}**: \`${mmbr.impression}\``)
@@ -722,6 +808,7 @@ function rawImpressions (guildClient, userId, args) {
  * @param {String[]} args The arguments passed with the command.
  */
 function setImpression (guildClient, userId, args) {
+  guildClient.logger.info('Received set impression command')
   var val = args[0]
   var id = userId
   // If insufficient arguments, return
@@ -752,6 +839,7 @@ function setImpression (guildClient, userId, args) {
  * @param {String[]} args Unused parameter.
  */
 function clearImpressions (guildClient, userId, args) {
+  guildClient.logger.info('Received clear impressions command')
   botClient.guildClients.forEach(gc => gc.members.forEach(usr => {
     usr.impression = 0
     keyv.delete(`${guildClient.guild.id}:${usr.id}:impression`)
@@ -767,6 +855,7 @@ function clearImpressions (guildClient, userId, args) {
  * @param {String[]} args Unused parameter.
  */
 function printGuild (guildClient, userId, args) {
+  guildClient.logger.info('Received print guild command')
   console.log(guildClient)
 }
 
@@ -778,6 +867,7 @@ function printGuild (guildClient, userId, args) {
  * @param {String[]} args Unused parameter.
  */
 function printMembers (guildClient, userId, args) {
+  guildClient.logger.info('Received print members command')
   console.log(guildClient.members)
 }
 
@@ -789,6 +879,7 @@ function printMembers (guildClient, userId, args) {
  * @param {String[]} args Unused parameter.
  */
 function clearDb (guildClient, userId, args) {
+  guildClient.logger.info('Received clear database command')
   keyv.clear()
   Functions.sendMsg(guildClient.textChannel, 'Cleared Database', guildClient).then(() => {
     Functions.sendMsg(guildClient.textChannel, 'Shutting down Snowboy, restart for changes to take effect', guildClient).then(() => {

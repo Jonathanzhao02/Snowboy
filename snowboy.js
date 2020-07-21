@@ -1,10 +1,8 @@
 const Detector = require('snowboy').Detector
 const Models = require('snowboy').Models
 const Events = require('events')
-const wit = require('./wit')
-
-const MAX_QUERY_TIME = 8000
-const SILENCE_QUERY_TIME = 2500
+const Wit = require('./wit')
+const Config = require('./config')
 
 /**
  * Uses Snowboy for hotword detection, triggering a callback.
@@ -15,6 +13,7 @@ const SILENCE_QUERY_TIME = 2500
  * @property {String} userId The ID of the SnowClient's user.
  * @property {EventEmitter} events The EventEmitter used for callbacks.
  * @property {Detector} detector The Detector used for Snowboy.
+ * @property {Any} logger The logger to use.
  * @property {Number} timeSinceLastChunk The time since the last chunk of data was read from the stream.
  */
 class SnowClient {
@@ -46,19 +45,16 @@ class SnowClient {
       language: 'en-US'
     })
 
-    this.detector.on('silence', function () {
-      // console.log('silent')
-    })
-
-    this.detector.on('sound', function (buffer) {
-      // console.log('sound')
-    })
-
-    this.detector.on('error', function () {
-      console.log('error')
-    })
-
     this.detector.on('hotword', (index, hotword, buffer) => { this.hotword(index, hotword, buffer) })
+  }
+
+  /**
+   * Sets the logger to use for this SnowClient instance.
+   *
+   * @param {Any} logger The logger to use.
+   */
+  setLogger (logger) {
+    this.logger = logger
   }
 
   /**
@@ -69,7 +65,7 @@ class SnowClient {
    */
   checkBuffer (chunk) {
     if (this.triggered) {
-      if (new Date().getTime() - this.timeSinceLastChunk < SILENCE_QUERY_TIME) {
+      if (new Date().getTime() - this.timeSinceLastChunk < Config.SILENCE_QUERY_TIME) {
         this.timeSinceLastChunk = new Date().getTime()
       }
     }
@@ -85,34 +81,40 @@ class SnowClient {
   hotword (index, hotword, buffer) {
     // If already triggered, emit the 'busy' event
     if (this.triggered) {
+      if (this.logger) this.logger.trace('Emitted busy event')
       this.events.emit('busy', this.guildClient, this.userId)
       return
     }
     // Emit the 'hotword' event and set the timeSinceLastChunk and initialTime values
+    if (this.logger) this.logger.trace('Emitted hotword event')
     this.events.emit('hotword', index, hotword, this.guildClient, this.userId)
     this.timeSinceLastChunk = new Date().getTime()
     const initialTime = this.timeSinceLastChunk
 
     const flag = new Events.EventEmitter()
     // Get the text of the audio stream from Wit.ai
-    wit.getStreamText(this.stream, flag, (finalResult) => {
+    Wit.getStreamText(this.stream, flag, (finalResult) => {
       this.triggered = false
+      if (this.logger) this.logger.trace('Emitted result event')
+      if (this.logger) this.logger.debug(`Received ${finalResult}`)
       this.events.emit('result', finalResult, this.guildClient, this.userId)
     },
     (error) => {
+      if (this.logger) this.logger.trace('Emitted error event')
+      if (this.logger) this.logger.error('Wit.ai failed with error:', error)
       this.triggered = false
       this.events.emit('error', error, this.guildClient, this.userId)
     })
 
     // Every 50ms, check if the query time has been exceeded, and finish if it has
     const intervalID = setInterval(() => {
-      if (new Date().getTime() - this.timeSinceLastChunk > SILENCE_QUERY_TIME || new Date().getTime() - initialTime > MAX_QUERY_TIME) {
+      if (new Date().getTime() - this.timeSinceLastChunk > Config.SILENCE_QUERY_TIME || new Date().getTime() - initialTime > Config.MAX_QUERY_TIME) {
         clearInterval(intervalID)
         flag.emit('finish')
         this.stream.removeAllListeners()
         this.stream.pipe(this.detector)
         this.triggered = false
-        console.log('Finished query')
+        if (this.logger) this.logger.info('Finished query')
       }
     }, 50)
 
@@ -136,8 +138,8 @@ class SnowClient {
    * @param {ReadableStream} strm The stream to read from for audio.
    */
   start (strm) {
+    if (this.logger) this.logger.info('Starting up SnowClient')
     this.stream = strm
-    console.log(`SNOWBOY: Listening to ${this.userId}...`)
     this.stream.pipe(this.detector)
   }
 
@@ -145,7 +147,7 @@ class SnowClient {
    * Shuts down the stream and cleans up all resources.
    */
   stop () {
-    console.log(`SNOWBOY: Shutting down ${this.userId}...`)
+    if (this.logger) this.logger.info('Shutting down SnowClient')
     if (!this.stream) return
     this.stream.end()
     this.stream.unpipe(this.detector)
