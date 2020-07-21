@@ -256,6 +256,7 @@ function getResponse (func, impression, args, useImpressions) {
  * @param {boolean} useImpressions Whether impressions are active or not.
  */
 function updateImpression (keyv, guildClient, userId, value, useImpressions) {
+  guildClient.logger.info(`Attempting to update impressions for ${userId}`)
   if (!useImpressions) return
   const member = guildClient.members.get(userId)
   if (member.impression + value > Config.ImpressionThresholds.MAX_IMPRESSION || member.impression + value < Config.ImpressionThresholds.MIN_IMPRESSION) return
@@ -305,6 +306,8 @@ function replaceMentions (msg, guild) {
  * @returns {Discord.Message|Discord.Message[]} Returns the message(s) sent.
  */
 async function sendMsg (textChannel, msg, guildClient, opts) {
+  guildClient.logger.info('Attempting to send message')
+  guildClient.logger.debug(msg)
   if (!textChannel) return undefined
   if (guildClient && !guildClient.settings.mentions) msg = replaceMentions(msg, guildClient.guild)
   let msgs
@@ -324,15 +327,18 @@ async function sendMsg (textChannel, msg, guildClient, opts) {
  */
 function cleanupGuildClient (guildClient, botClient) {
   if (Date.now() - guildClient.lastCalled >= Config.TIMEOUT) {
+    guildClient.logger.info('Attempting to clean up')
     // If the guild is currently connected, is not playing music, and has an active TextChannel,
     // notify, mark the guildClient for deletion, and leave
     if (guildClient.textChannel && guildClient.connection && !guildClient.playing) {
+      guildClient.logger.trace('Leaving voice channel')
       sendMsg(guildClient.textChannel,
         `${Emojis.happy} **It seems nobody needs me right now, so I'll be headed out. Call me when you do!**`,
         guildClient)
       guildClient.delete = true
       guildClient.voiceChannel.leave()
     } else {
+      guildClient.logger.trace('Deleting guildClient')
       botClient.guildClients.delete(guildClient.guild.id)
     }
   }
