@@ -1,7 +1,8 @@
-const Emojis = require('./emojis')
-const Streams = require('./streams')
+const Discord = require('discord.js')
 const Ytdl = require('ytdl-core-discord')
 const YouTube = require('youtube-node')
+const Emojis = require('./emojis')
+const Streams = require('./streams')
 const Gsearch = require('./gsearch')
 const Settings = require('./settings')
 const Config = require('./config')
@@ -619,6 +620,13 @@ function purge (guildClient, userId, args, msg, total, snowflake) {
   }
   if (!total) {
     guildClient.logger.info('Received purge command, first recursion')
+
+    // Check that the user can manage messages
+    if (!msg.member.hasPermission(Discord.Permissions.FLAGS.MANAGE_MESSAGES, { checkAdmin: true, checkOwner: true })) {
+      Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***You do not have permission to use this command!***`)
+      return
+    }
+
     total = 0
   }
   let filter = m => m.author.id === botClient.user.id
@@ -634,11 +642,21 @@ function purge (guildClient, userId, args, msg, total, snowflake) {
       case 't':
         filter = m => m.author.id === botClient.user.id || m.content.startsWith(guildClient.settings.prefix)
         break
-      // Delete all messages (SHOULD BE ADMIN ONLY)
+      // Delete all messages
       case 'all':
+        // Check that the user is an administrator
+        if (!msg.member.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR, { checkAdmin: true, checkOwner: true })) {
+          Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***You do not have permission to use this command!***`)
+          return
+        }
         filter = m => true
         break
       case 'a':
+        // Check that the user is an administrator
+        if (!msg.member.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR, { checkAdmin: true, checkOwner: true })) {
+          Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***You do not have permission to use this command!***`)
+          return
+        }
         filter = m => true
         break
       // Delete the requester's messages
@@ -726,7 +744,11 @@ function about (guildClient, userId, args, msg) {
 function settings (guildClient, userId, args, msg) {
   guildClient.logger.info('Received settings command')
   guildClient.logger.debug('Received args', args)
-  // SHOULD BE MADE ADMIN ONLY
+  // Check that the user is an administrator
+  if (!msg.member.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR, { checkAdmin: true, checkOwner: true })) {
+    Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***You do not have permission to use this command!***`)
+    return
+  }
   // If no arguments, print the settings embed with all values
   if (args.length === 0) {
     guildClient.logger.trace('Printing settings')
