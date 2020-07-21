@@ -13,6 +13,7 @@ Gsearch.setKey(process.env.GOOGLE_API_TOKEN)
 
 var botClient
 var keyv
+var logger
 
 /**
  * Sets the bot client used for commands.
@@ -33,20 +34,42 @@ function setDb (db) {
 }
 
 /**
+ * Sets the logger used for non-guild-specific functions.
+ *
+ * @param {Any} lgr The logger to use.
+ */
+function setLogger (lgr) {
+  logger = lgr
+}
+
+/**
+ * Plays silence frames in a voice channel.
+ *
+ * Necessary for 'speaking' event to continue functioning.
+ *
+ * @param {Object} guildClient The guildClient associated with the voice channel's server.
+ */
+function playSilence (guildClient) {
+  guildClient.logger.debug('Playing silence')
+  const silence = new Streams.Silence()
+  const dispatcher = guildClient.connection.play(silence, { type: 'opus' })
+  dispatcher.on('finish', () => {
+    silence.destroy()
+    dispatcher.destroy()
+    guildClient.logger.debug('Destroyed silence stream')
+  })
+}
+
+/**
  * Handles all setup associated with the connection.
  *
  * @param {Discord.VoiceConnection} connection The VoiceConnection from the VoiceChannel.
  * @param {Object} guildClient The guildClient associated with the server of the connection.
  */
 function connectionHandler (connection, guildClient) {
-  const silence = new Streams.Silence()
+  guildClient.logger.info('Successfully connected')
   guildClient.connection = connection
-  connection.play(silence, { type: 'opus' })
-  connection.dispatcher.on('finish', () => {
-    silence.destroy()
-    guildClient.connection.dispatcher.destroy()
-  })
-  console.log('Connected!')
+  playSilence(guildClient)
 }
 
 /**
@@ -60,12 +83,7 @@ function queuedPlay (video, guildClient) {
   if (!video) {
     // End current dispatcher
     if (guildClient.playing) guildClient.connection.dispatcher.end()
-    const silence = new Streams.Silence()
-    const dispatcher = guildClient.connection.play(silence, { type: 'opus' })
-    dispatcher.on('finish', () => {
-      silence.destroy()
-      dispatcher.destroy()
-    })
+    playSilence(guildClient)
     guildClient.playing = false
     guildClient.lastCalled = Date.now()
     setTimeout(() => {
@@ -299,13 +317,8 @@ function stop (guildClient, userId, args) {
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Nothing currently playing!***`, guildClient)
     return
   }
-  const silence = new Streams.Silence()
   guildClient.connection.dispatcher.end()
-  const dispatcher = guildClient.connection.play(silence, { type: 'opus' })
-  dispatcher.on('finish', () => {
-    silence.destroy()
-    dispatcher.destroy()
-  })
+  playSilence(guildClient)
   guildClient.playing = false
   guildClient.songQueue = []
   Functions.sendMsg(guildClient.textChannel, `${Emojis.stop} ***Stopped the music***`, guildClient)

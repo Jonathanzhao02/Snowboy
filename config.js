@@ -22,6 +22,12 @@ const ALONE_TIMEOUT = 10000
 // Threshold of how confident Snowboy should be in an intent before accepting it
 const CONFIDENCE_THRESHOLD = 0.7
 
+// Maximum time for a voice query command
+const MAX_QUERY_TIME = 8000
+
+// Maximum silence before a query is forcibly finished
+const SILENCE_QUERY_TIME = 2500
+
 // User IDs of users who are able to use debug commands, feel free to add your's
 const DEBUG_IDS = ['290237225596092416']
 
@@ -49,6 +55,8 @@ module.exports = {
   TIMEOUT: TIMEOUT,
   ALONE_TIMEOUT: ALONE_TIMEOUT,
   CONFIDENCE_THRESHOLD: CONFIDENCE_THRESHOLD,
+  MAX_QUERY_TIME: MAX_QUERY_TIME,
+  SILENCE_QUERY_TIME: SILENCE_QUERY_TIME,
   DEBUG_IDS: DEBUG_IDS,
   SettingsValues: {
     DEFAULT_BOT_PREFIX: DEFAULT_BOT_PREFIX,
