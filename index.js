@@ -19,7 +19,12 @@ if (Env.error) throw Env.error
 const Heapdump = require('heapdump')
 const Pino = require('pino')
 
-const logger = Pino({ nestedKey: 'objs' }, Pino.destination(`./logs/${new Date().toISOString()}.log`))
+const logger = Pino({
+  nestedKey: 'objs',
+  serializers: {
+    err: Pino.stdSerializers.err
+  }
+}, Pino.destination(`./logs/${new Date().toISOString()}.log`))
 
 const botClient = new Discord.Client()
 botClient.guildClients = new Map() // to keep track of individual active guilds
@@ -27,7 +32,7 @@ botClient.userClients = new Map() // to keep track of individual user bug report
 Wit.setKey(process.env.WIT_API_TOKEN)
 
 const keyv = new Keyv('sqlite://db/snowboy.db', { table: 'guilds' })
-keyv.on('error', console.error)
+keyv.on('error', error => { throw error })
 
 Commands.setClient(botClient)
 Commands.setDb(keyv)
