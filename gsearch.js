@@ -21,7 +21,7 @@ function search (qry, callback) {
   var method = 'GET'
   var host = 'www.googleapis.com'
   var path = '/customsearch/v1?'
-  var query = `key=${accessToken}&q=${qry.replace(' ', '+')}&cx=001359467268259198197:pj71gnzvmza`
+  var query = `key=${accessToken}&q=${qry.replace(/ +/gi, '+')}&cx=001359467268259198197:pj71gnzvmza`
 
   var options = {
     host: host,
