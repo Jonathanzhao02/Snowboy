@@ -61,10 +61,10 @@ function queuedPlay (video, guildClient) {
     // End current dispatcher
     if (guildClient.playing) guildClient.connection.dispatcher.end()
     const silence = new Streams.Silence()
-    guildClient.connection.play(silence, { type: 'opus' })
-    guildClient.connection.dispatcher.on('finish', () => {
+    const dispatcher = guildClient.connection.play(silence, { type: 'opus' })
+    dispatcher.on('finish', () => {
       silence.destroy()
-      guildClient.connection.dispatcher.destroy()
+      dispatcher.destroy()
     })
     guildClient.playing = false
     guildClient.lastCalled = Date.now()
@@ -99,14 +99,14 @@ function queuedPlay (video, guildClient) {
   // Uses ytdl-core-discord
   Ytdl(`http://www.youtube.com/watch?v=${video.id.videoId}`).then(stream => {
     guildClient.playing = true
-    guildClient.connection.play(stream, {
+    const dispatcher = guildClient.connection.play(stream, {
       type: 'opus',
       highWaterMark: 50
     })
       .on('finish', () => {
         // Goes to next song in queue
         var queue = guildClient.songQueue
-        guildClient.connection.dispatcher.destroy()
+        dispatcher.destroy()
         guildClient.playing = false
         stream.destroy()
 
@@ -301,10 +301,10 @@ function stop (guildClient, userId, args) {
   }
   const silence = new Streams.Silence()
   guildClient.connection.dispatcher.end()
-  guildClient.connection.play(silence, { type: 'opus' })
-  guildClient.connection.dispatcher.on('finish', () => {
+  const dispatcher = guildClient.connection.play(silence, { type: 'opus' })
+  dispatcher.on('finish', () => {
     silence.destroy()
-    guildClient.connection.dispatcher.destroy()
+    dispatcher.destroy()
   })
   guildClient.playing = false
   guildClient.songQueue = []

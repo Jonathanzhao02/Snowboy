@@ -290,6 +290,7 @@ function findMember (str, guild) {
  * @returns {String} Returns the formatted string.
  */
 function replaceMentions (msg, guild) {
+  if (msg instanceof Discord.MessageEmbed) return msg
   const regex = /<@!?(\d+)>/gi
   return msg.replace(regex, match => findMember(match, guild).displayName)
 }
