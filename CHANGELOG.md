@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.5 (PR #15)
+Bug fixes and new logger
+* Fixed regexes only replacing the first instance
+* Fixed process not exiting if no guilds are active
+* Added a new Pino logger instance
+
 ## v0.2.4 (PR #14)
 Organization, debugging, and package updates
 * Added error logging
