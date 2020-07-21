@@ -17,8 +17,6 @@ const Heapdump = require('heapdump')
 const Pino = require('pino')
 
 const logger = Pino({ nestedKey: 'objs' }, Pino.destination(`./logs/${new Date().toISOString()}.log`))
-logger.level = 'trace'
-logger.trace('testing 123')
 
 const botClient = new Discord.Client()
 botClient.guildClients = new Map() // to keep track of individual active guilds
