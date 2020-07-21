@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.7 (PR #17)
+Logging capabilities, constant refactoring, and code refactoring
+* Added logging to `commands.js`, `index.js`, `snobby.js`, and `bot-utils.js`
+* Moved `snowboy.js` constants to config
+* Refactored `Streams.silence()` creations into a method `playSilence(guildClient)`
+* Moved a few clean-up statements around in `commands.js`
+
 ## v0.2.6 (PR #16)
 Bug fixes and cleanup
 * Fixed bug with embeds while replacing mentions
