@@ -32,7 +32,7 @@ function createSearchEmbed (result, username) {
   return new Discord.MessageEmbed()
     .setColor('#32cd32')
     .setTitle(Entities.decode(result.title))
-    .setDescription(Entities.decode(result.snippet.replace('\n', '')))
+    .setDescription(Entities.decode(result.snippet.replace(/\n/gi, '')))
     .setURL(result.link)
     .setImage(result.pagemap.cse_image[0].src)
     .setFooter(`Requested by ${username}`)
@@ -220,7 +220,8 @@ function convertToRelation (impression) {
  */
 function format (msg, args) {
   for (var i = 0; i < args.length; i++) {
-    msg = msg.replace(`{${i}}`, args[i])
+    const regex = new RegExp(`\\{${i}\\}`, 'gi')
+    msg = msg.replace(regex, args[i])
   }
 
   return msg
@@ -289,14 +290,8 @@ function findMember (str, guild) {
  * @returns {String} Returns the formatted string.
  */
 function replaceMentions (msg, guild) {
-  const regex = /<@!?(\d+)>/
-
-  while (msg.match(regex)) {
-    const group = msg.match(regex)
-    msg = msg.replace(group[0], findMember(group[0], guild).displayName)
-  }
-
-  return msg
+  const regex = /<@!?(\d+)>/gi
+  return msg.replace(regex, match => findMember(match, guild).displayName)
 }
 
 /**

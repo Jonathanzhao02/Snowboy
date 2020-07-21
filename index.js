@@ -14,6 +14,11 @@ const Config = require('./config')
 
 // Logging
 const Heapdump = require('heapdump')
+const Pino = require('pino')
+
+const logger = Pino({ nestedKey: 'objs' }, Pino.destination(`./logs/${new Date().toISOString()}.log`))
+logger.level = 'trace'
+logger.trace('testing 123')
 
 const botClient = new Discord.Client()
 botClient.guildClients = new Map() // to keep track of individual active guilds
@@ -103,7 +108,7 @@ async function onSpeaking (member, speaking) {
  * @param {Discord.Message} msg The sent message.
  */
 function bugLog (msg) {
-  const file = Fs.createWriteStream(`./bug_reports/bug_report_${msg.createdAt.toDateString().replace(' ', '_')}_${msg.createdAt.getTime()}.txt`)
+  const file = Fs.createWriteStream(`./bug_reports/bug_report_${msg.createdAt.toISOString()}_${msg.createdAt.getTime()}.txt`)
   file.write(msg.content)
   file.write('\n')
   file.write(`${msg.author.username}#${msg.author.discriminator}`)
@@ -280,12 +285,6 @@ function ack (index, hotword, guildClient, userId) {
   setTimeout(() => { Functions.cleanupGuildClient(guildClient, botClient) }, Config.TIMEOUT + 500)
 }
 
-// Logs that the client is ready in console
-botClient.on('ready', () => {
-  console.log(`Logged in as ${botClient.user.tag}`)
-  console.log(`Started up at ${new Date().toString()}`)
-})
-
 // Settings up more callbacks
 botClient.on('message', onMessage)
 botClient.on('guildMemberSpeaking', onSpeaking)
@@ -337,6 +336,12 @@ if (process.argv.includes('-t') || process.argv.includes('--test')) {
   botClient.login(process.env.SNOWBOY_BOT_TOKEN)
 }
 
+// Logs that the client is ready in console
+botClient.on('ready', () => {
+  console.log(`Logged in as ${botClient.user.tag}`)
+  console.log(`Started up at ${new Date().toString()}`)
+})
+
 // Sends greeting message when joining a new guild
 botClient.on('guildCreate', guild => {
   console.log('Joined new guild')
@@ -351,11 +356,14 @@ botClient.on('guildCreate', guild => {
 // Error logging and exit handling
 botClient.on('error', error => {
   const promise = new Promise((resolve, reject) => {
-    Array.from(botClient.guildClients).forEach((guildClient, index, array) => {
+    const guilds = Array.from(botClient.guildClients)
+    guilds.forEach((guildClient, index, array) => {
       Functions.sendMsg(guildClient[1].textChannel, `${Emojis.error} ***Sorry, I ran into some fatal error. Hopefully I come back soon!***`).then(() => {
         if (index === array.length - 1) resolve()
       })
     })
+
+    if (guilds.length === 0) resolve()
   })
 
   promise.then(() => Heapdump.writeSnapshot(`./logs/${Date.now()}_CLI.heapdump`, () => {
@@ -382,11 +390,14 @@ process.on('SIGTERM', signal => {
 process.on('SIGINT', signal => {
   console.log(`Process ${process.pid} has been interrupted`)
   const promise = new Promise((resolve, reject) => {
-    Array.from(botClient.guildClients).forEach((guildClient, index, array) => {
+    const guilds = Array.from(botClient.guildClients)
+    guilds.forEach((guildClient, index, array) => {
       Functions.sendMsg(guildClient[1].textChannel, `${Emojis.error} ***Sorry, I'm going down for updates and maintenance! See you soon!***`).then(() => {
         if (index === array.length - 1) resolve()
       })
     })
+
+    if (guilds.length === 0) resolve()
   })
 
   promise.then(() => {
