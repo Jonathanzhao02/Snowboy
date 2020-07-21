@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.2.8 (PR #18)
+Fixed bugs and added new package
+* Moved environemntal variables to a `.env` file with `dotenv` package
+* Fixed bugs with logger not logging certain things (still have to make it properly log tracebacks & objects)
+
 ## v0.2.7 (PR #17)
 Logging capabilities, constant refactoring, and code refactoring
 * Added logging to `commands.js`, `index.js`, `snobby.js`, and `bot-utils.js`
