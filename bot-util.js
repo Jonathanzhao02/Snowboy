@@ -1,6 +1,7 @@
 const Entities = require('html-entities').Html5Entities
 const Discord = require('discord.js')
 const Emojis = require('./emojis')
+const Streams = require('./streams')
 const Config = require('./config')
 
 /**
@@ -346,6 +347,24 @@ function cleanupGuildClient (guildClient, botClient) {
   }
 }
 
+/**
+ * Plays silence frames in a voice channel.
+ *
+ * Necessary for 'speaking' event to continue functioning.
+ *
+ * @param {Object} guildClient The guildClient associated with the voice channel's server.
+ */
+function playSilence (guildClient) {
+  guildClient.logger.debug('Playing silence')
+  const silence = new Streams.Silence()
+  const dispatcher = guildClient.connection.play(silence, { type: 'opus' })
+  dispatcher.on('finish', () => {
+    silence.destroy()
+    dispatcher.destroy()
+    guildClient.logger.debug('Destroyed silence stream')
+  })
+}
+
 module.exports = {
   Embeds: {
     createVideoEmbed: createVideoEmbed,
@@ -363,6 +382,7 @@ module.exports = {
     updateImpression: updateImpression,
     findMember: findMember,
     sendMsg: sendMsg,
-    cleanupGuildClient: cleanupGuildClient
+    cleanupGuildClient: cleanupGuildClient,
+    playSilence: playSilence
   }
 }

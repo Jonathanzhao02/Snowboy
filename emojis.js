@@ -2,6 +2,8 @@ const emojis = {
   checkmark: '✔️',
   error: '❌',
   settings: '⚙️',
+  stats: '📊',
+  ping: '📶',
   playing: '▶',
   pause: '⏸️',
   greeting: '👋',
