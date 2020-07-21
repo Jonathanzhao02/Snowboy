@@ -3,9 +3,9 @@ const Keyv = require('keyv')
 const Resampler = require('node-libsamplerate')
 const Fs = require('fs')
 const Snowboy = require('./snowboy')
-const Wit = require('./wit')
 const Streams = require('./streams')
 const Emojis = require('./emojis')
+const Common = require('./common')
 const Commands = require('./commands')
 const Settings = require('./settings')
 const Functions = require('./bot-util').Functions
@@ -19,19 +19,23 @@ if (Env.error) throw Env.error
 const Heapdump = require('heapdump')
 const Pino = require('pino')
 
-const logger = Pino({ nestedKey: 'objs' }, Pino.destination(`./logs/${new Date().toISOString()}.log`))
+const logger = Pino({
+  nestedKey: 'objs',
+  serializers: {
+    err: Pino.stdSerializers.err
+  }
+}, Pino.destination(`./logs/${new Date().toISOString()}.log`))
 
 const botClient = new Discord.Client()
 botClient.guildClients = new Map() // to keep track of individual active guilds
 botClient.userClients = new Map() // to keep track of individual user bug reports
-Wit.setKey(process.env.WIT_API_TOKEN)
 
 const keyv = new Keyv('sqlite://db/snowboy.db', { table: 'guilds' })
-keyv.on('error', console.error)
+keyv.on('error', error => { throw error })
 
-Commands.setClient(botClient)
-Commands.setDb(keyv)
-Commands.setLogger(logger)
+Common.setClient(botClient)
+Common.setDb(keyv)
+Common.setLogger(logger)
 
 /**
  * Handles creation of new members or new SnowClients for untracked users
@@ -200,6 +204,11 @@ async function onMessage (msg) {
   if (msg.channel !== guildClient.textChannel && guildClient.connection && Commands.restrictedCommands.get(commandName)) {
     Functions.sendMsg(msg.channel, `${Emojis.error} ***Sorry, I am not actively listening to this channel!***`, guildClient)
     return
+  // If Snowboy is currently connected in the guild, and the GuildMember tries to run a restricted command without being in the active
+  // voice channel, notify the GuildMember and return
+  } else if (guildClient.connection && msg.member.voice.channelID !== guildClient.voiceChannel.id && Commands.restrictedCommands.get(commandName)) {
+    Functions.sendMsg(msg.channel, `${Emojis.error} ***Sorry, you are not in my voice channel!***`, guildClient)
+    return
   }
 
   // Create a new member if the GuildMember is not currently tracked, loading settings from database
@@ -227,14 +236,16 @@ async function onMessage (msg) {
   }
 
   // Check all relevant command maps for the current command name, and execute it
-  if (Commands.commands.get(commandName)) {
-    Commands.commands.get(commandName)(guildClient, userId, args)
+  if (Commands.biCommands.get(commandName)) {
+    Commands.biCommands.get(commandName).execute(guildClient, userId, args)
   } else if (Commands.restrictedCommands.get(commandName)) {
-    Commands.restrictedCommands.get(commandName)(guildClient, userId, args)
+    Commands.restrictedCommands.get(commandName).execute(guildClient, userId, args)
   } else if (Commands.textOnlyCommands.get(commandName)) {
-    Commands.textOnlyCommands.get(commandName)(guildClient, userId, args, msg)
+    Commands.textOnlyCommands.get(commandName).execute(guildClient, userId, args, msg)
   } else if (Config.DEBUG_IDS.includes(userId) && Commands.debugCommands.get(commandName)) {
-    Commands.debugCommands.get(commandName)(guildClient, userId, args)
+    Commands.debugCommands.get(commandName).execute(guildClient, userId, args)
+  } else if (Commands.eastereggCommands.get(commandName)) {
+    Commands.eastereggCommands.get(commandName).execute(guildClient, userId, args)
   } else {
     Functions.sendMsg(msg.channel, `${Emojis.confused} ***Sorry, I don't understand.***`, guildClient)
   }
@@ -277,6 +288,8 @@ function parse (result, guildClient, userId) {
     Commands.restrictedCommands.get(commandName)(guildClient, userId, args)
   } else if (Commands.voiceOnlyCommands.get(commandName)) {
     Commands.voiceOnlyCommands.get(commandName)(guildClient, userId, args)
+  } else if (Commands.eastereggCommands.get(commandName)) {
+    Commands.eastereggCommands.get(commandName).execute(guildClient, userId, args)
   } else {
     Functions.sendMsg(guildClient.textChannel, `${Emojis.confused} ***Sorry, I don't understand*** "\`${result.text}\`"`, guildClient)
     guildClient.logger.warn(`No command found for ${commandName}!`)
@@ -346,7 +359,7 @@ botClient.on('voiceStateUpdate', (oldPresence, newPresence) => {
         if (oldPresence.channel.members.size === 1) {
           guildClient.logger.info('Leaving channel, only member remaining')
           Functions.sendMsg(guildClient.textChannel, `${Emojis.sad} I'm leaving, I'm all by myself!`, guildClient)
-          Commands.restrictedCommands.get('leave')(guildClient)
+          Commands.restrictedCommands.get('leave').execute(guildClient)
         }
       }, Config.ALONE_TIMEOUT + 500)
     }
@@ -440,6 +453,22 @@ process.on('SIGINT', signal => {
     process.exit(0)
   })
 })
+
+if (process.argv.includes('trace')) {
+  logger.level = 'trace'
+} else if (process.argv.includes('debug')) {
+  logger.level = 'debug'
+} else if (process.argv.includes('info')) {
+  logger.level = 'info'
+} else if (process.argv.includes('warn')) {
+  logger.level = 'warn'
+} else if (process.argv.includes('error')) {
+  logger.level = 'error'
+} else if (process.argv.includes('fatal')) {
+  logger.level = 'fatal'
+} else if (process.argv.includes('silent')) {
+  logger.level = 'silent'
+}
 
 // Switch between testing bot and (future) production bot
 if (process.argv.includes('-t') || process.argv.includes('--test')) {

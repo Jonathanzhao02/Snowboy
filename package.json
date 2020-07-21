@@ -25,5 +25,8 @@
     "youtube-node": "^1.3.3",
     "ytdl-core": "^3.1.2",
     "ytdl-core-discord": "github:Jonathanzhao02/ytdl-core-discord"
+  },
+  "devDependencies": {
+    "mocha": "^8.0.1"
   }
 }
