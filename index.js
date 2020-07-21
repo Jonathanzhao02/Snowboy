@@ -460,8 +460,6 @@ if (process.argv.includes('trace')) {
   logger.level = 'fatal'
 } else if (process.argv.includes('silent')) {
   logger.level = 'silent'
-} else {
-  logger.level = 'info'
 }
 
 // Switch between testing bot and (future) production bot
