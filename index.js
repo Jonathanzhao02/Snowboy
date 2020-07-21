@@ -28,6 +28,7 @@ keyv.on('error', console.error)
 
 Commands.setClient(botClient)
 Commands.setDb(keyv)
+Commands.setLogger(logger)
 
 /**
  * Handles creation of new members or new SnowClients for untracked users
