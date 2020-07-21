@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.6 (PR #16)
+Bug fixes and cleanup
+* Fixed bug with embeds while replacing mentions
+* Fixed dispatchers not referencing themselves during cleanup
+* Removed useless Pino test logging
+
 ## v0.2.5 (PR #15)
 Bug fixes and new logger
 * Fixed regexes only replacing the first instance
