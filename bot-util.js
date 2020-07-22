@@ -308,7 +308,7 @@ function replaceMentions (msg, guild) {
  */
 async function sendMsg (textChannel, msg, guildClient, opts) {
   if (guildClient) {
-    guildClient.logger.info('Attempting to send message')
+    guildClient.logger.debug('Attempting to send message')
     guildClient.logger.debug(msg)
   }
   if (!textChannel) return undefined
@@ -330,18 +330,18 @@ async function sendMsg (textChannel, msg, guildClient, opts) {
  */
 function cleanupGuildClient (guildClient, botClient) {
   if (Date.now() - guildClient.lastCalled >= Config.TIMEOUT) {
-    guildClient.logger.info('Attempting to clean up')
+    guildClient.logger.debug('Attempting to clean up guildClient')
     // If the guild is currently connected, is not playing music, and has an active TextChannel,
     // notify, mark the guildClient for deletion, and leave
     if (guildClient.textChannel && guildClient.connection && !guildClient.playing) {
-      guildClient.logger.trace('Leaving voice channel')
+      guildClient.logger.debug('Leaving voice channel')
       sendMsg(guildClient.textChannel,
         `${Emojis.happy} **It seems nobody needs me right now, so I'll be headed out. Call me when you do!**`,
         guildClient)
       guildClient.delete = true
       guildClient.voiceChannel.leave()
     } else {
-      guildClient.logger.trace('Deleting guildClient')
+      guildClient.logger.debug('Deleting guildClient')
       botClient.guildClients.delete(guildClient.guild.id)
     }
   }

@@ -17,7 +17,7 @@ function leave (guildClient, userId, args) {
   guildClient.logger.info('Received leave command')
 
   if (!guildClient.connection) {
-    guildClient.logger.trace('Not connected')
+    guildClient.logger.debug('Not connected')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***I am not connected to a voice channel!***`, guildClient)
     return
   }
@@ -28,6 +28,7 @@ function leave (guildClient, userId, args) {
       guildClient)
   }
 
+  guildClient.logger.debug('Leaving')
   guildClient.logger.trace('Disconnecting')
   guildClient.connection.disconnect()
   guildClient.connection.removeAllListeners()
@@ -43,6 +44,7 @@ function leave (guildClient, userId, args) {
   guildClient.voiceChannel.leave()
   guildClient.voiceChannel = undefined
   guildClient.connection = undefined
+  guildClient.logger.debug('Successfully left')
 }
 
 module.exports = {

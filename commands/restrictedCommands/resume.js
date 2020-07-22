@@ -11,13 +11,14 @@ const { Functions } = require('../../bot-util')
 function resume (guildClient, userId, args) {
   guildClient.logger.info('Received resume command')
   if (!guildClient.playing) {
-    guildClient.logger.trace('Not playing anything')
+    guildClient.logger.debug('Not playing anything')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Nothing currently playing!***`, guildClient)
     return
   }
-  guildClient.logger.info('Resuming music')
+  guildClient.logger.debug('Resuming music')
   guildClient.connection.dispatcher.resume()
   Functions.sendMsg(guildClient.textChannel, `${Emojis.playing} **Resuming!**`, guildClient)
+  guildClient.logger.debug('Successfully resumed music')
 }
 
 module.exports = {

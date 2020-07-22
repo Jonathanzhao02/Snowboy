@@ -21,14 +21,15 @@ const Discord = require('discord.js')
 function purge (guildClient, userId, args, msg, total, snowflake) {
   // On the first recursion, return if the purging command is already active
   if (guildClient.purging && !total) {
-    guildClient.logger.trace('Already purging')
+    guildClient.logger.debug('Received command, but already purging')
     return
   }
   if (!total) {
-    guildClient.logger.info('Received purge command, first recursion')
+    guildClient.logger.info('Received purge command')
 
     // Check that the user can manage messages
     if (!msg.member.hasPermission(Discord.Permissions.FLAGS.MANAGE_MESSAGES, { checkAdmin: true, checkOwner: true })) {
+      guildClient.logger.debug('Rejected user due to insufficient permissions: MANAGE_MESSAGES')
       Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***You do not have permission to use this command!***`)
       return
     }
@@ -37,7 +38,8 @@ function purge (guildClient, userId, args, msg, total, snowflake) {
   }
   let filter = m => m.author.id === Common.botClient.user.id
   let mmbr
-  guildClient.logger.debug('Received args:', args)
+  guildClient.logger.debug('Received args')
+  guildClient.logger.debug(args)
 
   if (args[0]) {
     switch (args[0]) {
@@ -52,6 +54,7 @@ function purge (guildClient, userId, args, msg, total, snowflake) {
       case 'all':
         // Check that the user is an administrator
         if (!msg.member.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR, { checkAdmin: true, checkOwner: true })) {
+          guildClient.logger.debug('Rejected user due to insufficient permissions: ADMINISTRATOR')
           Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***You do not have permission to use this command!***`)
           return
         }
@@ -60,6 +63,7 @@ function purge (guildClient, userId, args, msg, total, snowflake) {
       case 'a':
         // Check that the user is an administrator
         if (!msg.member.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR, { checkAdmin: true, checkOwner: true })) {
+          guildClient.logger.debug('Rejected user due to insufficient permissions: ADMINISTRATOR')
           Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***You do not have permission to use this command!***`)
           return
         }
@@ -74,6 +78,7 @@ function purge (guildClient, userId, args, msg, total, snowflake) {
       default:
         mmbr = Functions.findMember(args[0], guildClient.guild)
         if (!mmbr) {
+          guildClient.logger.debug(`Rejected user due to invalid user: ${args[0]}`)
           Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Could not find user \`${args[0]}\`***`, guildClient)
           return
         } else {
@@ -96,11 +101,11 @@ function purge (guildClient, userId, args, msg, total, snowflake) {
 
       // If deleted messages, continue deleting recursively
       if (deletedMessages.size > 0) {
-        guildClient.logger.trace('Recursively purging', total)
+        guildClient.logger.debug(`Recursively purging: ${total} messages deleted`)
         purge(guildClient, userId, args, msg, total, deletedMessages.last().id)
       // If no messages deleted, purge command has finished all it can, return
       } else {
-        guildClient.logger.trace('Finished purging', total)
+        guildClient.logger.debug(`Finished purging: ${total} messages deleted`)
         guildClient.purging = false
         Functions.sendMsg(guildClient.textChannel,
           `${Emojis.trash} **Deleted \`${total}\` messages ${mmbr ? `from user \`${mmbr.displayName}\`` : ''}!**`,

@@ -13,16 +13,17 @@ const Gsearch = require('../../gsearch')
 function search (guildClient, userId, args) {
   guildClient.logger.info('Received search command')
   if (!args || args.length === 0) {
-    guildClient.logger.trace('No query found')
+    guildClient.logger.debug('No query found')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***I need something to search up!***`, guildClient)
     return
   }
 
   Functions.sendMsg(guildClient.textChannel, `${Emojis.search} ***Searching*** \`${args.join(' ')}\``, guildClient)
 
-  guildClient.logger.trace(`Searching up ${args.join(' ')}`)
+  guildClient.logger.debug(`Searching up ${args.join(' ')}`)
   Gsearch.search(args.join(' '), result => {
-    guildClient.logger.trace('Received result:', result)
+    guildClient.logger.debug('Received result')
+    guildClient.logger.debug(result)
     guildClient.guild.members.fetch(userId)
       .then(user => {
         Functions.sendMsg(guildClient.textChannel, Embeds.createSearchEmbed(result, user.username), guildClient)
