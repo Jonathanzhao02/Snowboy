@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.3.0 (PR #21)
+Commands refactoring, format editing, new package installation, and basic permission checking
+* Refactored all commands into their individual `js` files
+  * Refactored `commands` to `biCommands`, commands which work in both text and voice
+  * `debugCommands` are only available to developers with ther user IDs listed inside `config.js`
+  * `restrictedCommands` are commands available only to users within Snowboy's voice channel or text channel. These modify Snowboy's vocal behavior (i.e. pause, play)
+  * `textCommands` or `textOnlyCommands` are text-only, no voice support for them
+  * `voiceCommands` or `voiceOnlyCommands` are voice-only, no text support for them
+  * Added new `eastereggCommands` category for commands not shown to the user
+* Added dynamic command loading into `commands.js`
+* Added new command line argument specifying the level at which the logger should log
+* Added two new emojis, one for `ping` and one for `stats`
+* Refactored common resources (i.e. the database, the bot client, the logger) into a new file named `common.js`
+* Added new `mocha` dev dependency in preparation for unit tests
+* Added new permission checking for `purge` and `settings` commands
+
 ## v0.2.8 (PR #18)
 Fixed bugs and added new package
 * Moved environemntal variables to a `.env` file with `dotenv` package
