@@ -9,7 +9,8 @@ const { Functions } = require('../../bot-util')
  * @param {String[]} args Unused parameter.
  */
 function clearDb (guildClient, userId, args) {
-  guildClient.logger.info('Received clear database command')
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received clear database command')
   Common.keyv.clear()
   Functions.sendMsg(guildClient.textChannel, 'Cleared Database', guildClient).then(() => {
     Functions.sendMsg(guildClient.textChannel, 'Shutting down Snowboy, restart for changes to take effect', guildClient).then(() => {

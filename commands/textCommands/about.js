@@ -10,7 +10,8 @@ const { Embeds, Functions } = require('../../bot-util')
  * @param {Discord.Message} msg Unused parameter.
  */
 function about (guildClient, userId, args, msg) {
-  guildClient.logger.info('Received about command')
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received about command')
   Functions.sendMsg(guildClient.textChannel, Embeds.createAboutEmbed(Common.botClient), guildClient)
 }
 

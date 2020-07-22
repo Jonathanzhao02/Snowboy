@@ -9,7 +9,8 @@ const { Functions } = require('../../bot-util')
  * @param {String[]} args Unused parameter.
  */
 function flip (guildClient, userId, args) {
-  guildClient.logger.info('Received flip command')
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received flip command')
   const result = Functions.random(2)
   Functions.sendMsg(guildClient.textChannel,
     `${result === 0 ? Emojis.heads : Emojis.tails} **I flipped \`${result === 0 ? 'heads' : 'tails'}\`, <@${userId}>!**`,

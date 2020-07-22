@@ -22,10 +22,11 @@ function connectionHandler (connection, guildClient) {
  * @param {Discord.Message} msg The Message the user sent.
  */
 function join (guildClient, userId, args, msg) {
-  guildClient.logger.info('Received join command')
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received join command')
   // If the user is not connected to a VoiceChannel, notify and return
   if (!msg.member.voice.channel) {
-    guildClient.logger.trace('Member not connected')
+    logger.trace('Member not connected')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***You are not connected to a voice channel!***`, guildClient)
     return
   // Otherwise, set the guildClient VoiceChannel to the member's
@@ -35,7 +36,7 @@ function join (guildClient, userId, args, msg) {
 
   // If already connected, notify and return
   if (guildClient.connection) {
-    guildClient.logger.trace('Already connected')
+    logger.trace('Already connected')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***I'm already connected to a voice channel!***`, guildClient)
     return
   }
@@ -46,7 +47,7 @@ function join (guildClient, userId, args, msg) {
     guildClient)
 
   // Attempt to join and handle the connection, or error
-  guildClient.logger.trace('Attempting to join')
+  logger.trace('Attempting to join')
   guildClient.voiceChannel.join().then(connection => connectionHandler(connection, guildClient)).catch(e => {
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Could not connect! \\;(***`, guildClient)
     throw e

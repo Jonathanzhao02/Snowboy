@@ -9,7 +9,8 @@ const { Functions } = require('../../bot-util')
  * @param {String[]} args Unused parameter.
  */
 function clearImpressions (guildClient, userId, args) {
-  guildClient.logger.info('Received clear impressions command')
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received clear impressions command')
   Common.botClient.guildClients.forEach(gc => gc.members.forEach(usr => {
     usr.impression = 0
     Common.keyv.delete(`${guildClient.guild.id}:${usr.id}:impression`)

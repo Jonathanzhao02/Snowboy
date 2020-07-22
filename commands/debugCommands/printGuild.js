@@ -6,7 +6,8 @@
  * @param {String[]} args Unused parameter.
  */
 function printGuild (guildClient, userId, args) {
-  guildClient.logger.info('Received print guild command')
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received print guild command')
   console.log(guildClient)
 }
 

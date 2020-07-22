@@ -11,7 +11,8 @@ const { Functions } = require('../../bot-util')
  * @param {Discord.Message} msg Unused parameter.
  */
 function stats (guildClient, userId, args, msg) {
-  guildClient.logger.info('Received stats command')
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received stats command')
   Functions.sendMsg(guildClient.textChannel, `${Emojis.stats} **I am currently in \`${Common.botClient.guilds.cache.size}\` servers!**`, guildClient)
 }
 

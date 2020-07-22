@@ -12,7 +12,8 @@ const Config = require('../../config')
  * @param {String[]} args Unused parameter.
  */
 function gross (guildClient, userId, args) {
-  guildClient.logger.info('Received gross command')
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received gross command')
   Functions.sendMsg(guildClient.textChannel, `${Emojis.weird} **Not much I can do for you, <@${userId}>**`, guildClient)
   Functions.updateImpression(Common.keyv, guildClient, userId, Config.ImpressionValues.GROSS_VALUE, guildClient.settings.impressions)
 }

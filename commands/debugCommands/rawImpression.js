@@ -9,7 +9,8 @@ const { Functions } = require('../../bot-util')
  * @param {String[]} args The arguments passed with the command.
  */
 function rawImpression (guildClient, userId, args) {
-  guildClient.logger.info('Received raw impression command')
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received raw impression command')
   let member = guildClient.members.get(userId).member
 
   // Finds the member mentioned in the arguments

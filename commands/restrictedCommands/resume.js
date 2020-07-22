@@ -9,16 +9,17 @@ const { Functions } = require('../../bot-util')
  * @param {String[]} args Unused parameter.
  */
 function resume (guildClient, userId, args) {
-  guildClient.logger.info('Received resume command')
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received resume command')
   if (!guildClient.playing) {
-    guildClient.logger.debug('Not playing anything')
+    logger.debug('Not playing anything')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Nothing currently playing!***`, guildClient)
     return
   }
-  guildClient.logger.debug('Resuming music')
+  logger.debug('Resuming music')
   guildClient.connection.dispatcher.resume()
   Functions.sendMsg(guildClient.textChannel, `${Emojis.playing} **Resuming!**`, guildClient)
-  guildClient.logger.debug('Successfully resumed music')
+  logger.debug('Successfully resumed music')
 }
 
 module.exports = {

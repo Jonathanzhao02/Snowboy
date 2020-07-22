@@ -9,7 +9,8 @@ const { Functions } = require('../../bot-util')
  * @param {String[]} args Unused parameter.
  */
 function deafen (guildClient, userId, args) {
-  guildClient.logger.info(`Setting deafen state of ${userId} to \`${true}\``)
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info(`Setting deafen state of ${userId} to \`${true}\``)
   const voiceStates = guildClient.textChannel.guild.voiceStates.cache
   const userVoiceState = voiceStates.find(state => state.id === userId)
   if (userVoiceState) userVoiceState.setDeaf(true)

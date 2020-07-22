@@ -9,7 +9,8 @@ const { Functions } = require('../../bot-util')
  * @param {String[]} args Unused parameter
  */
 function chungus (guildClient, userId, args) {
-  guildClient.logger.info('Received chungus command')
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received chungus command')
   Functions.sendMsg(guildClient.textChannel, `${Emojis.rabbit} ***B I G   C H U N G U S*** ${Emojis.rabbit}`, guildClient, {
     files: [`../../resources/chungus/chungus${Functions.random(6)}.jpg`]
   })

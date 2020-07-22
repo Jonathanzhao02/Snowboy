@@ -9,16 +9,17 @@ const { Functions } = require('../../bot-util')
  * @param {String[]} args Unused parameter.
  */
 function skip (guildClient, userId, args) {
-  guildClient.logger.info('Received skip command')
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received skip command')
   if (!guildClient.playing) {
-    guildClient.logger.debug('Not playing anything')
+    logger.debug('Not playing anything')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Nothing currently playing!***`, guildClient)
     return
   }
-  guildClient.logger.debug('Skipping music')
+  logger.debug('Skipping music')
   Functions.sendMsg(guildClient.textChannel, `${Emojis.skip} ***Skipping the current song***`, guildClient)
   guildClient.connection.dispatcher.end()
-  guildClient.logger.debug('Successfully skipped music')
+  logger.debug('Successfully skipped music')
 }
 
 module.exports = {

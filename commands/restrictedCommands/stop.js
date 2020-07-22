@@ -9,19 +9,20 @@ const { Functions } = require('../../bot-util')
  * @param {String[]} args Unused parameter.
  */
 function stop (guildClient, userId, args) {
-  guildClient.logger.info('Received stop command')
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received stop command')
   if (!guildClient.playing) {
-    guildClient.logger.debug('Not playing anything')
+    logger.debug('Not playing anything')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Nothing currently playing!***`, guildClient)
     return
   }
-  guildClient.logger.debug('Stopping music')
+  logger.debug('Stopping music')
   guildClient.connection.dispatcher.end()
   Functions.playSilence(guildClient)
   guildClient.playing = false
   guildClient.songQueue = []
   Functions.sendMsg(guildClient.textChannel, `${Emojis.stop} ***Stopped the music***`, guildClient)
-  guildClient.logger.debug('Successfully stopped music')
+  logger.debug('Successfully stopped music')
 }
 
 module.exports = {

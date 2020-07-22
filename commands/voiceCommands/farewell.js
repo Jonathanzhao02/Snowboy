@@ -9,7 +9,8 @@ const { Responses, Functions } = require('../../bot-util')
  * @param {String[]} args Unused parameter.
  */
 function farewell (guildClient, userId, args) {
-  guildClient.logger.info('Received farewell command')
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received farewell command')
   const voiceStates = guildClient.textChannel.guild.voiceStates.cache
   const userVoiceState = voiceStates.find(state => state.id === userId)
   if (userVoiceState) userVoiceState.setChannel(null)
@@ -21,7 +22,7 @@ function farewell (guildClient, userId, args) {
       `${Emojis.farewell} **${Responses.farewells[Functions.random(Responses.farewells.length)]},** <@${userId}>!`,
       guildClient)
   } else {
-    guildClient.logger.warn(`No member construct found for ${userId}`)
+    logger.warn(`No member construct found for ${userId}`)
   }
 }
 
