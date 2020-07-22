@@ -409,6 +409,7 @@ botClient.on('error', error => {
   promise.then(() => Heapdump.writeSnapshot(`./logs/${Date.now()}_CLI.heapdump`, (err, filename) => {
     logger.error('Client exception')
     logger.error(error)
+    console.log(error)
     if (err) process.exit(1)
     logger.debug(`Heapdump written to ${filename}`)
     process.exit(1)
@@ -419,6 +420,7 @@ process.on('uncaughtException', error => {
   Heapdump.writeSnapshot(`./logs/${Date.now()}_ERR.heapdump`, (err, filename) => {
     logger.error('Uncaught exception')
     logger.error(error)
+    console.log(error)
     if (err) process.exit(1)
     logger.debug(`Heapdump written to ${filename}`)
     process.exit(1)
@@ -430,6 +432,7 @@ process.on('unhandledRejection', (error, promise) => {
     logger.error('Unhandled promise rejection')
     logger.error(promise)
     logger.error(error)
+    console.log(error)
     if (err) process.exit(1)
     logger.debug(`Heapdump written to ${filename}`)
     process.exit(1)
