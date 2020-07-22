@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.3.1 (PR #22)
+A little refactoring, better logging, and voice command fix
+* Moved `wit.js` and `gsearch.js` into `web_apis` folder
+* Moved `commands.js` into `commands` as `index.js`
+* Changed many trace-level logs to debug-level
+* Fixed voice commands failing due to not calling `.execute()`
+
 ## v0.3.0 (PR #21)
 Commands refactoring, format editing, new package installation, and basic permission checking
 * Refactored all commands into their individual `js` files
