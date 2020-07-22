@@ -11,13 +11,14 @@ const { Functions } = require('../../bot-util')
 function skip (guildClient, userId, args) {
   guildClient.logger.info('Received skip command')
   if (!guildClient.playing) {
-    guildClient.logger.trace('Not playing anything')
+    guildClient.logger.debug('Not playing anything')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Nothing currently playing!***`, guildClient)
     return
   }
-  guildClient.logger.trace('Skipping music')
+  guildClient.logger.debug('Skipping music')
   Functions.sendMsg(guildClient.textChannel, `${Emojis.skip} ***Skipping the current song***`, guildClient)
   guildClient.connection.dispatcher.end()
+  guildClient.logger.debug('Successfully skipped music')
 }
 
 module.exports = {

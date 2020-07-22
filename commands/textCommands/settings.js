@@ -18,7 +18,8 @@ const Discord = require('discord.js')
  */
 function settings (guildClient, userId, args, msg) {
   guildClient.logger.info('Received settings command')
-  guildClient.logger.debug('Received args', args)
+  guildClient.logger.debug('Received args')
+  guildClient.logger.debug(args)
   // Check that the user is an administrator
   if (!msg.member.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR, { checkAdmin: true, checkOwner: true })) {
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***You do not have permission to use this command!***`)
@@ -26,26 +27,26 @@ function settings (guildClient, userId, args, msg) {
   }
   // If no arguments, print the settings embed with all values
   if (args.length === 0) {
-    guildClient.logger.trace('Printing settings')
+    guildClient.logger.debug('Printing settings')
     Functions.sendMsg(guildClient.textChannel, Embeds.createSettingsEmbed(guildClient.settings), guildClient)
     return
   }
   const settingName = args.shift().toLowerCase()
   // If no option named what the user passed in, notify and return
   if (!Settings.descriptions[settingName]) {
-    guildClient.logger.trace(`No setting found for ${settingName}`)
+    guildClient.logger.debug(`No setting found for ${settingName}`)
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Could not find option named \`${settingName}\`***`)
     return
   }
   // If only passed in an option name, return information about that option
   if (args.length === 0) {
-    guildClient.logger.trace(`Printing info about ${settingName}`)
+    guildClient.logger.debug(`Printing info about ${settingName}`)
     Functions.sendMsg(guildClient.textChannel, Settings.descriptions[settingName](guildClient.settings), guildClient)
     return
   }
   // Modify the value of an option
   const val = args.join()
-  guildClient.logger.trace(`Attempting to set ${settingName} to ${val}`)
+  guildClient.logger.debug(`Attempting to set ${settingName} to ${val}`)
   Functions.sendMsg(guildClient.textChannel, guildClient.settings.set(Common.keyv, settingName, val), guildClient)
 }
 

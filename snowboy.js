@@ -1,7 +1,7 @@
 const Detector = require('snowboy').Detector
 const Models = require('snowboy').Models
 const Events = require('events')
-const Wit = require('./wit')
+const Wit = require('./web_apis/wit')
 const Config = require('./config')
 
 /**
@@ -81,7 +81,10 @@ class SnowClient {
   hotword (index, hotword, buffer) {
     // If already triggered, emit the 'busy' event
     if (this.triggered) {
-      if (this.logger) this.logger.trace('Emitted busy event')
+      if (this.logger) {
+        this.logger.trace('Emitted busy event')
+        this.logger.debug('Already processing query, rejected hotword trigger')
+      }
       this.events.emit('busy', this.guildClient, this.userId)
       return
     }
@@ -95,13 +98,19 @@ class SnowClient {
     // Get the text of the audio stream from Wit.ai
     Wit.getStreamText(this.stream, flag, (finalResult) => {
       this.triggered = false
-      if (this.logger) this.logger.trace('Emitted result event')
-      if (this.logger) this.logger.debug(`Received ${finalResult}`)
+      if (this.logger) {
+        this.logger.trace('Emitted result event')
+        this.logger.debug('Received result')
+        this.logger.debug(finalResult)
+      }
       this.events.emit('result', finalResult, this.guildClient, this.userId)
     },
     (error) => {
-      if (this.logger) this.logger.trace('Emitted error event')
-      if (this.logger) this.logger.error(`Wit.ai failed: ${error}`)
+      if (this.logger) {
+        this.logger.trace('Emitted error event')
+        this.logger.warn('Wit.ai failed')
+        this.logger.warn(error)
+      }
       this.triggered = false
       this.events.emit('error', error, this.guildClient, this.userId)
     })

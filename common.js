@@ -1,5 +1,5 @@
-const Gsearch = require('./gsearch')
-const Wit = require('./wit')
+const Gsearch = require('./web_apis/gsearch')
+const Wit = require('./web_apis/wit')
 
 Gsearch.setKey(process.env.GOOGLE_API_TOKEN)
 Wit.setKey(process.env.WIT_API_TOKEN)

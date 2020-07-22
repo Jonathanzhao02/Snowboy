@@ -63,8 +63,8 @@ async function onSpeaking (member, speaking) {
     }
 
     childLogger.debug(memberConstruct)
+    childLogger.debug(`Read member impression as ${memberConstruct.impression}`)
     if (!memberConstruct.impression) memberConstruct.impression = 0
-    childLogger.trace(`Read member impression as ${memberConstruct.impression}`)
     guildClient.members.set(member.id, memberConstruct)
     mmbr = memberConstruct
   }
@@ -186,6 +186,7 @@ async function onMessage (msg) {
 
     guildConstruct.logger.debug(`Read settings as ${guildConstruct.settings}`)
     if (!guildConstruct.settings) guildConstruct.settings = new Settings(guildId)
+    guildConstruct.logger.debug(guildConstruct)
     botClient.guildClients.set(guildId, guildConstruct)
   }
 
@@ -221,6 +222,7 @@ async function onMessage (msg) {
       impression: await keyv.get(`${guildId}:${userId}:impression`) // the member's impression level with snowboy
     }
 
+    guildClient.logger.debug(memberConstruct)
     if (!memberConstruct.impression) memberConstruct.impression = 0
     guildClient.members.set(userId, memberConstruct)
   }
@@ -268,11 +270,12 @@ async function onMessage (msg) {
  */
 function parse (result, guildClient, userId) {
   if (!guildClient || guildClient.settings.voice) return
-  guildClient.logger.debug(`Received results: ${result.text}, ${result.intents}`)
+  guildClient.logger.info(`Received results: ${result.text}, ${result.intents}`)
 
   // Checks that the user's voice has been parsed to some degree
   if (!result || !result.intents || !result.intents[0] || result.intents[0].confidence < Config.CONFIDENCE_THRESHOLD) {
-    guildClient.logger.info(`Rejected voice command: ${result}`)
+    guildClient.logger.debug('Rejected voice command')
+    guildClient.logger.debug(result)
     Functions.sendMsg(guildClient.textChannel, `${Emojis.unknown} ***Sorry, I didn't catch that...***`, guildClient)
     return
   }
@@ -283,11 +286,11 @@ function parse (result, guildClient, userId) {
 
   // Checks all relevant command maps
   if (Commands.commands.get(commandName)) {
-    Commands.commands.get(commandName)(guildClient, userId, args)
+    Commands.commands.get(commandName).execute(guildClient, userId, args)
   } else if (Commands.restrictedCommands.get(commandName)) {
-    Commands.restrictedCommands.get(commandName)(guildClient, userId, args)
+    Commands.restrictedCommands.get(commandName).execute(guildClient, userId, args)
   } else if (Commands.voiceOnlyCommands.get(commandName)) {
-    Commands.voiceOnlyCommands.get(commandName)(guildClient, userId, args)
+    Commands.voiceOnlyCommands.get(commandName).execute(guildClient, userId, args)
   } else if (Commands.eastereggCommands.get(commandName)) {
     Commands.eastereggCommands.get(commandName).execute(guildClient, userId, args)
   } else {
@@ -348,7 +351,7 @@ botClient.on('voiceStateUpdate', (oldPresence, newPresence) => {
     // If the bot has been disconnected, clean up the guildClient
     if (userId === botClient.user.id && !newPresence.channelID) {
       guildClient.logger.info('Bot disconnected, cleaning up...')
-      Commands.restrictedCommands.get('leave')(guildClient)
+      Commands.restrictedCommands.get('leave').execute(guildClient)
     }
 
     // If the bot has been left alone in a channel, wait a few seconds before leaving
@@ -394,7 +397,7 @@ botClient.on('error', error => {
   const promise = new Promise((resolve, reject) => {
     const guilds = Array.from(botClient.guildClients)
     guilds.forEach((guildClient, index, array) => {
-      guildClient[1].logger.trace('Sending error message')
+      guildClient[1].logger.debug('Sending error message')
       Functions.sendMsg(guildClient[1].textChannel, `${Emojis.error} ***Sorry, I ran into some fatal error. Hopefully I come back soon!***`).then(() => {
         if (index === array.length - 1) resolve()
       })
@@ -404,28 +407,31 @@ botClient.on('error', error => {
   })
 
   promise.then(() => Heapdump.writeSnapshot(`./logs/${Date.now()}_CLI.heapdump`, (err, filename) => {
-    logger.error(`Client Exception: ${error}`)
+    logger.error('Client exception')
+    logger.error(error)
     if (err) process.exit(1)
-    logger.info(`Heapdump written to ${filename}`)
+    logger.debug(`Heapdump written to ${filename}`)
     process.exit(1)
   }))
 })
 
 process.on('uncaughtException', error => {
   Heapdump.writeSnapshot(`./logs/${Date.now()}_ERR.heapdump`, (err, filename) => {
-    logger.error(`Uncaught Exception: ${error}`)
+    logger.error('Uncaught exception')
+    logger.error(error)
     if (err) process.exit(1)
-    logger.info(`Heapdump written to ${filename}`)
+    logger.debug(`Heapdump written to ${filename}`)
     process.exit(1)
   })
 })
 
 process.on('unhandledRejection', (error, promise) => {
   Heapdump.writeSnapshot(`./logs/${Date.now()}_REJ.heapdump`, (err, filename) => {
-    logger.error(`Unhandled Rejection: ${promise}`)
-    logger.error(`Reason: ${error}`)
+    logger.error('Unhandled promise rejection')
+    logger.error(promise)
+    logger.error(error)
     if (err) process.exit(1)
-    logger.info(`Heapdump written to ${filename}`)
+    logger.debug(`Heapdump written to ${filename}`)
     process.exit(1)
   })
 })
@@ -440,7 +446,7 @@ process.on('SIGINT', signal => {
   const promise = new Promise((resolve, reject) => {
     const guilds = Array.from(botClient.guildClients)
     guilds.forEach((guildClient, index, array) => {
-      if (guildClient[1]) guildClient[1].logger.trace('Sending interrupt message')
+      if (guildClient[1]) guildClient[1].logger.debug('Sending interrupt message')
       Functions.sendMsg(guildClient[1].textChannel, `${Emojis.error} ***Sorry, I'm going down for updates and maintenance! See you soon!***`).then(() => {
         if (index === array.length - 1) resolve()
       })

@@ -24,7 +24,7 @@ function queuedPlay (video, guildClient) {
     Functions.playSilence(guildClient)
     guildClient.playing = false
     guildClient.lastCalled = Date.now()
-    guildClient.logger.info('Starting expiration timer')
+    guildClient.logger.debug('Starting expiration timer')
     setTimeout(() => {
       Functions.cleanupGuildClient(guildClient, Common.botClient)
     }, Config.TIMEOUT + 500)
@@ -54,8 +54,9 @@ function queuedPlay (video, guildClient) {
     }) */
 
   // Uses ytdl-core-discord
-  guildClient.logger.info(`Attempting to download from ID ${video.id.videoId}`)
+  guildClient.logger.debug(`Attempting to download from ID ${video.id.videoId}`)
   Ytdl(`http://www.youtube.com/watch?v=${video.id.videoId}`).then(stream => {
+    guildClient.logger.debug('Successfully downloaded video, playing audio')
     guildClient.playing = true
     const dispatcher = guildClient.connection.play(stream, {
       type: 'opus',
@@ -77,8 +78,9 @@ function queuedPlay (video, guildClient) {
       })
   }).catch('error', error => {
     // Uh oh
-    guildClient.logger.error('Youtube error:', error)
+    guildClient.logger.error('Youtube error')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Sorry, an error occurred on playback!***`, guildClient)
+    throw error
   })
 }
 
@@ -93,46 +95,49 @@ function play (guildClient, userId, args) {
   guildClient.logger.info('Received play command')
   // If not connected, notify and return
   if (!guildClient.connection) {
-    guildClient.logger.trace('Not connected to a voice channel')
+    guildClient.logger.debug('Not connected to a voice channel')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***I am not in a voice channel!***`, guildClient)
     return
   }
 
   // If no query, notify and return
   if (!args || args.length === 0) {
-    guildClient.logger.trace('No query found')
+    guildClient.logger.debug('No query found')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***I need something to play!***`, guildClient)
     return
   }
 
   const query = args.join(' ')
-  guildClient.logger.trace(`Searching up ${query}`)
+  guildClient.logger.debug(`Searching up ${query}`)
   Functions.sendMsg(guildClient.textChannel, `${Emojis.search} ***Searching for*** \`${query}\``, guildClient)
 
   // Search for the video using the Youtube Data API
   youtube.search(query, 1, function (error, result) {
     if (error) {
-      guildClient.logger.error('Error while searching YouTube:', error)
+      guildClient.logger.error('Error while searching YouTube')
+      throw error
     } else {
       if (!result.items) {
-        guildClient.logger.trace(`No results found for ${query}`)
+        guildClient.logger.debug(`No results found for ${query}`)
         Functions.sendMsg(guildClient.textChannel, `${Emojis.sad} ***Could not find results for \`${result}\`***`, guildClient)
         return
       }
 
+      guildClient.logger.debug('Successfully received results for query')
+      guildClient.logger.debug(result)
       // Adds a property to track who requested the song
       result.items[0].requester = userId
       guildClient.songQueue.push(result.items[0])
 
       // If not playing anything, play this song
       if (!guildClient.playing) {
-        guildClient.logger.trace(`Playing ${result.items[0]}`)
+        guildClient.logger.debug(`Playing ${result.items[0]}`)
         queuedPlay(result.items[0], guildClient)
       // If playing something, just say it's queued
       } else {
         guildClient.guild.members.fetch(userId)
           .then(member => {
-            guildClient.logger.trace(`Queued ${result.items[0]}`)
+            guildClient.logger.debug(`Queued ${result.items[0]}`)
             Functions.sendMsg(guildClient.textChannel, `${Emojis.queue} **Queued:**`, guildClient)
             Functions.sendMsg(guildClient.textChannel, Embeds.createVideoEmbed(result.items[0], member.displayName), guildClient)
           })
