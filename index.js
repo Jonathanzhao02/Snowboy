@@ -412,6 +412,7 @@ botClient.on('error', error => {
     console.log(error)
     if (err) process.exit(1)
     logger.debug(`Heapdump written to ${filename}`)
+    botClient.destroy()
     process.exit(1)
   }))
 })
@@ -421,6 +422,7 @@ process.on('uncaughtException', error => {
     logger.error('Uncaught exception')
     logger.error(error)
     console.log(error)
+    botClient.destroy()
     if (err) process.exit(1)
     logger.debug(`Heapdump written to ${filename}`)
     process.exit(1)
@@ -433,6 +435,7 @@ process.on('unhandledRejection', (error, promise) => {
     logger.error(promise)
     logger.error(error)
     console.log(error)
+    botClient.destroy()
     if (err) process.exit(1)
     logger.debug(`Heapdump written to ${filename}`)
     process.exit(1)
@@ -441,6 +444,7 @@ process.on('unhandledRejection', (error, promise) => {
 
 process.on('SIGTERM', signal => {
   logger.info(`Process ${process.pid} received a SIGTERM signal`)
+  botClient.destroy()
   process.exit(0)
 })
 
@@ -459,6 +463,7 @@ process.on('SIGINT', signal => {
   })
 
   promise.then(() => {
+    botClient.destroy()
     process.exit(0)
   })
 })
