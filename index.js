@@ -177,6 +177,7 @@ async function onMessage (msg) {
       loopState: 0, // 0 = no loop, 1 = song loop, 2 = queue loop
       members: new Map(), // information about guildmembers including id, snowclients, guildmember, and impression with snowboy
       playing: false, // whether a song is currently playing
+      downloading: false, // whether a song is currently being downloaded
       guild: msg.guild, // the corresponding guild
       lastCalled: Date.now() - 2000, // when the last command was executed
       delete: false, // set to true to mark guild for deletion upon disconnect
