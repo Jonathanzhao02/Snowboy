@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.3.2 (PR #24)
+Bug fixes, improved logging, voice command fix (very important), and looping support!
+* Added better logging context and levels
+* Added support for sending arrays in `sendMsg`
+* Changed commands that send embeds and a message to send both at once
+* Added client destruction to properly cleanup the bot
+* Added looping support (addresses #20)
+* Fixed voice commands not activating due to missing exclamation mark
+* Edited a few messages for better clarity
+
 ## v0.3.1 (PR #22)
 A little refactoring, better logging, and voice command fix
 * Moved `wit.js` and `gsearch.js` into `web_apis` folder
