@@ -24,7 +24,7 @@ function showMe (guildClient, userId, args) {
   logger.debug(`Searching up ${query}`)
   Imgsearch(query, (error, results) => {
     if (error) throw error
-    const result = results[Math.floor(Math.random() * results.length)]
+    const result = results[Functions.random(results.length > 10 ? results.length : 10)]
     result.query = query
     logger.debug('Received result')
     logger.debug(result)
@@ -37,5 +37,6 @@ function showMe (guildClient, userId, args) {
 
 module.exports = {
   name: 'showme',
+  aliases: ['imagesearch', 'imgsearch'],
   execute: showMe
 }
