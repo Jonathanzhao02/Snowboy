@@ -50,9 +50,18 @@ function queuedPlay (video, guildClient) {
 
         // Goes to next song in queue
         if (guildClient.connection) {
-          guildClient.logger.info('Moving to next song in queue')
-          queue.shift()
-          queuedPlay(queue[0], guildClient)
+          if (guildClient.loopState === 0) {
+            guildClient.logger.info('Moving to next song in queue')
+            queue.shift()
+            queuedPlay(queue[0], guildClient)
+          } else if (guildClient.loopState === 1) {
+            guildClient.logger.info('Looping song')
+            queuedPlay(queue[0], guildClient)
+          } else if (guildClient.loopState === 2) {
+            guildClient.logger.info('Moving to next song in looped queue')
+            queue.push(queue.shift())
+            queuedPlay(queue[0], guildClient)
+          }
         }
       })
   }).catch('error', error => {
