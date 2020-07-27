@@ -19,7 +19,7 @@ function createVideoEmbed (vid, username) {
     .setDescription(Entities.decode(vid.description))
     .setThumbnail(vid.thumbnail)
     .setFooter(`Requested by ${username}`)
-    .setURL(`http://www.youtube.com/watch?v=${vid.videoId}`)
+    .setURL(vid.url)
 }
 
 /**
