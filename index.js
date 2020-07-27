@@ -177,6 +177,7 @@ async function onMessage (msg) {
       loopState: 0, // 0 = no loop, 1 = song loop, 2 = queue loop
       members: new Map(), // information about guildmembers including id, snowclients, guildmember, and impression with snowboy
       playing: false, // whether a song is currently playing
+      downloading: false, // whether a song is currently being downloaded
       guild: msg.guild, // the corresponding guild
       lastCalled: Date.now() - 2000, // when the last command was executed
       delete: false, // set to true to mark guild for deletion upon disconnect
@@ -399,7 +400,7 @@ botClient.on('error', error => {
     const guilds = Array.from(botClient.guildClients)
     guilds.forEach((guildClient, index, array) => {
       guildClient[1].logger.debug('Sending error message')
-      Functions.sendMsg(guildClient[1].textChannel, `${Emojis.error} ***Sorry, I ran into some fatal error. Hopefully I come back soon!***`).then(() => {
+      Functions.sendMsg(guildClient[1].textChannel, `${Emojis.skull} ***Sorry, I ran into some fatal error. Hopefully I come back soon!***`).then(() => {
         if (index === array.length - 1) resolve()
       })
     })
@@ -455,7 +456,7 @@ process.on('SIGINT', signal => {
     const guilds = Array.from(botClient.guildClients)
     guilds.forEach((guildClient, index, array) => {
       if (guildClient[1]) guildClient[1].logger.debug('Sending interrupt message')
-      Functions.sendMsg(guildClient[1].textChannel, `${Emojis.error} ***Sorry, I'm going down for updates and maintenance! See you soon!***`).then(() => {
+      Functions.sendMsg(guildClient[1].textChannel, `${Emojis.joyful} ***Sorry, I'm going down for updates and maintenance! See you soon!***`).then(() => {
         if (index === array.length - 1) resolve()
       })
     })

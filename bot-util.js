@@ -7,19 +7,20 @@ const Config = require('./config')
 /**
  * Creates an embed for a video.
  *
- * @param {Object} vid The JSON object representing the video, returned by Youtube Data API.
+ * @param {Object} vid The videoConstruct object representing the video.
  * @param {String} username The username of the video requester.
  * @returns {Discord.MessageEmbed} Returns a message embed detailing the video.
  */
 function createVideoEmbed (vid, username) {
   return new Discord.MessageEmbed()
     .setColor('#0099ff')
-    .setTitle(Entities.decode(vid.snippet.title))
-    .setAuthor(Entities.decode(vid.snippet.channelTitle))
-    .setDescription(Entities.decode(vid.snippet.description))
-    .setThumbnail(vid.snippet.thumbnails.high.url)
+    .setTitle(Entities.decode(vid.title))
+    .setAuthor(Entities.decode(vid.channel))
+    .addField('Queue position', vid.position, true)
+    .addField('Length', vid.duration, true)
+    .setThumbnail(vid.thumbnail)
     .setFooter(`Requested by ${username}`)
-    .setURL(`http://www.youtube.com/watch?v=${vid.id.videoId}`)
+    .setURL(vid.url)
 }
 
 /**
@@ -36,6 +37,22 @@ function createSearchEmbed (result, username) {
     .setDescription(Entities.decode(result.snippet.replace(/\n/gi, '')))
     .setURL(result.link)
     .setImage(result.pagemap.cse_image[0].src)
+    .setFooter(`Requested by ${username}`)
+}
+
+/**
+ * Creates an embed for an image result.
+ *
+ * @param {Object} result The JSON object representing the image result, returned by g-i-s.
+ * @param {String} username The username of the image requester.
+ * @returns {Discord.MessageEmbed} Returns a message embed detailing the image result.
+ */
+function createImageEmbed (result, username) {
+  return new Discord.MessageEmbed()
+    .setColor('#32cd32')
+    .setTitle(Entities.decode(result.query))
+    .setURL(result.url)
+    .setImage(result.url)
     .setFooter(`Requested by ${username}`)
 }
 
@@ -377,6 +394,7 @@ module.exports = {
   Embeds: {
     createVideoEmbed: createVideoEmbed,
     createSearchEmbed: createSearchEmbed,
+    createImageEmbed: createImageEmbed,
     createAboutEmbed: createAboutEmbed,
     createSettingsEmbed: createSettingsEmbed
   },
