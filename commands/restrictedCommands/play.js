@@ -5,7 +5,7 @@ const { Embeds, Functions } = require('../../bot-util')
 const Config = require('../../config')
 const YtdlDiscord = require('ytdl-core-discord')
 const Ytdl = require('ytdl-core')
-const Ytlist = require('youtube-playlist')
+const Ytpl = require('ytpl')
 const Ytsearch = require('yt-search')
 
 /**
@@ -266,19 +266,19 @@ function play (guildClient, userId, args) {
   logger.debug(`Searching up ${query}`)
 
   // Add each video from Youtube playlist
-  if (args[0].startsWith('https://www.youtube.com/playlist')) {
+  if (Ytpl.validateURL(args[0])) {
     Functions.sendMsg(guildClient.textChannel, `${Emojis.search} ***Searching for*** \`${args[0]}\``, guildClient)
-    Ytlist(args[0], 'url').then(result => {
-      const name = result.data.name
-      const vids = result.data.playlist
+    Ytpl(args[0], { limit: 0 }).then(result => {
+      const name = result.title
+      const vids = result.items
       Functions.sendMsg(guildClient.textChannel, `${Emojis.checkmark} **Adding \`${vids.length}\` videos from \`${name}\`**`, guildClient)
 
-      vids.forEach(val => {
-        playlistSearch(guildClient, userId, val, logger)
+      vids.forEach(vid => {
+        playlistSearch(guildClient, userId, vid.url_simple, logger)
       })
     })
   // Directly get info from URL
-  } else if (args[0].startsWith('https://www.youtube.com/watch')) {
+  } else if (Ytdl.validateURL(args[0])) {
     Functions.sendMsg(guildClient.textChannel, `${Emojis.search} ***Searching for*** \`${args[0]}\``, guildClient)
     urlSearch(args[0], logger).then(video => {
       video.query = args[0]
