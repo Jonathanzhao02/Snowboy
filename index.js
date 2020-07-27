@@ -130,6 +130,53 @@ function bugLog (msg) {
 }
 
 /**
+ * Checks permissions in a guild and returns any missing.
+ *
+ * @param {Object} guildClient The guildClient of the server where permissions are required.
+ * @returns The array of missing text/voice permissions or undefined if all permissions are granted.
+ */
+function checkPermissions (guildClient) {
+  if (guildClient.guild.me.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR)) return
+  const textPermissions = guildClient.guild.me.permissionsIn(guildClient.textChannel)
+  const textMissingPermissions = new Discord.Permissions(textPermissions.missing([
+    Discord.Permissions.FLAGS.VIEW_CHANNEL,
+    Discord.Permissions.FLAGS.SEND_MESSAGES,
+    Discord.Permissions.FLAGS.MANAGE_MESSAGES,
+    Discord.Permissions.FLAGS.EMBED_LINKS,
+    Discord.Permissions.FLAGS.ATTACH_FILES,
+    Discord.Permissions.FLAGS.READ_MESSAGE_HISTORY
+  ])).toArray()
+
+  if (textMissingPermissions.length > 0) return textMissingPermissions
+
+  if (guildClient.voiceChannel) {
+    const voicePermissions = guildClient.guild.me.permissionsIn(guildClient.voiceChannel)
+    console.log(voicePermissions.toArray())
+    const voiceMissingPermissions = new Discord.Permissions(voicePermissions.missing([
+      Discord.Permissions.FLAGS.VIEW_CHANNEL,
+      Discord.Permissions.FLAGS.CONNECT,
+      Discord.Permissions.FLAGS.SPEAK,
+      Discord.Permissions.FLAGS.DEAFEN_MEMBERS
+    ])).toArray()
+
+    if (voiceMissingPermissions.length > 0) return voiceMissingPermissions
+  }
+}
+
+/**
+ * Formats a list of strings into a fancy array.
+ * @param {String[]} list The list of strings.
+ * @returns An array of strings with fancy markdown formatting.
+ */
+function formatList (list) {
+  const msg = []
+  list.forEach(val => {
+    msg.push(`\`${val}\``)
+  })
+  return msg
+}
+
+/**
  * Parses the user's text commands.
  *
  * Handles bug reports, guildClient and member
@@ -169,7 +216,7 @@ async function onMessage (msg) {
   // Create a new guildClient if the Guild is not currently tracked, loading settings from database
   if (!botClient.guildClients.get(msg.guild.id)) {
     logger.info(`Creating new guild construct for ${msg.guild.name}`)
-    var guildConstruct = {
+    const guildConstruct = {
       textChannel: msg.channel, // text channel to listen to for commands
       voiceChannel: msg.member.voice.channel, // voice channel bot is interested in
       connection: undefined, // connection to the voice channel
@@ -195,6 +242,16 @@ async function onMessage (msg) {
   const guildClient = botClient.guildClients.get(msg.guild.id)
   const args = msg.content.slice(guildClient.settings.prefix.length).trim().split(/ +/)
   const commandName = args.shift().toLowerCase()
+
+  const missingPermissions = checkPermissions(guildClient)
+
+  if (missingPermissions) {
+    Functions.sendMsg(msg.channel,
+      `${Emojis.error} ***Please ensure I have all the following permissions! I won't completely work otherwise!***`,
+      guildClient)
+    Functions.sendMsg(msg.channel, formatList(missingPermissions), guildClient)
+    return
+  }
 
   // If the message is not a command for Snowboy, return
   if (!msg.content.startsWith(guildClient.settings.prefix)) return
