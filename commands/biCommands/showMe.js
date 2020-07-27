@@ -1,18 +1,18 @@
 const Emojis = require('../../emojis')
 const { Embeds, Functions } = require('../../bot-util')
 
-const Gsearch = require('../../web_apis/gsearch')
+const Imgsearch = require('g-i-s')
 
 /**
- * Searches up and prints the top result of a search query.
+ * Searches up and prints the top result of an image search query.
  *
  * @param {Object} guildClient The guildClient of the server the user is in.
  * @param {String} userId The ID of the user who requested the search.
  * @param {String[]} args The search query.
  */
-function search (guildClient, userId, args) {
+function showMe (guildClient, userId, args) {
   const logger = guildClient.logger.child({ user: userId })
-  logger.info('Received search command')
+  logger.info('Received showme command')
   if (!args || args.length === 0) {
     logger.debug('No query found')
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***I need something to search up!***`, guildClient)
@@ -21,19 +21,21 @@ function search (guildClient, userId, args) {
 
   const query = args.join(' ')
   Functions.sendMsg(guildClient.textChannel, `${Emojis.search} ***Searching*** \`${query}\``, guildClient)
-
   logger.debug(`Searching up ${query}`)
-  Gsearch.search(query, result => {
+  Imgsearch(query, (error, results) => {
+    if (error) throw error
+    const result = results[Math.floor(Math.random() * results.length)]
+    result.query = query
     logger.debug('Received result')
     logger.debug(result)
     guildClient.guild.members.fetch(userId)
       .then(member => {
-        Functions.sendMsg(guildClient.textChannel, Embeds.createSearchEmbed(result, member.displayName), guildClient)
+        Functions.sendMsg(guildClient.textChannel, Embeds.createImageEmbed(result, member.displayName), guildClient)
       })
   })
 }
 
 module.exports = {
-  name: 'search',
-  execute: search
+  name: 'showme',
+  execute: showMe
 }

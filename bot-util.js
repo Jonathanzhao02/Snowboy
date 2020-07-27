@@ -41,6 +41,22 @@ function createSearchEmbed (result, username) {
 }
 
 /**
+ * Creates an embed for an image result.
+ *
+ * @param {Object} result The JSON object representing the image result, returned by g-i-s.
+ * @param {String} username The username of the image requester.
+ * @returns {Discord.MessageEmbed} Returns a message embed detailing the image result.
+ */
+function createImageEmbed (result, username) {
+  return new Discord.MessageEmbed()
+    .setColor('#32cd32')
+    .setTitle(Entities.decode(result.query))
+    .setURL(result.url)
+    .setImage(result.url)
+    .setFooter(`Requested by ${username}`)
+}
+
+/**
  * Creates an embed detailing the bot.
  *
  * @param {Discord.Client} botClient The Client of the bot.
@@ -378,6 +394,7 @@ module.exports = {
   Embeds: {
     createVideoEmbed: createVideoEmbed,
     createSearchEmbed: createSearchEmbed,
+    createImageEmbed: createImageEmbed,
     createAboutEmbed: createAboutEmbed,
     createSettingsEmbed: createSettingsEmbed
   },
