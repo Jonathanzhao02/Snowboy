@@ -16,7 +16,7 @@ function createVideoEmbed (vid, username) {
     .setColor('#0099ff')
     .setTitle(Entities.decode(vid.title))
     .setAuthor(Entities.decode(vid.channel))
-    .setDescription(Entities.decode(vid.description))
+    .addField('Queue position', vid.position)
     .setThumbnail(vid.thumbnail)
     .setFooter(`Requested by ${username}`)
     .setURL(vid.url)

@@ -75,24 +75,8 @@ function queuedPlay (video, guildClient) {
   // Sends a message detailing the currently playing video
   guildClient.guild.members.fetch(video.requester)
     .then(async member => {
-      // Fill in video details if only the URL was queued
-      if (!video.description) {
-        logger.info(`Searching missing description for ${video.url}`)
-        try {
-          const result = await urlSearch(video.url, logger)
-          if (!result) {
-            logger.debug(`No results found for ${video.url}`)
-            Functions.sendMsg(guildClient.textChannel, `${Emojis.sad} ***Could not play \`${video.url}\`***`, guildClient)
-            return
-          }
-          video = result
-        } catch (error) {
-          logger.error(`Error while searching for ${video.url}`)
-          Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Sorry, an error occurred on playback!***`, guildClient)
-          throw error
-        }
-      }
       video.channel = `${Emojis.playing} Now Playing! - ${video.channel}`
+      video.position = 'Now!'
       Functions.sendMsg(guildClient.textChannel,
         Embeds.createVideoEmbed(video, member.displayName),
         guildClient)
@@ -130,6 +114,7 @@ async function queue (guildClient, userId, video, query) {
         return
       }
       video.channel = `${Emojis.queue} Queued! - ${video.channel}`
+      video.position = guildClient.songQueue.length - 1
       Functions.sendMsg(guildClient.textChannel,
         Embeds.createVideoEmbed(video, member.displayName),
         guildClient)

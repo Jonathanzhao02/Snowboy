@@ -4,7 +4,7 @@ const emojis = {
   settings: '⚙️',
   stats: '📊',
   ping: '📶',
-  playing: '▶',
+  playing: '▶️',
   pause: '⏸️',
   loop: '🔁',
   greeting: '👋',
