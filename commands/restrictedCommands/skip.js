@@ -16,10 +16,10 @@ function skip (guildClient, userId, args) {
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Nothing currently playing!***`, guildClient)
     return
   }
-  logger.debug('Skipping music')
+  logger.debug('Skipping song')
   Functions.sendMsg(guildClient.textChannel, `${Emojis.skip} ***Skipping the current song***`, guildClient)
   guildClient.connection.dispatcher.end()
-  logger.debug('Successfully skipped music')
+  logger.debug('Successfully skipped song')
 }
 
 module.exports = {

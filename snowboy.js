@@ -106,12 +106,12 @@ class SnowClient {
       this.events.emit('result', finalResult, this.guildClient, this.userId)
     },
     (error) => {
+      this.triggered = false
       if (this.logger) {
         this.logger.trace('Emitted error event')
         this.logger.warn('Wit.ai failed')
         this.logger.warn(error)
       }
-      this.triggered = false
       this.events.emit('error', error, this.guildClient, this.userId)
     })
 

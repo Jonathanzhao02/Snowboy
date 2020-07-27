@@ -174,6 +174,7 @@ async function onMessage (msg) {
       voiceChannel: msg.member.voice.channel, // voice channel bot is interested in
       connection: undefined, // connection to the voice channel
       songQueue: [], // song queue
+      loopState: 0, // 0 = no loop, 1 = song loop, 2 = queue loop
       members: new Map(), // information about guildmembers including id, snowclients, guildmember, and impression with snowboy
       playing: false, // whether a song is currently playing
       guild: msg.guild, // the corresponding guild
@@ -269,7 +270,7 @@ async function onMessage (msg) {
  * @param {String} userId The user ID of the speaker.
  */
 function parse (result, guildClient, userId) {
-  if (!guildClient || guildClient.settings.voice) return
+  if (!guildClient || !guildClient.settings.voice) return
   guildClient.logger.info(`Received results: ${result.text}, ${result.intents}`)
 
   // Checks that the user's voice has been parsed to some degree
@@ -285,8 +286,8 @@ function parse (result, guildClient, userId) {
   guildClient.logger.debug(`Understood command as ${commandName} and arguments as ${args}`)
 
   // Checks all relevant command maps
-  if (Commands.commands.get(commandName)) {
-    Commands.commands.get(commandName).execute(guildClient, userId, args)
+  if (Commands.biCommands.get(commandName)) {
+    Commands.biCommands.get(commandName).execute(guildClient, userId, args)
   } else if (Commands.restrictedCommands.get(commandName)) {
     Commands.restrictedCommands.get(commandName).execute(guildClient, userId, args)
   } else if (Commands.voiceOnlyCommands.get(commandName)) {
