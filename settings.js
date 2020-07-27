@@ -122,4 +122,12 @@ Settings.descriptions = {
   sensitivity: settings => `${Emojis.settings} **The sensitivity of the voice activation. Current value: \`${settings.sensitivity}\`**`
 }
 
+Settings.names = [
+  ['Prefix', 'prefix'],
+  ['Impressions', 'impressions'],
+  ['Voice', 'voice'],
+  ['Mentions', 'mentions'],
+  ['Sensitivity', 'sensitivity']
+]
+
 module.exports = Settings

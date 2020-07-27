@@ -243,6 +243,7 @@ async function onMessage (msg) {
   const args = msg.content.slice(guildClient.settings.prefix.length).trim().split(/ +/)
   const commandName = args.shift().toLowerCase()
 
+  // Check that Snowboy has all necessary permissions in text channel and voice channel
   const missingPermissions = checkPermissions(guildClient)
 
   if (missingPermissions) {
@@ -451,7 +452,7 @@ botClient.on('guildCreate', guild => {
   '**Please note that I\'m still in testing, so I \\*may\\* shut down frequently!**')
 })
 
-// Error logging and exit handling
+// On discord.js error
 botClient.on('error', error => {
   const promise = new Promise((resolve, reject) => {
     const guilds = Array.from(botClient.guildClients)
@@ -465,7 +466,7 @@ botClient.on('error', error => {
     if (guilds.length === 0) resolve()
   })
 
-  promise.then(() => Heapdump.writeSnapshot(`./logs/${Date.now()}_CLI.heapdump`, (err, filename) => {
+  promise.then(() => Heapdump.writeSnapshot(`./logs/${new Date().toISOString()}_CLI.heapdump`, (err, filename) => {
     logger.error('Client exception')
     logger.error(error)
     console.log(error)
@@ -476,8 +477,9 @@ botClient.on('error', error => {
   }))
 })
 
+// On uncaught exception
 process.on('uncaughtException', error => {
-  Heapdump.writeSnapshot(`./logs/${Date.now()}_ERR.heapdump`, (err, filename) => {
+  Heapdump.writeSnapshot(`./logs/${new Date().toISOString()}_ERR.heapdump`, (err, filename) => {
     logger.error('Uncaught exception')
     logger.error(error)
     console.log(error)
@@ -488,8 +490,9 @@ process.on('uncaughtException', error => {
   })
 })
 
+// On unhandled promise rejection
 process.on('unhandledRejection', (error, promise) => {
-  Heapdump.writeSnapshot(`./logs/${Date.now()}_REJ.heapdump`, (err, filename) => {
+  Heapdump.writeSnapshot(`./logs/${new Date().toISOString()}_REJ.heapdump`, (err, filename) => {
     logger.error('Unhandled promise rejection')
     logger.error(promise)
     logger.error(error)
@@ -501,12 +504,14 @@ process.on('unhandledRejection', (error, promise) => {
   })
 })
 
+// On process termination (exits normally)
 process.on('SIGTERM', signal => {
   logger.info(`Process ${process.pid} received a SIGTERM signal`)
   botClient.destroy()
   process.exit(0)
 })
 
+// On process interrupt
 process.on('SIGINT', signal => {
   logger.info(`Process ${process.pid} has been interrupted`)
   const promise = new Promise((resolve, reject) => {
@@ -527,6 +532,7 @@ process.on('SIGINT', signal => {
   })
 })
 
+// Determines log level
 if (process.argv.includes('trace')) {
   logger.level = 'trace'
 } else if (process.argv.includes('debug')) {

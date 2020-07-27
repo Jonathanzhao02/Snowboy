@@ -3,6 +3,7 @@ const Discord = require('discord.js')
 const Emojis = require('./emojis')
 const Streams = require('./streams')
 const Config = require('./config')
+const Settings = require('./settings')
 
 /**
  * Creates an embed for a video.
@@ -84,14 +85,11 @@ function createAboutEmbed (botClient) {
  * @returns {Discord.MessageEmbed} Returns a message embed detailing the Settings values and properties.
  */
 function createSettingsEmbed (settings) {
-  return new Discord.MessageEmbed()
+  const embed = new Discord.MessageEmbed()
     .setTitle(`${Emojis.settings} __**Settings**__`)
-    .setDescription('Use `settings [option name]` to see more information about each option.')
-    .addField('prefix', `\`${settings.prefix}\``)
-    .addField('impressions', `\`${settings.impressions}\``)
-    .addField('voice', `\`${settings.voice}\``)
-    .addField('mentions', `\`${settings.mentions}\``)
-    .addField('sensitivity', `\`${settings.sensitivity}\``)
+    .setDescription('Use `settings <optionname>` to see more information about each option.')
+  Settings.names.forEach(val => embed.addField(val[0], `\`${settings[val[1]]}\``, true))
+  return embed
 }
 
 /**
