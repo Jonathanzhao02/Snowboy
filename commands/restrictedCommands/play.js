@@ -153,7 +153,8 @@ async function querySearch (query, logger) {
     title: topResult.title,
     channel: topResult.author.name,
     description: topResult.description,
-    thumbnail: topResult.thumbnail
+    thumbnail: topResult.thumbnail,
+    duration: topResult.timestamp
   }
   return videoConstruct
 }
@@ -185,13 +186,16 @@ async function urlSearch (url, logger) {
   // Truncates description
   let description = topResult.shortDescription.length > 122 ? topResult.shortDescription.substr(0, 122) + '...' : topResult.shortDescription
   description = description.replace(/\n/gi, ' ')
+  const duration = Math.floor(topResult.lengthSeconds / 60) + ':' + topResult.lengthSeconds % 60
+  console.log(duration)
   // Modifies properties to allow better context within functions
   const videoConstruct = {
     url: 'https://www.youtube.com/watch?v=' + topResult.videoId,
     title: topResult.title,
     channel: topResult.author,
     description: description,
-    thumbnail: topResult.thumbnail.thumbnails[0].url
+    thumbnail: topResult.thumbnail.thumbnails[0].url,
+    duration: duration
   }
   return videoConstruct
 }
@@ -237,7 +241,8 @@ function play (guildClient, userId, args) {
           url: vid.url_simple,
           title: vid.title,
           channel: vid.author.name,
-          thumbnail: vid.thumbnail
+          thumbnail: vid.thumbnail,
+          duration: vid.duration
         })
       })
     })
