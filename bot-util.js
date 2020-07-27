@@ -7,19 +7,19 @@ const Config = require('./config')
 /**
  * Creates an embed for a video.
  *
- * @param {Object} vid The JSON object representing the video, returned by Youtube Data API.
+ * @param {Object} vid The videoConstruct object representing the video.
  * @param {String} username The username of the video requester.
  * @returns {Discord.MessageEmbed} Returns a message embed detailing the video.
  */
 function createVideoEmbed (vid, username) {
   return new Discord.MessageEmbed()
     .setColor('#0099ff')
-    .setTitle(Entities.decode(vid.snippet.title))
-    .setAuthor(Entities.decode(vid.snippet.channelTitle))
-    .setDescription(Entities.decode(vid.snippet.description))
-    .setThumbnail(vid.snippet.thumbnails.high.url)
+    .setTitle(Entities.decode(vid.title))
+    .setAuthor(Entities.decode(vid.channel))
+    .setDescription(Entities.decode(vid.description))
+    .setThumbnail(vid.thumbnail)
     .setFooter(`Requested by ${username}`)
-    .setURL(`http://www.youtube.com/watch?v=${vid.id.videoId}`)
+    .setURL(`http://www.youtube.com/watch?v=${vid.videoId}`)
 }
 
 /**
