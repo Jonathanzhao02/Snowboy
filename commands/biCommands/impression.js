@@ -8,7 +8,8 @@ const { Responses, Functions } = require('../../bot-util')
  * @param {String[]} args Unused parameter.
  */
 function impression (guildClient, userId, args) {
-  guildClient.logger.info('Received impression command')
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received impression command')
   Functions.sendMsg(guildClient.textChannel,
     Responses.getResponse('impression', guildClient.members.get(userId).impression, [`<@${userId}>`], guildClient.settings.impressions),
     guildClient)

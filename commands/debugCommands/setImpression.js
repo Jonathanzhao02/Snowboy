@@ -12,7 +12,8 @@ const Config = require('../../config')
  * @param {String[]} args The arguments passed with the command.
  */
 function setImpression (guildClient, userId, args) {
-  guildClient.logger.info('Received set impression command')
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received set impression command')
   var val = args[0]
   var id = userId
   // If insufficient arguments, return

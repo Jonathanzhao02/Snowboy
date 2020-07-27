@@ -11,13 +11,14 @@ const Config = require('../../config')
  * @param {String} userId The ID of the user who requested the command.
  * @param {String[]} args Unused parameter.
  */
-function happy (guildClient, userId, args) {
-  guildClient.logger.info('Received happy command')
+function compliment (guildClient, userId, args) {
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received compliment command')
   Functions.sendMsg(guildClient.textChannel, `${Emojis.happy} **Thank you!**`)
   Functions.updateImpression(Common.keyv, guildClient, userId, Config.ImpressionValues.HAPPY_VALUE, guildClient.settings.impressions)
 }
 
 module.exports = {
   name: 'compliment',
-  execute: happy
+  execute: compliment
 }

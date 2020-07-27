@@ -6,6 +6,7 @@ const emojis = {
   ping: '📶',
   playing: '▶',
   pause: '⏸️',
+  loop: '🔁',
   greeting: '👋',
   farewell: '👋',
   mute: '🔇',

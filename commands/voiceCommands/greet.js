@@ -12,7 +12,8 @@ const Config = require('../../config')
  * @param {String[]} args Unused parameter.
  */
 function greet (guildClient, userId, args) {
-  guildClient.logger.info('Received greet command')
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received greet command')
   Functions.sendMsg(guildClient.textChannel,
     `${Emojis.greeting} **${Responses.greetings[Functions.random(Responses.greetings.length)]},** <@${userId}>!`,
     guildClient)

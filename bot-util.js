@@ -292,9 +292,17 @@ function findMember (str, guild) {
  * @returns {String} Returns the formatted string.
  */
 function replaceMentions (msg, guild) {
-  if (msg instanceof Discord.MessageEmbed) return msg
-  const regex = /<@!?(\d+)>/gi
-  return msg.replace(regex, match => findMember(match, guild).displayName)
+  if (msg instanceof Array) {
+    msg.forEach((val, index, array) => {
+      array[index] = replaceMentions(val, guild)
+    })
+    return msg
+  } else if (msg instanceof Discord.MessageEmbed) {
+    return msg
+  } else {
+    const regex = /<@!?(\d+)>/gi
+    return msg.replace(regex, match => findMember(match, guild).displayName)
+  }
 }
 
 /**
@@ -311,7 +319,7 @@ async function sendMsg (textChannel, msg, guildClient, opts) {
     guildClient.logger.debug('Attempting to send message')
     guildClient.logger.debug(msg)
   }
-  if (!textChannel) return undefined
+  if (!textChannel) return
   if (guildClient && !guildClient.settings.mentions) msg = replaceMentions(msg, guildClient.guild)
   let msgs
   if (opts) msgs = await textChannel.send(msg, opts)

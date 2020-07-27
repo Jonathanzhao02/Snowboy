@@ -12,7 +12,8 @@ const Config = require('../../config')
  * @param {String[]} args Unused parameter.
  */
 function nevermind (guildClient, userId, args) {
-  guildClient.logger.info('Received nevermind command')
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received nevermind command')
   Functions.sendMsg(guildClient.textChannel, `${Emojis.angry} **Call me only when you need me, <@${userId}>!**`, guildClient)
   Functions.updateImpression(Common.keyv, guildClient, userId, Config.ImpressionValues.NEVERMIND_VALUE, guildClient.settings.impressions)
 }

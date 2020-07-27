@@ -11,13 +11,14 @@ const Config = require('../../config')
  * @param {String} userId The ID of the user who requested the command.
  * @param {String[]} args Unused parameter.
  */
-function sad (guildClient, userId, args) {
-  guildClient.logger.info('Received sad command')
+function insult (guildClient, userId, args) {
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received insult command')
   Functions.sendMsg(guildClient.textChannel, `${Emojis.sad} *Okay...*`, guildClient)
   Functions.updateImpression(Common.keyv, guildClient, userId, Config.ImpressionValues.SAD_VALUE, guildClient.settings.impressions)
 }
 
 module.exports = {
   name: 'insult',
-  execute: sad
+  execute: insult
 }

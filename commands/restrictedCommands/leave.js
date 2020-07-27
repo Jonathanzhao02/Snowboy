@@ -10,41 +10,43 @@ const { Responses, Functions } = require('../../bot-util')
  * @param {String[]} args Unused parameter.
  */
 function leave (guildClient, userId, args) {
+  const logger = userId ? guildClient.logger.child({ user: userId }) : guildClient.logger
   if (!guildClient) {
     Common.logger.warn('Attempted to leave, but no guildClient found')
     return
   }
-  guildClient.logger.info('Received leave command')
-
-  if (!guildClient.connection) {
-    guildClient.logger.debug('Not connected')
-    Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***I am not connected to a voice channel!***`, guildClient)
-    return
-  }
+  logger.info('Received leave command')
 
   if (userId) {
+    if (!guildClient.connection) {
+      logger.debug('Not connected')
+      Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***I am not connected to a voice channel!***`, guildClient)
+      return
+    }
+
     Functions.sendMsg(guildClient.textChannel,
       `${Emojis.farewell} **${Responses.farewells[Functions.random(Responses.farewells.length)]},** <@${userId}>!`,
       guildClient)
   }
 
-  guildClient.logger.debug('Leaving')
-  guildClient.logger.trace('Disconnecting')
+  logger.debug('Leaving')
+  logger.trace('Disconnecting')
   guildClient.connection.disconnect()
   guildClient.connection.removeAllListeners()
   if (guildClient.connection.dispatcher) {
-    guildClient.logger.trace('Ending dispatcher')
+    logger.trace('Ending dispatcher')
     guildClient.connection.dispatcher.end()
     guildClient.connection.dispatcher.destroy()
   }
-  guildClient.logger.trace('Cleaning up members')
+  logger.trace('Cleaning up members')
   guildClient.members.forEach(member => { if (member.snowClient) member.snowClient.stop() })
   guildClient.members.clear()
-  guildClient.logger.trace('Leaving channel')
+  logger.trace('Leaving channel')
   guildClient.voiceChannel.leave()
   guildClient.voiceChannel = undefined
   guildClient.connection = undefined
-  guildClient.logger.debug('Successfully left')
+  guildClient.loopState = 0
+  logger.debug('Successfully left')
 }
 
 module.exports = {

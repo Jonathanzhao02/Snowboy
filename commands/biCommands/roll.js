@@ -9,7 +9,8 @@ const { Functions } = require('../../bot-util')
  * @param {String[]} args Unused parameter.
  */
 function roll (guildClient, userId, args) {
-  guildClient.logger.info('Received roll command')
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received roll command')
   Functions.sendMsg(guildClient.textChannel, `${Emojis.dice} **I rolled a \`${Functions.random(6) + 1}\`, <@${userId}>!**`, guildClient)
 }
 

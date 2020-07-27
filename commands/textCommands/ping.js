@@ -10,7 +10,8 @@ const { Functions } = require('../../bot-util')
  * @param {Discord.Message} msg The Message the user sent.
  */
 function ping (guildClient, userId, args, msg) {
-  guildClient.logger.info('Received ping command')
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received ping command')
   const latency = Date.now() - msg.createdAt.getTime()
   Functions.sendMsg(guildClient.textChannel, `${Emojis.ping} **Current ping: \`${latency}ms\`**`, guildClient)
 }

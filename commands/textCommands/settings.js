@@ -17,9 +17,10 @@ const Discord = require('discord.js')
  * @param {Discord.Message} msg Unused parameter.
  */
 function settings (guildClient, userId, args, msg) {
-  guildClient.logger.info('Received settings command')
-  guildClient.logger.debug('Received args')
-  guildClient.logger.debug(args)
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received settings command')
+  logger.debug('Received args')
+  logger.debug(args)
   // Check that the user is an administrator
   if (!msg.member.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR, { checkAdmin: true, checkOwner: true })) {
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***You do not have permission to use this command!***`)
@@ -27,26 +28,26 @@ function settings (guildClient, userId, args, msg) {
   }
   // If no arguments, print the settings embed with all values
   if (args.length === 0) {
-    guildClient.logger.debug('Printing settings')
+    logger.debug('Printing settings')
     Functions.sendMsg(guildClient.textChannel, Embeds.createSettingsEmbed(guildClient.settings), guildClient)
     return
   }
   const settingName = args.shift().toLowerCase()
   // If no option named what the user passed in, notify and return
   if (!Settings.descriptions[settingName]) {
-    guildClient.logger.debug(`No setting found for ${settingName}`)
+    logger.debug(`No setting found for ${settingName}`)
     Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Could not find option named \`${settingName}\`***`)
     return
   }
   // If only passed in an option name, return information about that option
   if (args.length === 0) {
-    guildClient.logger.debug(`Printing info about ${settingName}`)
+    logger.debug(`Printing info about ${settingName}`)
     Functions.sendMsg(guildClient.textChannel, Settings.descriptions[settingName](guildClient.settings), guildClient)
     return
   }
   // Modify the value of an option
   const val = args.join()
-  guildClient.logger.debug(`Attempting to set ${settingName} to ${val}`)
+  logger.debug(`Attempting to set ${settingName} to ${val}`)
   Functions.sendMsg(guildClient.textChannel, guildClient.settings.set(Common.keyv, settingName, val), guildClient)
 }
 

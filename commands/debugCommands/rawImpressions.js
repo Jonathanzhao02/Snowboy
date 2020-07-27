@@ -8,7 +8,8 @@ const { Functions } = require('../../bot-util')
  * @param {String[]} args Unused parameter.
  */
 function rawImpressions (guildClient, userId, args) {
-  guildClient.logger.info('Received raw impressions command')
+  const logger = guildClient.logger.child({ user: userId })
+  logger.info('Received raw impressions command')
   const response = ['Raw impressions:']
   guildClient.members.forEach(mmbr => {
     response.push(`    **${mmbr.member.displayName}**: \`${mmbr.impression}\``)
