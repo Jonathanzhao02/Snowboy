@@ -399,7 +399,7 @@ botClient.on('error', error => {
     const guilds = Array.from(botClient.guildClients)
     guilds.forEach((guildClient, index, array) => {
       guildClient[1].logger.debug('Sending error message')
-      Functions.sendMsg(guildClient[1].textChannel, `${Emojis.error} ***Sorry, I ran into some fatal error. Hopefully I come back soon!***`).then(() => {
+      Functions.sendMsg(guildClient[1].textChannel, `${Emojis.skull} ***Sorry, I ran into some fatal error. Hopefully I come back soon!***`).then(() => {
         if (index === array.length - 1) resolve()
       })
     })
@@ -455,7 +455,7 @@ process.on('SIGINT', signal => {
     const guilds = Array.from(botClient.guildClients)
     guilds.forEach((guildClient, index, array) => {
       if (guildClient[1]) guildClient[1].logger.debug('Sending interrupt message')
-      Functions.sendMsg(guildClient[1].textChannel, `${Emojis.error} ***Sorry, I'm going down for updates and maintenance! See you soon!***`).then(() => {
+      Functions.sendMsg(guildClient[1].textChannel, `${Emojis.joyful} ***Sorry, I'm going down for updates and maintenance! See you soon!***`).then(() => {
         if (index === array.length - 1) resolve()
       })
     })

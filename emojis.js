@@ -20,6 +20,7 @@ const emojis = {
   heads: '😐',
   tails: '🐕',
   trash: '🗑',
+  skull: '💀',
   unknown: '😕',
   confused: '🤔',
   sad: '😔',

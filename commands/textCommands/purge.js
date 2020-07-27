@@ -48,20 +48,8 @@ function purge (guildClient, userId, args, msg, total, snowflake) {
       case 'true':
         filter = m => m.author.id === Common.botClient.user.id || m.content.startsWith(guildClient.settings.prefix)
         break
-      case 't':
-        filter = m => m.author.id === Common.botClient.user.id || m.content.startsWith(guildClient.settings.prefix)
-        break
       // Delete all messages
       case 'all':
-        // Check that the user is an administrator
-        if (!msg.member.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR, { checkAdmin: true, checkOwner: true })) {
-          logger.debug('Rejected user due to insufficient permissions: ADMINISTRATOR')
-          Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***You do not have permission to use this command!***`)
-          return
-        }
-        filter = m => true
-        break
-      case 'a':
         // Check that the user is an administrator
         if (!msg.member.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR, { checkAdmin: true, checkOwner: true })) {
           logger.debug('Rejected user due to insufficient permissions: ADMINISTRATOR')
