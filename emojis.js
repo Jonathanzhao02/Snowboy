@@ -1,5 +1,5 @@
 const emojis = {
-  checkmark: '✔️',
+  checkmark: '✅',
   error: '❌',
   settings: '⚙️',
   stats: '📊',
