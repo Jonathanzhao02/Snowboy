@@ -4,7 +4,6 @@ const { Embeds, Functions } = require('../../bot-util')
 
 const Config = require('../../config')
 const YtdlDiscord = require('ytdl-core-discord')
-const Ytdl = require('ytdl-core')
 const Ytpl = require('ytpl')
 const Ytsearch = require('yt-search')
 
@@ -184,7 +183,7 @@ async function urlSearch (url, logger) {
   let result
   // Attempt to get info from url
   try {
-    result = await Ytdl.getBasicInfo(url)
+    result = await YtdlDiscord.getBasicInfo(url)
   } catch (error) {
     return
   }
@@ -202,7 +201,7 @@ async function urlSearch (url, logger) {
   description = description.replace(/\n/gi, ' ')
   // Modifies properties to allow better context within functions
   const videoConstruct = {
-    url: url,
+    url: 'https://www.youtube.com/watch?v=' + topResult.videoId,
     title: topResult.title,
     channel: topResult.author,
     description: description,
@@ -278,7 +277,7 @@ function play (guildClient, userId, args) {
       })
     })
   // Directly get info from URL
-  } else if (Ytdl.validateURL(args[0])) {
+  } else if (YtdlDiscord.validateURL(args[0])) {
     Functions.sendMsg(guildClient.textChannel, `${Emojis.search} ***Searching for*** \`${args[0]}\``, guildClient)
     urlSearch(args[0], logger).then(video => {
       video.query = args[0]
