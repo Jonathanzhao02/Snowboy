@@ -9,7 +9,7 @@ const Ytlist = require('youtube-playlist')
 const Ytsearch = require('yt-search')
 
 /**
- * Queues a song for playback.
+ * Plays a song from the queue.
  *
  * @param {Object} video The videoConstruct object representing the video.
  * @param {Object} guildClient The guildClient associated with the server of the playback.
@@ -74,6 +74,7 @@ function queuedPlay (video, guildClient) {
   // Sends a message detailing the currently playing video
   guildClient.guild.members.fetch(video.requester)
     .then(async member => {
+      // Fill in video details if only the URL was queued
       if (!video.title) {
         logger.info(`Searching missing info for ${video.url}`)
         try {
@@ -97,6 +98,13 @@ function queuedPlay (video, guildClient) {
     })
 }
 
+/**
+ * Queues a song up for playback.
+ *
+ * @param {Object} guildClient The guildClient of the server of the queue.
+ * @param {String} userId The ID of the user who requested the song.
+ * @param {Object} video The videoConstruct object of the video.
+ */
 async function queue (guildClient, userId, video) {
   const logger = guildClient.logger
   if (!video) {
@@ -129,6 +137,12 @@ async function queue (guildClient, userId, video) {
   }
 }
 
+/**
+ * Searches YouTube for videos from a query.
+ *
+ * @param {String} query The search query.
+ * @param {Object} logger The logger for logging.
+ */
 async function querySearch (query, logger) {
   logger.info(`Searching query ${query}`)
   let result
@@ -159,6 +173,12 @@ async function querySearch (query, logger) {
   return videoConstruct
 }
 
+/**
+ * Searches YouTube for videos from a URL.
+ *
+ * @param {String} url The URL.
+ * @param {Object} logger The logger for logging.
+ */
 async function urlSearch (url, logger) {
   logger.info(`Searching URL ${url}`)
   let result
@@ -191,6 +211,14 @@ async function urlSearch (url, logger) {
   return videoConstruct
 }
 
+/**
+ * Adds all URLs from a YouTube playlist to the queue.
+ *
+ * @param {Object} guildClient The guildClient associated with the server of the queue.
+ * @param {String} userId The ID of the user who requested the playlist.
+ * @param {String} query The URL of the video being added.
+ * @param {Object} logger The logger used for logging.
+ */
 function playlistSearch (guildClient, userId, query, logger) {
   logger.info(`Adding ${query} to queue as playlist item`)
   // Modifies properties to allow better context within functions
@@ -250,7 +278,7 @@ function play (guildClient, userId, args) {
       })
     })
   // Directly get info from URL
-  } else if (args[0].startsWith('https://www.youtube.com')) {
+  } else if (args[0].startsWith('https://www.youtube.com/watch')) {
     Functions.sendMsg(guildClient.textChannel, `${Emojis.search} ***Searching for*** \`${args[0]}\``, guildClient)
     urlSearch(args[0], logger).then(video => {
       video.query = args[0]
