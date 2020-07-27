@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.3.4 (PR #26)
+* Changed showme to only pull from top 10 results, note that images will sometimes still have restricted domains
+* Added aliases 'imgsearch' and 'imagesearch' to `showme`
+* Added basic permission checking (addresses #4)
+* Changed `guildConstruct` from `var` to `constant` in `index.js`
+
 ## v0.3.3 (PR #25)
 Play command overhaul, new image search command, new emojis, and more
 * Added new workspace to .gitignore for personal work
