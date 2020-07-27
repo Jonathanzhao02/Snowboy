@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.3.3 (PR #25)
+Play command overhaul, new image search command, new emojis, and more
+* Added new workspace to .gitignore for personal work
+* Overhauled play command
+  * Now accepts playlists, valid URLs, and search queries (addresses #19)
+  * Sends only one embed instead of attempting to send a message and an embed to notify the user
+  * Wrapped videos into a videoConstruct object to provide better context
+  * Completely divorced from Google's Youtube v3 API for free packages
+  * Refactored parts into new functions to improve readability
+* Added new skull emoji, and replaced play emoji and checkmark emoji with more visible versions
+* Edited message emojis
+* Uninstalled unused packages
+* Edited video embeds to no longer include description, but rather duration and queue position
+* Added new image search command showme
+* Fixed requester name being undefined in search command
+
 ## v0.3.2 (PR #24)
 Bug fixes, improved logging, voice command fix (very important), and looping support!
 * Added better logging context and levels
