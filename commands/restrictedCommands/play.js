@@ -76,8 +76,8 @@ function queuedPlay (video, guildClient) {
   guildClient.guild.members.fetch(video.requester)
     .then(async member => {
       // Fill in video details if only the URL was queued
-      if (!video.title) {
-        logger.info(`Searching missing info for ${video.url}`)
+      if (!video.description) {
+        logger.info(`Searching missing description for ${video.url}`)
         try {
           const result = await urlSearch(video.url, logger)
           if (!result) {
@@ -123,7 +123,7 @@ async function queue (guildClient, userId, video, query) {
   // If playing something, just say it's queued
   } else {
     logger.info(`Queued ${video}`)
-    if (video.title) {
+    if (video.description) {
       const member = await guildClient.guild.members.fetch(userId)
       if (!member) {
         logger.warn(`No user found for ID ${userId}!`)
@@ -247,8 +247,13 @@ function play (guildClient, userId, args) {
       Functions.sendMsg(guildClient.textChannel, `${Emojis.checkmark} **Adding \`${vids.length}\` videos from \`${name}\`**`, guildClient)
 
       vids.forEach(vid => {
-        logger.info(`Adding ${vid.url_simple} to queue as playlist item`)
-        queue(guildClient, userId, { url: vid.url_simple })
+        logger.info(`Adding ${vid} to queue as playlist item`)
+        queue(guildClient, userId, {
+          url: vid.url_simple,
+          title: vid.title,
+          channel: vid.author.name,
+          thumbnail: vid.thumbnail
+        })
       })
     })
   // Directly get info from URL
