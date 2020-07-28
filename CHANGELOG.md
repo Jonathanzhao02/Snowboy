@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.4.0 (PR #27)
+Complete overhaul of Settings, new wrapper object for Users, bug fixes, and small enhancements
+* Added new UserSettings object
+* Renamed Settings object to GuildSettings
+* Wrapped Users in new userClient constructs
+* Refactored all commands and SnowClient to accept userClient instead of userIds
+* Renamed `snowboy` to `snowclient` and simplified exports
+* Fixed `common` exports not updating correctly
+* Added `SIGINT` emission to `clearDb` command
+* Refactored `guildClient` and `userClient` construct creation into new commands
+* Added new database tables
+* Added new database for testing
+
 ## v0.3.4 (PR #26)
 * Changed showme to only pull from top 10 results, note that images will sometimes still have restricted domains
 * Added aliases 'imgsearch' and 'imagesearch' to `showme`
