@@ -214,14 +214,25 @@ async function onSpeaking (member, speaking) {
  * Logs a bug report from Snowboy's personal DMs.
  *
  * @param {Discord.Message} msg The sent message.
+ * @param {Object} userClient The userClient associated with the User who sent the message.
  */
-function bugLog (msg) {
-  logger.info(`Read bug report from ${msg.author.username}`)
-  const file = Fs.createWriteStream(`./bug_reports/bug_report_${msg.createdAt.toISOString()}_${msg.createdAt.getTime()}.txt`)
-  file.write(msg.content)
-  file.write('\n')
-  file.write(`${msg.author.username}#${msg.author.discriminator}`)
-  file.close()
+function logBug (msg, userClient) {
+  const logger = userClient.logger
+  logger.info(`Received message in DM: ${msg}`)
+  if (Date.now() - userClient.lastReport < 86400000) {
+    logger.info(`Rejected bug report from ${msg.author.username}`)
+    Functions.sendMsg(msg.channel, '**Please only send a bug report every 24 hours!**')
+  } else {
+    logger.info(`Accepting bug report from ${msg.author.username}`)
+    userClient.lastReport = Date.now()
+    logger.info(`Read bug report from ${msg.author.username}`)
+    const file = Fs.createWriteStream(`./bug_reports/bug_report_${msg.createdAt.toISOString()}_${msg.createdAt.getTime()}.txt`)
+    file.write(msg.content)
+    file.write('\n')
+    file.write(`${msg.author.username}#${msg.author.discriminator}`)
+    file.close()
+    Functions.sendMsg(msg.channel, '***Logged.*** **Thank you for your submission!**')
+  }
 }
 
 /**
@@ -288,23 +299,17 @@ async function onMessage (msg) {
   if (!userClient) userClient = await createUserClient(msg.author)
 
   // If it is in Snowboy's DMs, log a new bug report and start the 24 hour cooldown.
-  if (msg.channel instanceof Discord.DMChannel) {
-    logger.info(`Received message in DM: ${msg}`)
-    if (Date.now() - userClient.lastReport < 86400000) {
-      logger.info(`Rejected bug report from ${msg.author.username}`)
-      Functions.sendMsg(msg.channel, '**Please only send a bug report every 24 hours!**')
-    } else {
-      logger.info(`Accepting bug report from ${msg.author.username}`)
-      userClient.lastReport = Date.now()
-      bugLog(msg)
-      Functions.sendMsg(msg.channel, '***Logged.*** **Thank you for your submission!**')
-    }
+  if (!msg.guild) {
+    logBug(msg, userClient)
     return
   }
 
   // Create a new guildClient if the Guild is not currently tracked, loading settings from database
   let guildClient = botClient.guildClients.get(msg.guild.id)
   if (!guildClient) guildClient = await createGuildClient(msg.guild, msg.channel, msg.member.voice.channel)
+
+  // Create a new member if the GuildMember is not currently tracked, loading settings from database
+  if (!guildClient.members.get(userClient.id)) createMemberClient(msg.member, guildClient)
 
   // Parse out command name and arguments
   const args = msg.content.slice(guildClient.settings.prefix.length).trim().split(/ +/)
@@ -325,9 +330,6 @@ async function onMessage (msg) {
     Functions.sendMsg(msg.channel, formatList(missingPermissions), guildClient)
     return
   }
-
-  // Create a new member if the GuildMember is not currently tracked, loading settings from database
-  if (!guildClient.members.get(userClient.id)) createMemberClient(msg.member, guildClient)
 
   // If Snowboy is currently connected in the guild, and the GuildMember tries to run a restricted command (affects Snowboy's behavior
   // in the voice channel) in another text channel, notify the GuildMember and return
