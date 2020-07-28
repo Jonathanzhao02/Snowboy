@@ -10,7 +10,7 @@ const Config = require('./config')
  * @property {ReadableStream} stream The stream to be piped to the detector.
  * @property {boolean} triggered Whether the client is triggered by a hotword currently.
  * @property {Object} guildClient The guildClient of the server the SnowClient's user is in.
- * @property {String} userId The ID of the SnowClient's user.
+ * @property {Object} userClient The userClient of the SnowClient's user.
  * @property {EventEmitter} events The EventEmitter used for callbacks.
  * @property {Detector} detector The Detector used for Snowboy.
  * @property {Any} logger The logger to use.
@@ -21,14 +21,14 @@ class SnowClient {
    * Initializes the Snowboy detection.
    *
    * @param {Object} gldClnt The guildClient of the server the SnowClient's user is in.
-   * @param {String} usrId The ID of the SnowClient's user.
+   * @param {Object} usrClnt The userClient of the SnowClient's user.
    * @param {String} sensitivity The sensitivity of the model.
    */
-  constructor (gldClnt, usrId, sensitivity) {
+  constructor (gldClnt, usrClnt, sensitivity) {
     this.stream = null
     this.triggered = false
     this.guildClient = gldClnt
-    this.userId = usrId
+    this.userClient = usrClnt
     this.events = new Events.EventEmitter()
 
     const models = new Models()
@@ -85,12 +85,12 @@ class SnowClient {
         this.logger.trace('Emitted busy event')
         this.logger.debug('Already processing query, rejected hotword trigger')
       }
-      this.events.emit('busy', this.guildClient, this.userId)
+      this.events.emit('busy', this.guildClient, this.userClient)
       return
     }
     // Emit the 'hotword' event and set the timeSinceLastChunk and initialTime values
     if (this.logger) this.logger.trace('Emitted hotword event')
-    this.events.emit('hotword', index, hotword, this.guildClient, this.userId)
+    this.events.emit('hotword', index, hotword, this.guildClient, this.userClient)
     this.timeSinceLastChunk = new Date().getTime()
     const initialTime = this.timeSinceLastChunk
 
@@ -103,7 +103,7 @@ class SnowClient {
         this.logger.debug('Received result')
         this.logger.debug(finalResult)
       }
-      this.events.emit('result', finalResult, this.guildClient, this.userId)
+      this.events.emit('result', finalResult, this.guildClient, this.userClient)
     },
     (error) => {
       this.triggered = false
@@ -112,7 +112,7 @@ class SnowClient {
         this.logger.warn('Wit.ai failed')
         this.logger.warn(error)
       }
-      this.events.emit('error', error, this.guildClient, this.userId)
+      this.events.emit('error', error, this.guildClient, this.userClient)
     })
 
     // Every 50ms, check if the query time has been exceeded, and finish if it has
@@ -166,4 +166,4 @@ class SnowClient {
   }
 }
 
-exports.SnowClient = SnowClient
+module.exports = SnowClient

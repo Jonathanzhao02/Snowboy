@@ -2,12 +2,13 @@ const Discord = require('discord.js')
 const Keyv = require('keyv')
 const Resampler = require('node-libsamplerate')
 const Fs = require('fs')
-const Snowboy = require('./snowboy')
+const SnowClient = require('./snowClient')
 const Streams = require('./streams')
 const Emojis = require('./emojis')
 const Common = require('./common')
 const Commands = require('./commands')
-const Settings = require('./settings')
+const GuildSettings = require('./guildSettings')
+const UserSettings = require('./userSettings')
 const Functions = require('./bot-util').Functions
 const Responses = require('./bot-util').Responses
 const Config = require('./config')
@@ -30,12 +31,77 @@ const botClient = new Discord.Client()
 botClient.guildClients = new Map() // to keep track of individual active guilds
 botClient.userClients = new Map() // to keep track of individual user bug reports
 
-const keyv = new Keyv('sqlite://db/snowboy.db', { table: 'guilds' })
-keyv.on('error', error => { throw error })
+const gKeyv = new Keyv(
+  process.argv.includes('-t') || process.argv.includes('--testing') ? 'sqlite://db/testing.db' : 'sqlite://db/snowboy.db',
+  { table: 'guilds' })
+const uKeyv = new Keyv(
+  process.argv.includes('-t') || process.argv.includes('--testing') ? 'sqlite://db/testing.db' : 'sqlite://db/snowboy.db',
+  { table: 'users' })
+gKeyv.on('error', error => { throw error })
+uKeyv.on('error', error => { throw error })
 
 Common.setClient(botClient)
-Common.setDb(keyv)
+Common.setGKeyv(gKeyv)
+Common.setUKeyv(uKeyv)
 Common.setLogger(logger)
+
+/**
+ * Creates a userClient object and updates the userClients map for a User.
+ *
+ * @param {Discord.User} user The User the userClient is associated with.
+ * @returns {Object} Returns the created userClient.
+ */
+async function createUserClient (user) {
+  logger.info(`Creating user construct for ${user.username}`)
+  const userConstruct = {
+    id: user.id, // the id of the user
+    lastReport: 0, // the time of the user's last bug report
+    impression: await uKeyv.get(`${user.id}:impression`), // the user's impression level with snowboy
+    settings: await UserSettings.load(uKeyv, user.id), // custom settings for the current user
+    user: user, // the User object associated with this user
+    logger: logger.child({ user: user.id, name: user.username }) // The logger object to be used for this client
+  }
+  userConstruct.logger.debug(`Read settings for ${user.id} as ${userConstruct.settings}`)
+  if (!userConstruct.settings) userConstruct.settings = new UserSettings(user.id)
+  if (!userConstruct.impression) userConstruct.impression = 0
+  userConstruct.logger.debug(userConstruct)
+  botClient.userClients.set(user.id, userConstruct)
+  return userConstruct
+}
+
+/**
+ * Creates a guildClient object and updates the guildClients map for a Guild.
+ *
+ * @param {Discord.Guild} guild The Guild the guildClient is associated with.
+ * @param {Discord.TextChannel} textChannel The TextChannel the guildClient is listening to.
+ * @param {Discord.VoiceChannel} voiceChannel The VoiceChannel the guildClient is interested in.
+ */
+async function createGuildClient (guild, textChannel, voiceChannel) {
+  logger.info(`Creating new guild construct for ${guild.name}`)
+  const guildConstruct = {
+    id: guild.id, // the id of the guild
+    textChannel: textChannel, // text channel to listen to for commands
+    voiceChannel: voiceChannel, // voice channel bot is interested in
+    connection: undefined, // connection to the voice channel
+    songQueue: [], // song queue
+    loopState: 0, // 0 = no loop, 1 = song loop, 2 = queue loop
+    members: new Map(), // information about guildmembers including id, snowclients, guildmember, and impression with snowboy
+    playing: false, // whether a song is currently playing
+    downloading: false, // whether a song is currently being downloaded
+    guild: guild, // the corresponding guild
+    lastCalled: Date.now() - 2000, // when the last command was executed
+    delete: false, // set to true to mark guild for deletion upon disconnect
+    purging: false, // whether the purging command is currently active
+    settings: await GuildSettings.load(gKeyv, guild.id), // custom settings for the current guild
+    logger: logger.child({ guild: guild.id, name: guild.name }) // pino logger
+  }
+
+  guildConstruct.logger.debug(`Read settings as ${guildConstruct.settings}`)
+  if (!guildConstruct.settings) guildConstruct.settings = new GuildSettings(guild.id)
+  guildConstruct.logger.debug(guildConstruct)
+  botClient.guildClients.set(guild.id, guildConstruct)
+  return guildConstruct
+}
 
 /**
  * Handles creation of new members or new SnowClients for untracked users
@@ -49,23 +115,25 @@ async function onSpeaking (member, speaking) {
   const guildClient = botClient.guildClients.get(member.guild.id)
   if (!guildClient || member.voice.channel !== guildClient.voiceChannel || !guildClient.settings.voice) return
   let mmbr = guildClient.members.get(member.id)
-  let newClient = null
+  let userClient = botClient.userClients.get(member.id)
   const childLogger = guildClient.logger
+
+  // If the User is not currently tracked, create a new userConstruct object
+  if (!userClient) {
+    userClient = await createUserClient(member.user)
+  }
 
   // If the GuildMember is untracked, create a new member object
   if (!mmbr) {
     childLogger.info(`Creating new member construct for ${member.displayName}`)
     const memberConstruct = {
-      id: member.id,
-      snowClient: newClient,
-      member: member,
-      impression: await keyv.get(`${member.guild.id}:${member.id}:impression`)
+      id: userClient.id,
+      snowClient: undefined,
+      member: member
     }
 
     childLogger.debug(memberConstruct)
-    childLogger.debug(`Read member impression as ${memberConstruct.impression}`)
-    if (!memberConstruct.impression) memberConstruct.impression = 0
-    guildClient.members.set(member.id, memberConstruct)
+    guildClient.members.set(userClient.id, memberConstruct)
     mmbr = memberConstruct
   }
 
@@ -97,12 +165,12 @@ async function onSpeaking (member, speaking) {
       audioStream.destroy()
       resample.destroy()
     })
-    newClient = new Snowboy.SnowClient(guildClient, member.id, guildClient.settings.sensitivity)
-    newClient.setLogger(childLogger.child({ user: mmbr.id }))
+    const newClient = new SnowClient(guildClient, userClient.id, userClient.settings.sensitivity)
+    newClient.setLogger(childLogger.child({ user: userClient.id }))
     newClient.on('hotword', ack)
     newClient.on('result', parse)
-    newClient.on('busy', (guildClient, userId) => Functions.sendMsg(guildClient.textChannel,
-      `***I'm still working on your last request, <@${userId}>!***`,
+    newClient.on('busy', (guildClient, userClient) => Functions.sendMsg(guildClient.textChannel,
+      `***I'm still working on your last request, <@${userClient.id}>!***`,
       guildClient))
     newClient.on('error', msg => {
       Functions.sendMsg(guildClient.textChannel,
@@ -133,7 +201,7 @@ function bugLog (msg) {
  * Checks permissions in a guild and returns any missing.
  *
  * @param {Object} guildClient The guildClient of the server where permissions are required.
- * @returns The array of missing text/voice permissions or undefined if all permissions are granted.
+ * @returns {String[]?} The array of missing text/voice permissions or undefined if all permissions are granted.
  */
 function checkPermissions (guildClient) {
   if (guildClient.guild.me.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR)) return
@@ -166,7 +234,7 @@ function checkPermissions (guildClient) {
 /**
  * Formats a list of strings into a fancy array.
  * @param {String[]} list The list of strings.
- * @returns An array of strings with fancy markdown formatting.
+ * @returns {String[]} An array of strings with fancy markdown formatting.
  */
 function formatList (list) {
   const msg = []
@@ -188,63 +256,45 @@ async function onMessage (msg) {
   // If it is an automated message of some sort, return
   if (msg.author.bot || msg.system) return
 
+  // Create a new userConstruct if the User is not currently tracked, loading settings from database
+  let userClient = botClient.userClients.get(msg.author.id)
+  if (!userClient) {
+    userClient = await createUserClient(msg.author)
+  }
+
   // If it is in Snowboy's DMs, log a new bug report and start the 24 hour cooldown.
   if (msg.channel instanceof Discord.DMChannel) {
     logger.info(`Received message in DM: ${msg}`)
-    if (!botClient.userClients.get(msg.author.id)) {
-      logger.info(`Creating user construct for ${msg.author.username}`)
-      const userConstruct = {
-        lastReport: 0
-      }
-      botClient.userClients.set(msg.author.id, userConstruct)
-    }
-    if (Date.now() - botClient.userClients.get(msg.author.id).lastReport < 86400000) {
+    if (Date.now() - userClient.lastReport < 86400000) {
       logger.info(`Rejected bug report from ${msg.author.username}`)
       Functions.sendMsg(msg.channel, '**Please only send a bug report every 24 hours!**')
     } else {
       logger.info(`Accepting bug report from ${msg.author.username}`)
-      botClient.userClients.get(msg.author.id).lastReport = Date.now()
+      userClient.lastReport = Date.now()
       bugLog(msg)
       Functions.sendMsg(msg.channel, '***Logged.*** **Thank you for your submission!**')
     }
     return
   }
 
-  const guildId = msg.guild.id
-  const userId = msg.author.id
-
   // Create a new guildClient if the Guild is not currently tracked, loading settings from database
-  if (!botClient.guildClients.get(msg.guild.id)) {
-    logger.info(`Creating new guild construct for ${msg.guild.name}`)
-    const guildConstruct = {
-      textChannel: msg.channel, // text channel to listen to for commands
-      voiceChannel: msg.member.voice.channel, // voice channel bot is interested in
-      connection: undefined, // connection to the voice channel
-      songQueue: [], // song queue
-      loopState: 0, // 0 = no loop, 1 = song loop, 2 = queue loop
-      members: new Map(), // information about guildmembers including id, snowclients, guildmember, and impression with snowboy
-      playing: false, // whether a song is currently playing
-      downloading: false, // whether a song is currently being downloaded
-      guild: msg.guild, // the corresponding guild
-      lastCalled: Date.now() - 2000, // when the last command was executed
-      delete: false, // set to true to mark guild for deletion upon disconnect
-      purging: false, // whether the purging command is currently active
-      settings: await Settings.load(keyv, guildId), // custom settings for the current guild
-      logger: logger.child({ guild: guildId, name: msg.guild.name }) // pino logger
-    }
-
-    guildConstruct.logger.debug(`Read settings as ${guildConstruct.settings}`)
-    if (!guildConstruct.settings) guildConstruct.settings = new Settings(guildId)
-    guildConstruct.logger.debug(guildConstruct)
-    botClient.guildClients.set(guildId, guildConstruct)
+  let guildClient = botClient.guildClients.get(msg.guild.id)
+  if (!guildClient) {
+    guildClient = await createGuildClient(msg.guild, msg.channel, msg.member.voice.channel)
   }
 
-  const guildClient = botClient.guildClients.get(msg.guild.id)
+  // Parse out command name and arguments
   const args = msg.content.slice(guildClient.settings.prefix.length).trim().split(/ +/)
   const commandName = args.shift().toLowerCase()
 
-  const missingPermissions = checkPermissions(guildClient)
+  // If the message is not a command for Snowboy, return
+  if (!msg.content.startsWith(guildClient.settings.prefix)) return
 
+  // If there is no TextChannel associated with the guildClient, associate the current one
+  if (!guildClient.textChannel) guildClient.textChannel = msg.channel
+
+  // Check that Snowboy has all necessary permissions in text channel and voice channel
+  const missingPermissions = checkPermissions(guildClient)
   if (missingPermissions) {
     Functions.sendMsg(msg.channel,
       `${Emojis.error} ***Please ensure I have all the following permissions! I won't completely work otherwise!***`,
@@ -252,12 +302,6 @@ async function onMessage (msg) {
     Functions.sendMsg(msg.channel, formatList(missingPermissions), guildClient)
     return
   }
-
-  // If the message is not a command for Snowboy, return
-  if (!msg.content.startsWith(guildClient.settings.prefix)) return
-
-  // If there is no TextChannel associated with the guildClient, associate the current one
-  if (!guildClient.textChannel) guildClient.textChannel = msg.channel
 
   // If Snowboy is currently connected in the guild, and the GuildMember tries to run a restricted command (affects Snowboy's behavior
   // in the voice channel), notify the GuildMember and return
@@ -272,18 +316,16 @@ async function onMessage (msg) {
   }
 
   // Create a new member if the GuildMember is not currently tracked, loading settings from database
-  if (!guildClient.members.get(userId)) {
+  if (!guildClient.members.get(userClient.id)) {
     guildClient.logger.info(`Creating new member construct for ${msg.member.displayName}`)
     const memberConstruct = {
-      id: userId, // the user's discord id
+      id: userClient.id, // the user's discord id
       snowClient: undefined, // the snowclient listening to the member
-      member: msg.member, // the guildmember object of the member within the guild
-      impression: await keyv.get(`${guildId}:${userId}:impression`) // the member's impression level with snowboy
+      member: msg.member // the guildmember object of the member within the guild
     }
 
     guildClient.logger.debug(memberConstruct)
-    if (!memberConstruct.impression) memberConstruct.impression = 0
-    guildClient.members.set(userId, memberConstruct)
+    guildClient.members.set(userClient.id, memberConstruct)
   }
 
   guildClient.logger.info(`Received ${msg.content}`)
@@ -298,15 +340,15 @@ async function onMessage (msg) {
 
   // Check all relevant command maps for the current command name, and execute it
   if (Commands.biCommands.get(commandName)) {
-    Commands.biCommands.get(commandName).execute(guildClient, userId, args)
+    Commands.biCommands.get(commandName).execute(guildClient, userClient, args)
   } else if (Commands.restrictedCommands.get(commandName)) {
-    Commands.restrictedCommands.get(commandName).execute(guildClient, userId, args)
+    Commands.restrictedCommands.get(commandName).execute(guildClient, userClient, args)
   } else if (Commands.textOnlyCommands.get(commandName)) {
-    Commands.textOnlyCommands.get(commandName).execute(guildClient, userId, args, msg)
-  } else if (Config.DEBUG_IDS.includes(userId) && Commands.debugCommands.get(commandName)) {
-    Commands.debugCommands.get(commandName).execute(guildClient, userId, args)
+    Commands.textOnlyCommands.get(commandName).execute(guildClient, userClient, args, msg)
+  } else if (Config.DEBUG_IDS.includes(userClient.id) && Commands.debugCommands.get(commandName)) {
+    Commands.debugCommands.get(commandName).execute(guildClient, userClient, args)
   } else if (Commands.eastereggCommands.get(commandName)) {
-    Commands.eastereggCommands.get(commandName).execute(guildClient, userId, args)
+    Commands.eastereggCommands.get(commandName).execute(guildClient, userClient, args)
   } else {
     Functions.sendMsg(msg.channel, `${Emojis.confused} ***Sorry, I don't understand.***`, guildClient)
   }
@@ -325,9 +367,9 @@ async function onMessage (msg) {
  *
  * @param {Object} result The JSON object returned by Wit.
  * @param {Object} guildClient The guildClient handling this server.
- * @param {String} userId The user ID of the speaker.
+ * @param {String} userClient The userClient of the speaker.
  */
-function parse (result, guildClient, userId) {
+function parse (result, guildClient, userClient) {
   if (!guildClient || !guildClient.settings.voice) return
   guildClient.logger.info(`Received results: ${result.text}, ${result.intents}`)
 
@@ -345,15 +387,19 @@ function parse (result, guildClient, userId) {
 
   // Checks all relevant command maps
   if (Commands.biCommands.get(commandName)) {
-    Commands.biCommands.get(commandName).execute(guildClient, userId, args)
+    Commands.biCommands.get(commandName).execute(guildClient, userClient, args)
   } else if (Commands.restrictedCommands.get(commandName)) {
-    Commands.restrictedCommands.get(commandName).execute(guildClient, userId, args)
+    Commands.restrictedCommands.get(commandName).execute(guildClient, userClient, args)
   } else if (Commands.voiceOnlyCommands.get(commandName)) {
-    Commands.voiceOnlyCommands.get(commandName).execute(guildClient, userId, args)
+    Commands.voiceOnlyCommands.get(commandName).execute(guildClient, userClient, args)
   } else if (Commands.eastereggCommands.get(commandName)) {
-    Commands.eastereggCommands.get(commandName).execute(guildClient, userId, args)
+    Commands.eastereggCommands.get(commandName).execute(guildClient, userClient, args)
   } else {
-    Functions.sendMsg(guildClient.textChannel, `${Emojis.confused} ***Sorry, I don't understand*** "\`${result.text}\`"`, guildClient)
+    Functions.sendMsg(
+      guildClient.textChannel,
+      `${Emojis.confused} ***Sorry, I don't understand*** "\`${result.text}\`"`,
+      guildClient
+    )
     guildClient.logger.warn(`No command found for ${commandName}!`)
   }
 }
@@ -367,16 +413,16 @@ function parse (result, guildClient, userId) {
  * @param {Number} index The index of the detected hotword in the model. Always 0.
  * @param {String} hotword The detected hotword. Always 'snowboy'.
  * @param {Object} guildClient The guildClient handling this server.
- * @param {String} userId The user ID of the speaker.
+ * @param {String} userClient The userClient of the speaker.
  */
-function ack (index, hotword, guildClient, userId) {
+function ack (index, hotword, guildClient, userClient) {
   if (!guildClient.connection) return
-  guildClient.logger.info(`Received hotword from ${userId}`)
+  guildClient.logger.info(`Received hotword from ${userClient.id}`)
   Functions.sendMsg(guildClient.textChannel,
     `**${Responses.getResponse('hotword',
-      guildClient.members.get(userId).impression,
-      [`<@${userId}>`],
-      guildClient.settings.impressions)}**`,
+      userClient.impression,
+      [`<@${userClient.id}>`],
+      userClient.settings.impressions)}**`,
     guildClient)
 
   // Start the expiration timer
@@ -385,7 +431,7 @@ function ack (index, hotword, guildClient, userId) {
   setTimeout(() => { Functions.cleanupGuildClient(guildClient, botClient) }, Config.TIMEOUT + 500)
 }
 
-// Settings up more callbacks
+// Setting up more callbacks
 botClient.on('message', onMessage)
 botClient.on('guildMemberSpeaking', onSpeaking)
 botClient.on('voiceStateUpdate', (oldPresence, newPresence) => {
@@ -429,7 +475,7 @@ botClient.on('voiceStateUpdate', (oldPresence, newPresence) => {
     // If the bot has disconnected and the guildClient is marked for deletion, delete it
     if (userId === botClient.user.id && !newPresence.channelID && guildClient.delete) {
       guildClient.logger.info('Deleting guild client')
-      botClient.guildClients.delete(guildClient.guild.id)
+      botClient.guildClients.delete(guildClient.id)
     }
   }
 })
@@ -451,13 +497,17 @@ botClient.on('guildCreate', guild => {
   '**Please note that I\'m still in testing, so I \\*may\\* shut down frequently!**')
 })
 
-// Error logging and exit handling
+// On discord.js error
 botClient.on('error', error => {
   const promise = new Promise((resolve, reject) => {
     const guilds = Array.from(botClient.guildClients)
     guilds.forEach((guildClient, index, array) => {
       guildClient[1].logger.debug('Sending error message')
-      Functions.sendMsg(guildClient[1].textChannel, `${Emojis.skull} ***Sorry, I ran into some fatal error. Hopefully I come back soon!***`).then(() => {
+      Functions.sendMsg(
+        guildClient[1].textChannel,
+        `${Emojis.skull} ***Sorry, I ran into some fatal error. Hopefully I come back soon!***`,
+        guildClient[1]
+      ).then(() => {
         if (index === array.length - 1) resolve()
       })
     })
@@ -465,7 +515,7 @@ botClient.on('error', error => {
     if (guilds.length === 0) resolve()
   })
 
-  promise.then(() => Heapdump.writeSnapshot(`./logs/${Date.now()}_CLI.heapdump`, (err, filename) => {
+  promise.then(() => Heapdump.writeSnapshot(`./logs/${new Date().toISOString()}_CLI.heapdump`, (err, filename) => {
     logger.error('Client exception')
     logger.error(error)
     console.log(error)
@@ -476,8 +526,9 @@ botClient.on('error', error => {
   }))
 })
 
+// On uncaught exception
 process.on('uncaughtException', error => {
-  Heapdump.writeSnapshot(`./logs/${Date.now()}_ERR.heapdump`, (err, filename) => {
+  Heapdump.writeSnapshot(`./logs/${new Date().toISOString()}_ERR.heapdump`, (err, filename) => {
     logger.error('Uncaught exception')
     logger.error(error)
     console.log(error)
@@ -488,8 +539,9 @@ process.on('uncaughtException', error => {
   })
 })
 
+// On unhandled promise rejection
 process.on('unhandledRejection', (error, promise) => {
-  Heapdump.writeSnapshot(`./logs/${Date.now()}_REJ.heapdump`, (err, filename) => {
+  Heapdump.writeSnapshot(`./logs/${new Date().toISOString()}_REJ.heapdump`, (err, filename) => {
     logger.error('Unhandled promise rejection')
     logger.error(promise)
     logger.error(error)
@@ -501,19 +553,25 @@ process.on('unhandledRejection', (error, promise) => {
   })
 })
 
+// On process termination (exits normally)
 process.on('SIGTERM', signal => {
   logger.info(`Process ${process.pid} received a SIGTERM signal`)
   botClient.destroy()
   process.exit(0)
 })
 
+// On process interrupt
 process.on('SIGINT', signal => {
   logger.info(`Process ${process.pid} has been interrupted`)
   const promise = new Promise((resolve, reject) => {
     const guilds = Array.from(botClient.guildClients)
     guilds.forEach((guildClient, index, array) => {
       if (guildClient[1]) guildClient[1].logger.debug('Sending interrupt message')
-      Functions.sendMsg(guildClient[1].textChannel, `${Emojis.joyful} ***Sorry, I'm going down for updates and maintenance! See you soon!***`).then(() => {
+      Functions.sendMsg(
+        guildClient[1].textChannel,
+        `${Emojis.joyful} ***Sorry, I'm going down for updates and maintenance! See you soon!***`,
+        guildClient[1]
+      ).then(() => {
         if (index === array.length - 1) resolve()
       })
     })
@@ -527,6 +585,7 @@ process.on('SIGINT', signal => {
   })
 })
 
+// Determines log level
 if (process.argv.includes('trace')) {
   logger.level = 'trace'
 } else if (process.argv.includes('debug')) {

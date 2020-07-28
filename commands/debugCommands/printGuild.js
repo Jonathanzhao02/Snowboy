@@ -2,11 +2,11 @@
  * Prints a guildClient to console.
  *
  * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {String} userId Unused parameter.
+ * @param {Object} userClient Unused parameter.
  * @param {String[]} args Unused parameter.
  */
-function printGuild (guildClient, userId, args) {
-  const logger = guildClient.logger.child({ user: userId })
+function printGuild (guildClient, userClient, args) {
+  const logger = guildClient.logger.child({ user: userClient.id })
   logger.info('Received print guild command')
   console.log(guildClient)
 }

@@ -2,11 +2,11 @@
  * Prints the members map to console.
  *
  * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {String} userId Unused parameter.
+ * @param {Object} userClient Unused parameter.
  * @param {String[]} args Unused parameter.
  */
-function printMembers (guildClient, userId, args) {
-  const logger = guildClient.logger.child({ user: userId })
+function printMembers (guildClient, userClient, args) {
+  const logger = guildClient.logger.child({ user: userClient.id })
   logger.info('Received print members command')
   console.log(guildClient.members)
 }

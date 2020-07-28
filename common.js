@@ -4,17 +4,13 @@ const Wit = require('./web_apis/wit')
 Gsearch.setKey(process.env.GOOGLE_API_TOKEN)
 Wit.setKey(process.env.WIT_API_TOKEN)
 
-var botClient
-var keyv
-var logger
-
 /**
  * Sets the bot client used for commands.
  *
  * @param {Discord.Client} client The Client of the bot to be used.
  */
 function setClient (client) {
-  botClient = client
+  module.exports.botClient = client
 }
 
 /**
@@ -22,8 +18,17 @@ function setClient (client) {
  *
  * @param {Keyv} db The Keyv database to be used.
  */
-function setDb (db) {
-  keyv = db
+function setGKeyv (db) {
+  module.exports.gKeyv = db
+}
+
+/**
+ * Sets the database used for commands.
+ *
+ * @param {Keyv} db The Keyv database to be used.
+ */
+function setUKeyv (db) {
+  module.exports.uKeyv = db
 }
 
 /**
@@ -32,14 +37,12 @@ function setDb (db) {
  * @param {Any} lgr The logger to use.
  */
 function setLogger (lgr) {
-  logger = lgr
+  module.exports.logger = lgr
 }
 
 module.exports = {
   setClient: setClient,
-  setDb: setDb,
-  setLogger: setLogger,
-  botClient: botClient,
-  keyv: keyv,
-  logger: logger
+  setGKeyv: setGKeyv,
+  setUKeyv: setUKeyv,
+  setLogger: setLogger
 }
