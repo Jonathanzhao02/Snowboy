@@ -14,8 +14,9 @@ const Config = require('../../config')
 function compliment (guildClient, userId, args) {
   const logger = guildClient.logger.child({ user: userId })
   logger.info('Received compliment command')
+  const userClient = Common.botClient.userClients.get(userId)
   Functions.sendMsg(guildClient.textChannel, `${Emojis.happy} **Thank you!**`)
-  Functions.updateImpression(Common.keyv, guildClient, userId, Config.ImpressionValues.HAPPY_VALUE, guildClient.settings.impressions)
+  Functions.updateImpression(Common.uKeyv, userId, userClient, Config.ImpressionValues.HAPPY_VALUE, userClient.settings.impressions)
 }
 
 module.exports = {

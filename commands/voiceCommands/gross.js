@@ -14,8 +14,9 @@ const Config = require('../../config')
 function gross (guildClient, userId, args) {
   const logger = guildClient.logger.child({ user: userId })
   logger.info('Received gross command')
+  const userClient = Common.botClient.userClients.get(userId)
   Functions.sendMsg(guildClient.textChannel, `${Emojis.weird} **Not much I can do for you, <@${userId}>**`, guildClient)
-  Functions.updateImpression(Common.keyv, guildClient, userId, Config.ImpressionValues.GROSS_VALUE, guildClient.settings.impressions)
+  Functions.updateImpression(Common.uKeyv, userId, userClient, Config.ImpressionValues.GROSS_VALUE, userClient.settings.impressions)
 }
 
 module.exports = {

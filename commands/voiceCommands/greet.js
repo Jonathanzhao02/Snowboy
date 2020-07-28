@@ -14,10 +14,11 @@ const Config = require('../../config')
 function greet (guildClient, userId, args) {
   const logger = guildClient.logger.child({ user: userId })
   logger.info('Received greet command')
+  const userClient = Common.botClient.userClients.get(userId)
   Functions.sendMsg(guildClient.textChannel,
     `${Emojis.greeting} **${Responses.greetings[Functions.random(Responses.greetings.length)]},** <@${userId}>!`,
     guildClient)
-  Functions.updateImpression(Common.keyv, guildClient, userId, Config.ImpressionValues.GREET_VALUE, guildClient.settings.impressions)
+  Functions.updateImpression(Common.uKeyv, userId, userClient, Config.ImpressionValues.GREET_VALUE, userClient.settings.impressions)
 }
 
 module.exports = {

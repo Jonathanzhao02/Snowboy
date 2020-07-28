@@ -11,10 +11,13 @@ const { Functions } = require('../../bot-util')
 function clearImpressions (guildClient, userId, args) {
   const logger = guildClient.logger.child({ user: userId })
   logger.info('Received clear impressions command')
-  Common.botClient.guildClients.forEach(gc => gc.members.forEach(usr => {
-    usr.impression = 0
-    Common.keyv.delete(`${guildClient.guild.id}:${usr.id}:impression`)
-  }))
+  Common.botClient.users.cache.forEach(usr => {
+    Common.logger.debug(`Deleting impression of ${usr.id}`)
+    if (Common.botClient.userClients.get(usr.id)) {
+      Common.botClient.userClients.get(usr.id).impression = 0
+    }
+    Common.uKeyv.delete(`${usr.id}:impression`)
+  })
   Functions.sendMsg(guildClient.textChannel, 'Cleared all impressions', guildClient)
 }
 

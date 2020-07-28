@@ -31,8 +31,8 @@ function setImpression (guildClient, userId, args) {
   const member = guildClient.members.get(id)
   // Ensures a member is found, and that the value is a number between the maximum and minimum values
   if (!member || isNaN(val) || val > Config.ImpressionThresholds.MAX_IMPRESSION || val < Config.ImpressionThresholds.MIN_IMPRESSION) return
-  member.impression = val
-  Common.keyv.set(`${guildClient.guild.id}:${id}:impression`, val)
+  const userClient = Common.botClient.userClients.get(id)
+  Functions.updateImpression(Common.uKeyv, id, userClient, val - userClient.impression)
   Functions.sendMsg(guildClient.textChannel, `Set impression of \`${member.member.displayName}\` to \`${val}\``, guildClient)
 }
 

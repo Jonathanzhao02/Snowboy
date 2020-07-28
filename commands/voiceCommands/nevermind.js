@@ -14,8 +14,9 @@ const Config = require('../../config')
 function nevermind (guildClient, userId, args) {
   const logger = guildClient.logger.child({ user: userId })
   logger.info('Received nevermind command')
+  const userClient = Common.botClient.userClients.get(userId)
   Functions.sendMsg(guildClient.textChannel, `${Emojis.angry} **Call me only when you need me, <@${userId}>!**`, guildClient)
-  Functions.updateImpression(Common.keyv, guildClient, userId, Config.ImpressionValues.NEVERMIND_VALUE, guildClient.settings.impressions)
+  Functions.updateImpression(Common.uKeyv, userId, userClient, Config.ImpressionValues.NEVERMIND_VALUE, userClient.settings.impressions)
 }
 
 module.exports = {

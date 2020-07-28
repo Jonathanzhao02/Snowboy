@@ -3,7 +3,9 @@ const Discord = require('discord.js')
 const Emojis = require('./emojis')
 const Streams = require('./streams')
 const Config = require('./config')
-const Settings = require('./settings')
+const GuildSettings = require('./guildSettings')
+const UserSettings = require('./userSettings')
+const Common = require('./common')
 
 /**
  * Creates an embed for a video.
@@ -81,14 +83,18 @@ function createAboutEmbed (botClient) {
 /**
  * Creates an embed detailing the settings.
  *
- * @param {Settings} settings The Settings object to be used in displaying values.
- * @returns {Discord.MessageEmbed} Returns a message embed detailing the Settings values and properties.
+ * @param {GuildSettings} guildSettings The GuildSettings object to be used in displaying values.
+ * @param {UserSettings} userSettings The UserSettings object to be used in displaying values.
+ * @returns {Discord.MessageEmbed} Returns a message embed detailing the GuildSettings values and properties.
  */
-function createSettingsEmbed (settings) {
+function createSettingsEmbed (guildSettings, userSettings) {
   const embed = new Discord.MessageEmbed()
     .setTitle(`${Emojis.settings} __**Settings**__`)
     .setDescription('Use `settings <optionname>` to see more information about each option.')
-  Settings.names.forEach(val => embed.addField(val[0], `\`${settings[val[1]]}\``, true))
+    .addField('Server Settings', 'These settings apply on the server level.')
+  GuildSettings.names.forEach(val => embed.addField(val[0], `\`${guildSettings[val[1]]}\``, true))
+  embed.addField('User Settings', 'These settings apply on the user level.')
+  UserSettings.names.forEach(val => embed.addField(val[0], `\`${userSettings[val[1]]}\``, true))
   return embed
 }
 
@@ -263,21 +269,20 @@ function getResponse (func, impression, args, useImpressions) {
 }
 
 /**
- * Updates the impression level of a user in a server.
+ * Updates the impression level of a user.
  *
- * @param {Keyv} keyv The database to save to.
- * @param {Object} guildClient The guildClient associated with the server.
- * @param {String} userId The ID of the user to be updated.
+ * @param {Keyv} keyv The Keyv database to save to.
+ * @param {String} key The key of the user to be updated.
+ * @param {Object} client The object containing the impression to be updated.
  * @param {Number} value The change in the user's impression level.
- * @param {boolean} useImpressions Whether impressions are active or not.
+ * @param {boolean} useImpressions If the impression system is in use or not.
  */
-function updateImpression (keyv, guildClient, userId, value, useImpressions) {
-  guildClient.logger.info(`Attempting to update impressions for ${userId}`)
-  if (!useImpressions) return
-  const member = guildClient.members.get(userId)
-  if (member.impression + value > Config.ImpressionThresholds.MAX_IMPRESSION || member.impression + value < Config.ImpressionThresholds.MIN_IMPRESSION) return
-  member.impression += value
-  keyv.set(`${guildClient.guild.id}:${userId}`, value)
+function updateImpression (keyv, key, client, value, useImpressions) {
+  if (useImpressions === false) return
+  Common.logger.info(`Attempting to update impressions for ${key}`)
+  if (client.impression + value > Config.ImpressionThresholds.MAX_IMPRESSION || client.impression + value < Config.ImpressionThresholds.MIN_IMPRESSION) return
+  client.impression += value
+  keyv.set(`${key}`, value)
 }
 
 /**
