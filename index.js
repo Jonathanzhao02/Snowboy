@@ -86,7 +86,7 @@ async function createGuildClient (guild, textChannel, voiceChannel) {
     connection: undefined, // connection to the voice channel
     songQueue: [], // song queue
     loopState: 0, // 0 = no loop, 1 = song loop, 2 = queue loop
-    members: new Map(), // information about guildmembers including id, snowclients, guildmember, and impression with snowboy
+    memberClients: new Map(), // information about guildmembers including id, snowclients, guildmember, and impression with snowboy
     playing: false, // whether a song is currently playing
     downloading: false, // whether a song is currently being downloaded
     guild: guild, // the corresponding guild
@@ -121,7 +121,7 @@ function createMemberClient (member, guildClient) {
   }
 
   guildClient.logger.debug(memberConstruct)
-  guildClient.members.set(member.id, memberConstruct)
+  guildClient.memberClients.set(member.id, memberConstruct)
   return memberConstruct
 }
 
@@ -132,6 +132,7 @@ function createMemberClient (member, guildClient) {
  * @returns {Object} Returns an Object containing all three clients.
  */
 async function getClientsFromMessage (message) {
+  logger.info(`Fetching clients for ${message}`)
   // Create a new userConstruct if the User is not currently tracked, loading settings from database
   let userClient = botClient.userClients.get(message.author.id)
   if (!userClient) userClient = await createUserClient(message.author)
@@ -139,13 +140,45 @@ async function getClientsFromMessage (message) {
   // If message is a DM (no Guild associated), only return the userClient
   if (!message.guild) return { userClient: userClient }
 
-  // Create a new guildClient if the Guild is not currently tracked, loading settings from database
+  // Create a new guildConstruct if the Guild is not currently tracked, loading settings from database
   let guildClient = botClient.guildClients.get(message.guild.id)
   if (!guildClient) guildClient = await createGuildClient(message.guild, message.channel, message.member.voice.channel)
 
-  // Create a new member if the GuildMember is not currently tracked, loading settings from database
-  let memberClient = guildClient.members.get(userClient.id)
+  // Create a new memberConstruct if the GuildMember is not currently tracked, loading settings from database
+  let memberClient = guildClient.memberClients.get(userClient.id)
   if (!memberClient) memberClient = createMemberClient(message.member, guildClient)
+
+  return {
+    userClient: userClient,
+    guildClient: guildClient,
+    memberClient: memberClient
+  }
+}
+
+/**
+ * Gets or creates userClient and memberClient from a GuildMember object.
+ *
+ * Also returns the guildClient, if it exists.
+ *
+ * @param {Discord.GuildMember} member The GuildMember to fetch all information from.
+ * @returns {Object} Returns an Object containing all three clients.
+ */
+async function getClientsFromMember (member) {
+  logger.info(`Fetching clients for ${member}`)
+  // Create a new userConstruct if the User is not currently tracked, loading settings from database
+  let userClient = botClient.userClients.get(member.id)
+  if (!userClient) userClient = await createUserClient(member.user)
+
+  // Check a guildClient exists
+  const guildClient = botClient.guildClients.get(member.guild.id)
+  if (!guildClient) {
+    logger.warn(`No guildClient found for ${member.guild.id}!`)
+    return { userClient: userClient }
+  }
+
+  // Create a new memberConstruct if the GuildMember is not currently tracked, loading settings from database
+  let memberClient = guildClient.memberClients.get(userClient.id)
+  if (!memberClient) memberClient = createMemberClient(member, guildClient)
 
   return {
     userClient: userClient,
@@ -201,25 +234,13 @@ function createAudioStream (member, receiver) {
  */
 async function onSpeaking (member, speaking) {
   if (!member || speaking.equals(0) || member.id === botClient.user.id) return
-  const guildClient = botClient.guildClients.get(member.guild.id)
+  const { userClient, guildClient, memberClient } = getClientsFromMember(member)
   if (!guildClient || member.voice.channelID !== guildClient.voiceChannel.id || !guildClient.settings.voice) return
-  let mmbr = guildClient.members.get(member.id)
-  let userClient = botClient.userClients.get(member.id)
   const childLogger = guildClient.logger
-
-  // If the User is not currently tracked, create a new userConstruct object
-  if (!userClient) {
-    userClient = await createUserClient(member.user)
-  }
-
-  // If the GuildMember is untracked, create a new member object
-  if (!mmbr) {
-    mmbr = createMemberClient(member, guildClient)
-  }
 
   // If the member is not being listened to, create a new SnowClient and process the audio
   // through all necessary streams
-  if (!mmbr.snowClient) {
+  if (!memberClient.snowClient) {
     childLogger.info(`Creating SnowClient for ${member.displayName}`)
     const newClient = new SnowClient(guildClient, userClient.id, userClient.settings.sensitivity)
     newClient.setLogger(childLogger.child({ user: userClient.id }))
@@ -234,7 +255,7 @@ async function onSpeaking (member, speaking) {
         guildClient)
     })
     newClient.start(createAudioStream(member, guildClient.connection.receiver))
-    mmbr.snowClient = newClient
+    memberClient.snowClient = newClient
     childLogger.info(`Successfully created SnowClient for ${member.displayName}`)
   }
 }
@@ -322,7 +343,7 @@ function formatList (list) {
 async function onMessage (msg) {
   // If it is an automated message of some sort, return
   if (msg.author.bot || msg.system) return
-  const { userClient, guildClient, memberClient } = await getClientsFromMessage(msg)
+  const { userClient, guildClient } = await getClientsFromMessage(msg)
 
   // If it is in Snowboy's DMs, log a new bug report and start the 24 hour cooldown.
   if (!guildClient) {
@@ -473,13 +494,13 @@ botClient.on('voiceStateUpdate', (oldPresence, newPresence) => {
     guildClient.logger.info('User has left the voice channel')
 
     // If user is being listened to, stop listening
-    if (guildClient.members.get(userId)) {
+    if (guildClient.memberClients.get(userId)) {
       guildClient.logger.info(`Stopping SnowClient for ${newPresence.member.displayName}`)
-      const snowClient = guildClient.members.get(userId).snowClient
+      const snowClient = guildClient.memberClients.get(userId).snowClient
       if (snowClient) {
         snowClient.stop()
       }
-      guildClient.members.get(userId).snowClient = undefined
+      guildClient.memberClients.get(userId).snowClient = undefined
     }
 
     // If the bot has been disconnected, clean up the guildClient

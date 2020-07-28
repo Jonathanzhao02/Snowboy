@@ -32,7 +32,7 @@ function showMe (guildClient, userClient, args) {
       guildClient.textChannel,
       Embeds.createImageEmbed(
         result,
-        guildClient.members.get(userClient.id).member.displayName
+        guildClient.memberClients.get(userClient.id).member.displayName
       ),
       guildClient
     )

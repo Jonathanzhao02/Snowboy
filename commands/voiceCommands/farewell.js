@@ -15,9 +15,9 @@ function farewell (guildClient, userClient, args) {
   const userVoiceState = voiceStates.find(state => state.id === userClient.id)
   if (userVoiceState) userVoiceState.setChannel(null)
 
-  if (guildClient && guildClient.members.get(userClient.id)) {
-    guildClient.members.get(userClient.id).snowClient.stop()
-    guildClient.members.delete(userClient.id)
+  if (guildClient && guildClient.memberClients.get(userClient.id)) {
+    guildClient.memberClients.get(userClient.id).snowClient.stop()
+    guildClient.memberClients.delete(userClient.id)
     Functions.sendMsg(
       guildClient.textChannel,
       `${Emojis.farewell} **${Responses.farewells[Functions.random(Responses.farewells.length)]},** <@${userClient.id}>!`,

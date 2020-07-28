@@ -39,8 +39,8 @@ function leave (guildClient, userClient, args) {
     guildClient.connection.dispatcher.destroy()
   }
   logger.trace('Cleaning up members')
-  guildClient.members.forEach(member => { if (member.snowClient) member.snowClient.stop() })
-  guildClient.members.clear()
+  guildClient.memberClients.forEach(member => { if (member.snowClient) member.snowClient.stop() })
+  guildClient.memberClients.clear()
   logger.trace('Leaving channel')
   guildClient.voiceChannel.leave()
   guildClient.voiceChannel = undefined

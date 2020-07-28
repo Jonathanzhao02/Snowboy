@@ -8,7 +8,7 @@
 function printMembers (guildClient, userClient, args) {
   const logger = guildClient.logger.child({ user: userClient.id })
   logger.info('Received print members command')
-  console.log(guildClient.members)
+  console.log(guildClient.memberClients)
 }
 
 module.exports = {

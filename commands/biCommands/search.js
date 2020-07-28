@@ -38,7 +38,7 @@ function search (guildClient, userClient, args) {
       guildClient.textChannel,
       Embeds.createSearchEmbed(
         result,
-        guildClient.members.get(userClient.id).member.displayName
+        guildClient.memberClients.get(userClient.id).member.displayName
       ),
       guildClient
     )

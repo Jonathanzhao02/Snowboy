@@ -28,7 +28,7 @@ function setImpression (guildClient, userClient, args) {
     id = mmbr.id
     val = args[1]
   }
-  const member = guildClient.members.get(id)
+  const member = guildClient.memberClients.get(id)
   // Ensures a member is found, and that the value is a number between the maximum and minimum values
   if (!member || isNaN(val) || val > Config.ImpressionThresholds.MAX_IMPRESSION || val < Config.ImpressionThresholds.MIN_IMPRESSION) return
   const usrClient = Common.botClient.userClients.get(id)

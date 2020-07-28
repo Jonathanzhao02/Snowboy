@@ -12,7 +12,7 @@ function rawImpressions (guildClient, userClient, args) {
   const logger = guildClient.logger.child({ user: userClient.id })
   logger.info('Received raw impressions command')
   const response = ['Raw impressions:']
-  guildClient.members.forEach((mmbr, id) => {
+  guildClient.memberClients.forEach((mmbr, id) => {
     const userClient = Common.botClient.userClients.get(id)
     response.push(`    **${mmbr.member.displayName}**: \`${userClient.impression}\``)
   })

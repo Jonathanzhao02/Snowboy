@@ -13,7 +13,7 @@ const Common = require('../../common')
 function rawImpression (guildClient, userClient, args) {
   const logger = guildClient.logger.child({ user: userClient.id })
   logger.info('Received raw impression command')
-  let member = guildClient.members.get(userClient.id).member
+  let member = guildClient.memberClients.get(userClient.id).member
 
   // Finds the member mentioned in the arguments
   if (args[0]) {
@@ -27,7 +27,7 @@ function rawImpression (guildClient, userClient, args) {
       return
     }
     member = mmbr
-    if (!guildClient.members.get(member.id)) {
+    if (!guildClient.memberClients.get(member.id)) {
       Functions.sendMsg(
         guildClient.textChannel,
         `${Emojis.error} ***Could not find data for user \`${args[0]}\`***`,

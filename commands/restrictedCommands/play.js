@@ -72,7 +72,7 @@ function queuedPlay (video, guildClient) {
   })
 
   // Sends a message detailing the currently playing video
-  const mmbr = guildClient.members.get(video.requester)
+  const mmbr = guildClient.memberClients.get(video.requester)
   if (!mmbr) {
     logger.warn(`No user found for ID ${video.requester}!`)
     return
@@ -111,15 +111,15 @@ async function queue (guildClient, userClient, video, query) {
   } else {
     logger.info(`Queued ${video}`)
     if (video.description) {
-      const mmbr = await guildClient.members.get(userClient.id)
-      if (!mmbr) {
+      const memberClient = await guildClient.memberClients.get(userClient.id)
+      if (!memberClient) {
         logger.warn(`No user found for ID ${userClient.id}!`)
         return
       }
       video.channel = `${Emojis.queue} Queued! - ${video.channel}`
       video.position = guildClient.songQueue.length - 1
       Functions.sendMsg(guildClient.textChannel,
-        Embeds.createVideoEmbed(video, mmbr.member.displayName),
+        Embeds.createVideoEmbed(video, memberClient.member.displayName),
         guildClient)
     }
   }
