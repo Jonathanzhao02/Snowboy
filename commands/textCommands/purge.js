@@ -12,14 +12,14 @@ const Discord = require('discord.js')
  * Moreover, it can only delete messages up to 2 weeks old.
  *
  * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {String} userId The ID of the user who requested the command.
+ * @param {Object} userClient The userClient of the user who requested the command.
  * @param {String[]} args Any options sent with the command.
  * @param {Discord.Message} msg The Message the user sent.
  * @param {Number?} total The total number of messages deleted. Passed recursively.
  * @param {String?} snowflake The ID of the latest deleted message. Passed recursively.
  */
-function purge (guildClient, userId, args, msg, total, snowflake) {
-  const logger = guildClient.logger.child({ user: userId })
+function purge (guildClient, userClient, args, msg, total, snowflake) {
+  const logger = guildClient.logger.child({ user: userClient.id })
   // On the first recursion, return if the purging command is already active
   if (guildClient.purging && !total) {
     logger.debug('Received command, but already purging')
@@ -91,14 +91,19 @@ function purge (guildClient, userId, args, msg, total, snowflake) {
       // If deleted messages, continue deleting recursively
       if (deletedMessages.size > 0) {
         logger.debug(`Recursively purging: ${total} messages deleted`)
-        purge(guildClient, userId, args, msg, total, deletedMessages.last().id)
+        purge(guildClient, userClient, args, msg, total, deletedMessages.last().id)
       // If no messages deleted, purge command has finished all it can, return
       } else {
         logger.debug(`Finished purging: ${total} messages deleted`)
         guildClient.purging = false
-        Functions.sendMsg(guildClient.textChannel,
-          `${Emojis.trash} **Deleted \`${total}\` messages ${mmbr ? `from user \`${mmbr.displayName}\`` : ''}!**`,
-          guildClient)
+        Functions.sendMsg(
+          guildClient.textChannel,
+          [
+            `${Emojis.checkmark} **Successfully finished purging, <@${userClient.id}>!**`,
+            `${Emojis.trash} **Deleted \`${total}\` messages ${mmbr ? `from user \`${mmbr.displayName}\`` : ''}!**`
+          ],
+          guildClient
+        )
       }
     })
   })

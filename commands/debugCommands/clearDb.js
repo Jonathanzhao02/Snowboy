@@ -5,16 +5,24 @@ const { Functions } = require('../../bot-util')
  * Clears Snowboy's database completely and shuts the bot down.
  *
  * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {String} userId Unused parameter.
+ * @param {Object} userClient Unused parameter.
  * @param {String[]} args Unused parameter.
  */
-function clearDb (guildClient, userId, args) {
-  const logger = guildClient.logger.child({ user: userId })
+function clearDb (guildClient, userClient, args) {
+  const logger = guildClient.logger.child({ user: userClient.id })
   logger.info('Received clear database command')
   Common.gKeyv.clear()
   Common.uKeyv.clear()
-  Functions.sendMsg(guildClient.textChannel, 'Cleared Database', guildClient).then(() => {
-    Functions.sendMsg(guildClient.textChannel, 'Shutting down Snowboy, restart for database changes to take effect', guildClient).then(() => {
+  Functions.sendMsg(
+    guildClient.textChannel,
+    'Cleared Database',
+    guildClient
+  ).then(() => {
+    Functions.sendMsg(
+      guildClient.textChannel,
+      'Shutting down Snowboy, restart for database changes to take effect',
+      guildClient
+    ).then(() => {
       process.emit('SIGINT')
     })
   })

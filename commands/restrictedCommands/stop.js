@@ -5,15 +5,19 @@ const { Functions } = require('../../bot-util')
  * Stops all song playback and clears the queue.
  *
  * @param {Object} guildClient The guildClient of the server with song playback.
- * @param {String} userId Unused parameter.
+ * @param {Object} userClient Unused parameter.
  * @param {String[]} args Unused parameter.
  */
-function stop (guildClient, userId, args) {
-  const logger = guildClient.logger.child({ user: userId })
+function stop (guildClient, userClient, args) {
+  const logger = guildClient.logger.child({ user: userClient.id })
   logger.info('Received stop command')
   if (!guildClient.playing) {
     logger.debug('Not playing anything')
-    Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Nothing currently playing!***`, guildClient)
+    Functions.sendMsg(
+      guildClient.textChannel,
+      `${Emojis.error} ***Nothing currently playing!***`,
+      guildClient
+    )
     return
   }
   logger.debug('Stopping music')
@@ -21,7 +25,11 @@ function stop (guildClient, userId, args) {
   Functions.playSilence(guildClient)
   guildClient.playing = false
   guildClient.songQueue = []
-  Functions.sendMsg(guildClient.textChannel, `${Emojis.stop} ***Stopped the music***`, guildClient)
+  Functions.sendMsg(
+    guildClient.textChannel,
+    `${Emojis.stop} ***Stopped the music***`,
+    guildClient
+  )
   logger.debug('Successfully stopped music')
 }
 

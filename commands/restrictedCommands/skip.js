@@ -5,19 +5,27 @@ const { Functions } = require('../../bot-util')
  * Skips to the next song in queue by ending the current dispatcher.
  *
  * @param {Object} guildClient The guildClient of the server with song playback.
- * @param {String} userId Unused parameter.
+ * @param {Object} userClient Unused parameter.
  * @param {String[]} args Unused parameter.
  */
-function skip (guildClient, userId, args) {
-  const logger = guildClient.logger.child({ user: userId })
+function skip (guildClient, userClient, args) {
+  const logger = guildClient.logger.child({ user: userClient.id })
   logger.info('Received skip command')
   if (!guildClient.playing) {
     logger.debug('Not playing anything')
-    Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Nothing currently playing!***`, guildClient)
+    Functions.sendMsg(
+      guildClient.textChannel,
+      `${Emojis.error} ***Nothing currently playing!***`,
+      guildClient
+    )
     return
   }
   logger.debug('Skipping song')
-  Functions.sendMsg(guildClient.textChannel, `${Emojis.skip} ***Skipping the current song***`, guildClient)
+  Functions.sendMsg(
+    guildClient.textChannel,
+    `${Emojis.skip} ***Skipping the current song***`,
+    guildClient
+  )
   guildClient.connection.dispatcher.end()
   logger.debug('Successfully skipped song')
 }

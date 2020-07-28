@@ -13,13 +13,12 @@ const Discord = require('discord.js')
  * about the settings, about a certain option, or modify an option.
  *
  * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {String} userId Unused parameter.
+ * @param {Object} userClient The userClient of the user who requested this command.
  * @param {String[]} args The arguments passed with the command.
  * @param {Discord.Message} msg Unused parameter.
  */
-function settings (guildClient, userId, args, msg) {
-  const userClient = Common.botClient.userClients.get(userId)
-  const logger = guildClient.logger.child({ user: userId })
+function settings (guildClient, userClient, args, msg) {
+  const logger = guildClient.logger.child({ user: userClient.id })
   logger.info('Received settings command')
   logger.debug('Received args')
   logger.debug(args)

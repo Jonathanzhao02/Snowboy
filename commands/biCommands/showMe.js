@@ -7,11 +7,11 @@ const Imgsearch = require('g-i-s')
  * Searches up and prints the top result of an image search query.
  *
  * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {String} userId The ID of the user who requested the search.
+ * @param {Object} userClient The userClient of the user who requested the search.
  * @param {String[]} args The search query.
  */
-function showMe (guildClient, userId, args) {
-  const logger = guildClient.logger.child({ user: userId })
+function showMe (guildClient, userClient, args) {
+  const logger = guildClient.logger.child({ user: userClient.id })
   logger.info('Received showme command')
   if (!args || args.length === 0) {
     logger.debug('No query found')
@@ -28,10 +28,14 @@ function showMe (guildClient, userId, args) {
     result.query = query
     logger.debug('Received result')
     logger.debug(result)
-    guildClient.guild.members.fetch(userId)
-      .then(member => {
-        Functions.sendMsg(guildClient.textChannel, Embeds.createImageEmbed(result, member.displayName), guildClient)
-      })
+    Functions.sendMsg(
+      guildClient.textChannel,
+      Embeds.createImageEmbed(
+        result,
+        guildClient.members.get(userClient.id).member.displayName
+      ),
+      guildClient
+    )
   })
 }
 

@@ -5,11 +5,11 @@ const { Functions } = require('../../bot-util')
  * Pauses the current song.
  *
  * @param {Object} guildClient The guildClient of the server with song playback.
- * @param {String} userId Unused parameter.
+ * @param {Object} userClient Unused parameter.
  * @param {String[]} args Unused parameter.
  */
-function pause (guildClient, userId, args) {
-  const logger = guildClient.logger.child({ user: userId })
+function pause (guildClient, userClient, args) {
+  const logger = guildClient.logger.child({ user: userClient.id })
   logger.info('Received pause command')
   if (!guildClient.playing) {
     logger.debug('Not playing anything')

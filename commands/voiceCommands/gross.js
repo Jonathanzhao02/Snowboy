@@ -8,15 +8,24 @@ const Config = require('../../config')
  * Makes Snowboy grossed out.
  *
  * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {String} userId The ID of the user who requested the command.
+ * @param {Object} userClient The userClient of the user who requested the command.
  * @param {String[]} args Unused parameter.
  */
-function gross (guildClient, userId, args) {
-  const logger = guildClient.logger.child({ user: userId })
+function gross (guildClient, userClient, args) {
+  const logger = guildClient.logger.child({ user: userClient.id })
   logger.info('Received gross command')
-  const userClient = Common.botClient.userClients.get(userId)
-  Functions.sendMsg(guildClient.textChannel, `${Emojis.weird} **Not much I can do for you, <@${userId}>**`, guildClient)
-  Functions.updateImpression(Common.uKeyv, userId, userClient, Config.ImpressionValues.GROSS_VALUE, userClient.settings.impressions)
+  Functions.sendMsg(
+    guildClient.textChannel,
+    `${Emojis.weird} **Not much I can do for you, <@${userClient.id}>**`,
+    guildClient
+  )
+  Functions.updateImpression(
+    Common.uKeyv,
+    userClient.id,
+    userClient,
+    Config.ImpressionValues.GROSS_VALUE,
+    userClient.settings.impressions
+  )
 }
 
 module.exports = {

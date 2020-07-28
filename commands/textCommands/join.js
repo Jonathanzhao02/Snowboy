@@ -17,12 +17,12 @@ function connectionHandler (connection, guildClient) {
  * Makes Snowboy join a VoiceChannel.
  *
  * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {String} userId The ID of the user who requested the command.
+ * @param {Object} userClient The userClient of the user who requested the command.
  * @param {String[]} args Unused parameter.
  * @param {Discord.Message} msg The Message the user sent.
  */
-function join (guildClient, userId, args, msg) {
-  const logger = guildClient.logger.child({ user: userId })
+function join (guildClient, userClient, args, msg) {
+  const logger = guildClient.logger.child({ user: userClient.id })
   logger.info('Received join command')
   // If the user is not connected to a VoiceChannel, notify and return
   if (!msg.member.voice.channel) {
@@ -43,7 +43,7 @@ function join (guildClient, userId, args, msg) {
 
   // Greet the user
   Functions.sendMsg(guildClient.textChannel,
-    `${Emojis.greeting} **${Responses.greetings[Functions.random(Responses.greetings.length)]},** <@${userId}>!`,
+    `${Emojis.greeting} **${Responses.greetings[Functions.random(Responses.greetings.length)]},** <@${userClient.id}>!`,
     guildClient)
 
   // Attempt to join and handle the connection, or error

@@ -5,18 +5,20 @@ const { Functions } = require('../../bot-util')
  * Undeafens a user.
  *
  * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {String} userId The ID of the user who requested to undeafen.
+ * @param {Object} userClient The userClient of the user who requested to undeafen.
  * @param {String[]} args Unused parameter.
  */
-function undeafen (guildClient, userId, args) {
-  const logger = guildClient.logger.child({ user: userId })
-  logger.info(`Setting deafen state of ${userId} to \`${false}\``)
+function undeafen (guildClient, userClient, args) {
+  const logger = guildClient.logger.child({ user: userClient.id })
+  logger.info(`Setting deafen state of ${userClient.id} to \`${false}\``)
   const voiceStates = guildClient.textChannel.guild.voiceStates.cache
-  const userVoiceState = voiceStates.find(state => state.id === userId)
+  const userVoiceState = voiceStates.find(state => state.id === userClient.id)
   if (userVoiceState) userVoiceState.setDeaf(false)
-  Functions.sendMsg(guildClient.textChannel,
-    `**${Emojis.unmute} Undeafened <@${userId}>**`,
-    guildClient)
+  Functions.sendMsg(
+    guildClient.textChannel,
+    `**${Emojis.unmute} Undeafened <@${userClient.id}>**`,
+    guildClient
+  )
 }
 
 module.exports = {

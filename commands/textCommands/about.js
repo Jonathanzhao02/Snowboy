@@ -5,14 +5,18 @@ const { Embeds, Functions } = require('../../bot-util')
  * Prints the about embed of Snowboy.
  *
  * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {String} userId Unused parameter.
+ * @param {Object} userClient Unused parameter.
  * @param {String[]} args Unused parameter.
  * @param {Discord.Message} msg Unused parameter.
  */
-function about (guildClient, userId, args, msg) {
-  const logger = guildClient.logger.child({ user: userId })
+function about (guildClient, userClient, args, msg) {
+  const logger = guildClient.logger.child({ user: userClient.id })
   logger.info('Received about command')
-  Functions.sendMsg(guildClient.textChannel, Embeds.createAboutEmbed(Common.botClient), guildClient)
+  Functions.sendMsg(
+    guildClient.textChannel,
+    Embeds.createAboutEmbed(Common.botClient),
+    guildClient
+  )
 }
 
 module.exports = {
