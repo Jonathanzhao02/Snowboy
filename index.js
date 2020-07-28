@@ -48,7 +48,7 @@ Common.setLogger(logger)
 /**
  * Creates a userClient object and updates the userClients map for a User.
  *
- * @param {Discord.User} user The user the userClient is associated with.
+ * @param {Discord.User} user The User the userClient is associated with.
  * @returns {Object} Returns the created userClient.
  */
 async function createUserClient (user) {
@@ -68,6 +68,13 @@ async function createUserClient (user) {
   return userConstruct
 }
 
+/**
+ * Creates a guildClient object and updates the guildClients map for a Guild.
+ *
+ * @param {Discord.Guild} guild The Guild the guildClient is associated with.
+ * @param {Discord.TextChannel} textChannel The TextChannel the guildClient is listening to.
+ * @param {Discord.VoiceChannel} voiceChannel The VoiceChannel the guildClient is interested in.
+ */
 async function createGuildClient (guild, textChannel, voiceChannel) {
   logger.info(`Creating new guild construct for ${guild.name}`)
   const guildConstruct = {
@@ -91,6 +98,7 @@ async function createGuildClient (guild, textChannel, voiceChannel) {
   if (!guildConstruct.settings) guildConstruct.settings = new GuildSettings(guild.id)
   guildConstruct.logger.debug(guildConstruct)
   botClient.guildClients.set(guild.id, guildConstruct)
+  return guildConstruct
 }
 
 /**
@@ -271,7 +279,7 @@ async function onMessage (msg) {
   let guildClient = botClient.guildClients.get(msg.guild.id)
 
   // Create a new guildClient if the Guild is not currently tracked, loading settings from database
-  if (guildClient) {
+  if (!guildClient) {
     guildClient = await createGuildClient(msg.guild, msg.channel, msg.member.voice.channel)
   }
 

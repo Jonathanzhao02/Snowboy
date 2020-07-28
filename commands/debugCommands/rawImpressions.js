@@ -1,6 +1,6 @@
 const { Functions } = require('../../bot-util')
 
-const { botClient } = require('../../common')
+const Common = require('../../common')
 
 /**
  * Prints all the raw impressions of members in a server.
@@ -14,7 +14,7 @@ function rawImpressions (guildClient, userId, args) {
   logger.info('Received raw impressions command')
   const response = ['Raw impressions:']
   guildClient.members.forEach((mmbr, id) => {
-    const userClient = botClient.userClients.get(id)
+    const userClient = Common.botClient.userClients.get(id)
     response.push(`    **${mmbr.member.displayName}**: \`${userClient.impression}\``)
   })
   Functions.sendMsg(guildClient.textChannel, response, guildClient)

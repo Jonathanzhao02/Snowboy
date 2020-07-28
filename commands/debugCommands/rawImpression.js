@@ -1,7 +1,7 @@
 const Emojis = require('../../emojis')
 const { Functions } = require('../../bot-util')
 
-const { botClient } = require('../../common')
+const Common = require('../../common')
 
 /**
  * Prints the raw impression of a user.
@@ -30,7 +30,7 @@ function rawImpression (guildClient, userId, args) {
   }
 
   Functions.sendMsg(guildClient.textChannel,
-    `Raw impression of ${member.displayName}: \`${botClient.userClients.get(member.id).impression}\``,
+    `Raw impression of ${member.displayName}: \`${Common.botClient.userClients.get(member.id).impression}\``,
     guildClient)
 }
 

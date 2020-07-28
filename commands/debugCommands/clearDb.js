@@ -14,8 +14,8 @@ function clearDb (guildClient, userId, args) {
   Common.gKeyv.clear()
   Common.uKeyv.clear()
   Functions.sendMsg(guildClient.textChannel, 'Cleared Database', guildClient).then(() => {
-    Functions.sendMsg(guildClient.textChannel, 'Shutting down Snowboy, restart for changes to take effect', guildClient).then(() => {
-      process.exit(0)
+    Functions.sendMsg(guildClient.textChannel, 'Shutting down Snowboy, restart for database changes to take effect', guildClient).then(() => {
+      process.emit('SIGINT')
     })
   })
 }
