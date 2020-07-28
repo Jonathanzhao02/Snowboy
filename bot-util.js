@@ -348,15 +348,26 @@ async function sendMsg (textChannel, msg, guildClient, opts) {
 }
 
 /**
+ * Starts the timeout for cleanup of a guildClient.
+ *
+ * @param {Object} guildClient The guildClient to begin timing out.
+ */
+function startTimeout (guildClient) {
+  guildClient.logger.info('Starting expiration timer')
+  guildClient.lastCalled = Date.now()
+  if (guildClient.timeoutId) clearTimeout(guildClient.timeoutId)
+  guildClient.timeoutId = setTimeout(() => { cleanupGuildClient(guildClient) }, Config.TIMEOUT + 500)
+}
+
+/**
  * Deletes a guildClient if it has been inactive for a certain amount of time.
  *
  * If the guildClient has an active voice connection, notify through the TextChannel and mark the guildClient
  * for deletion to be handled by the voiceStateUpdate event before leaving the voice channel.
  *
  * @param {Object} guildClient The guildClient to be checked for expiration.
- * @param {Discord.Client} botClient The Client of the active bot.
  */
-function cleanupGuildClient (guildClient, botClient) {
+function cleanupGuildClient (guildClient) {
   if (Date.now() - guildClient.lastCalled >= Config.TIMEOUT) {
     guildClient.logger.debug('Attempting to clean up guildClient')
     // If the guild is currently connected, is not playing music, and has an active TextChannel,
@@ -370,7 +381,7 @@ function cleanupGuildClient (guildClient, botClient) {
       guildClient.voiceChannel.leave()
     } else {
       guildClient.logger.debug('Deleting guildClient')
-      botClient.guildClients.delete(guildClient.guild.id)
+      Common.botClient.guildClients.delete(guildClient.guild.id)
     }
   }
 }
@@ -411,6 +422,7 @@ module.exports = {
     updateImpression: updateImpression,
     findMember: findMember,
     sendMsg: sendMsg,
+    startTimeout: startTimeout,
     cleanupGuildClient: cleanupGuildClient,
     playSilence: playSilence
   }

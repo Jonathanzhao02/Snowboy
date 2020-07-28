@@ -46,7 +46,7 @@ Common.setUKeyv(uKeyv)
 Common.setLogger(logger)
 
 /**
- * Creates a userClient object and updates the userClients map for a User.
+ * Creates a userClient object and updates the userClients map.
  *
  * @param {Discord.User} user The User the userClient is associated with.
  * @returns {Object} Returns the created userClient.
@@ -70,11 +70,12 @@ async function createUserClient (user) {
 }
 
 /**
- * Creates a guildClient object and updates the guildClients map for a Guild.
+ * Creates a guildClient object and updates the guildClients map.
  *
  * @param {Discord.Guild} guild The Guild the guildClient is associated with.
  * @param {Discord.TextChannel} textChannel The TextChannel the guildClient is listening to.
  * @param {Discord.VoiceChannel} voiceChannel The VoiceChannel the guildClient is interested in.
+ * @returns {Object} Returns the created guildClient.
  */
 async function createGuildClient (guild, textChannel, voiceChannel) {
   logger.info(`Creating new guild construct for ${guild.name}`)
@@ -93,6 +94,7 @@ async function createGuildClient (guild, textChannel, voiceChannel) {
     delete: false, // set to true to mark guild for deletion upon disconnect
     purging: false, // whether the purging command is currently active
     settings: await GuildSettings.load(gKeyv, guild.id), // custom settings for the current guild
+    timeoutId: undefined, // the id of the current timeout interval function
     logger: logger.child({ guild: guild.id, name: guild.name }) // pino logger
   }
 
@@ -101,6 +103,64 @@ async function createGuildClient (guild, textChannel, voiceChannel) {
   guildConstruct.logger.debug(guildConstruct)
   botClient.guildClients.set(guild.id, guildConstruct)
   return guildConstruct
+}
+
+/**
+ * Creates a memberClient object and updates the guildClient's member map.
+ *
+ * @param {Discord.GuildMember} member The GuildMember this memberClient is referring to.
+ * @param {Object} guildClient The guildClient this memberClient is assigned to.
+ * @return {Object} Returns the created memberClient.
+ */
+function createMemberClient (member, guildClient) {
+  guildClient.logger.info(`Creating new member construct for ${member.displayName}`)
+  const memberConstruct = {
+    id: member.id,
+    snowClient: undefined,
+    member: member
+  }
+
+  guildClient.logger.debug(memberConstruct)
+  guildClient.members.set(member.id, memberConstruct)
+  return memberConstruct
+}
+
+/**
+ * Creates a processed audio stream listening to a GuildMember.
+ *
+ * Returned stream is formatted 16kHz, mono, 16-bit, little-endian, signed integers.
+ * @param {Discord.GuildMember} member The GuildMember to listen to.
+ * @param {Discord.VoiceReceiver} receiver The receiver to create the connection from.
+ * @returns {ReadableStream} Returns a stream to read audio data from.
+ */
+function createAudioStream (member, receiver) {
+  logger.debug(`Attemting to create audio stream for ${member.displayName} in ${member.guild.id}`)
+  const audioStream = receiver.createStream(member, {
+    mode: 'pcm',
+    end: 'manual'
+  })
+  // Turns from stereo to mono
+  const transformStream = new Streams.TransformStream()
+  // Turns from 48k to 16k
+  const resample = new Resampler({
+    type: 3,
+    channels: 1,
+    fromRate: 48000,
+    fromDepth: 16,
+    toRate: 16000,
+    toDepth: 16
+  })
+
+  // Ensures proper stream cleanup
+  resample.on('close', () => {
+    transformStream.removeAllListeners()
+    audioStream.removeAllListeners()
+    resample.removeAllListeners()
+    transformStream.destroy()
+    audioStream.destroy()
+    resample.destroy()
+  })
+  return audioStream.pipe(transformStream).pipe(resample)
 }
 
 /**
@@ -113,7 +173,7 @@ async function createGuildClient (guild, textChannel, voiceChannel) {
 async function onSpeaking (member, speaking) {
   if (!member || speaking.equals(0) || member.id === botClient.user.id) return
   const guildClient = botClient.guildClients.get(member.guild.id)
-  if (!guildClient || member.voice.channel !== guildClient.voiceChannel || !guildClient.settings.voice) return
+  if (!guildClient || member.voice.channelID !== guildClient.voiceChannel.id || !guildClient.settings.voice) return
   let mmbr = guildClient.members.get(member.id)
   let userClient = botClient.userClients.get(member.id)
   const childLogger = guildClient.logger
@@ -125,46 +185,13 @@ async function onSpeaking (member, speaking) {
 
   // If the GuildMember is untracked, create a new member object
   if (!mmbr) {
-    childLogger.info(`Creating new member construct for ${member.displayName}`)
-    const memberConstruct = {
-      id: userClient.id,
-      snowClient: undefined,
-      member: member
-    }
-
-    childLogger.debug(memberConstruct)
-    guildClient.members.set(userClient.id, memberConstruct)
-    mmbr = memberConstruct
+    mmbr = createMemberClient(member, guildClient)
   }
 
   // If the member is not being listened to, create a new SnowClient and process the audio
   // through all necessary streams
   if (!mmbr.snowClient) {
     childLogger.info(`Creating SnowClient for ${member.displayName}`)
-    const transformStream = new Streams.TransformStream()
-    const resample = new Resampler({
-      type: 3,
-      channels: 1,
-      fromRate: 48000,
-      fromDepth: 16,
-      toRate: 16000,
-      toDepth: 16
-    })
-
-    const audioStream = guildClient.connection.receiver.createStream(member, {
-      mode: 'pcm',
-      end: 'manual'
-    })
-
-    audioStream.pipe(transformStream).pipe(resample)
-    resample.on('close', () => {
-      transformStream.removeAllListeners()
-      audioStream.removeAllListeners()
-      resample.removeAllListeners()
-      transformStream.destroy()
-      audioStream.destroy()
-      resample.destroy()
-    })
     const newClient = new SnowClient(guildClient, userClient.id, userClient.settings.sensitivity)
     newClient.setLogger(childLogger.child({ user: userClient.id }))
     newClient.on('hotword', ack)
@@ -177,7 +204,7 @@ async function onSpeaking (member, speaking) {
         `${Emojis.error} ***Error:*** \`${msg}\``,
         guildClient)
     })
-    newClient.start(resample)
+    newClient.start(createAudioStream(member, guildClient.connection.receiver))
     mmbr.snowClient = newClient
     childLogger.info(`Successfully created SnowClient for ${member.displayName}`)
   }
@@ -258,9 +285,7 @@ async function onMessage (msg) {
 
   // Create a new userConstruct if the User is not currently tracked, loading settings from database
   let userClient = botClient.userClients.get(msg.author.id)
-  if (!userClient) {
-    userClient = await createUserClient(msg.author)
-  }
+  if (!userClient) userClient = await createUserClient(msg.author)
 
   // If it is in Snowboy's DMs, log a new bug report and start the 24 hour cooldown.
   if (msg.channel instanceof Discord.DMChannel) {
@@ -279,9 +304,7 @@ async function onMessage (msg) {
 
   // Create a new guildClient if the Guild is not currently tracked, loading settings from database
   let guildClient = botClient.guildClients.get(msg.guild.id)
-  if (!guildClient) {
-    guildClient = await createGuildClient(msg.guild, msg.channel, msg.member.voice.channel)
-  }
+  if (!guildClient) guildClient = await createGuildClient(msg.guild, msg.channel, msg.member.voice.channel)
 
   // Parse out command name and arguments
   const args = msg.content.slice(guildClient.settings.prefix.length).trim().split(/ +/)
@@ -303,9 +326,12 @@ async function onMessage (msg) {
     return
   }
 
+  // Create a new member if the GuildMember is not currently tracked, loading settings from database
+  if (!guildClient.members.get(userClient.id)) createMemberClient(msg.member, guildClient)
+
   // If Snowboy is currently connected in the guild, and the GuildMember tries to run a restricted command (affects Snowboy's behavior
-  // in the voice channel), notify the GuildMember and return
-  if (msg.channel !== guildClient.textChannel && guildClient.connection && Commands.restrictedCommands.get(commandName)) {
+  // in the voice channel) in another text channel, notify the GuildMember and return
+  if (msg.channel.id !== guildClient.textChannel.id && guildClient.connection && Commands.restrictedCommands.get(commandName)) {
     Functions.sendMsg(msg.channel, `${Emojis.error} ***Sorry, I am not actively listening to this channel!***`, guildClient)
     return
   // If Snowboy is currently connected in the guild, and the GuildMember tries to run a restricted command without being in the active
@@ -313,19 +339,6 @@ async function onMessage (msg) {
   } else if (guildClient.connection && msg.member.voice.channelID !== guildClient.voiceChannel.id && Commands.restrictedCommands.get(commandName)) {
     Functions.sendMsg(msg.channel, `${Emojis.error} ***Sorry, you are not in my voice channel!***`, guildClient)
     return
-  }
-
-  // Create a new member if the GuildMember is not currently tracked, loading settings from database
-  if (!guildClient.members.get(userClient.id)) {
-    guildClient.logger.info(`Creating new member construct for ${msg.member.displayName}`)
-    const memberConstruct = {
-      id: userClient.id, // the user's discord id
-      snowClient: undefined, // the snowclient listening to the member
-      member: msg.member // the guildmember object of the member within the guild
-    }
-
-    guildClient.logger.debug(memberConstruct)
-    guildClient.members.set(userClient.id, memberConstruct)
   }
 
   guildClient.logger.info(`Received ${msg.content}`)
@@ -353,10 +366,7 @@ async function onMessage (msg) {
     Functions.sendMsg(msg.channel, `${Emojis.confused} ***Sorry, I don't understand.***`, guildClient)
   }
 
-  // Start the expiration timer
-  guildClient.logger.info('Starting expiration timer')
-  guildClient.lastCalled = Date.now()
-  setTimeout(() => { Functions.cleanupGuildClient(guildClient, botClient) }, Config.TIMEOUT + 500)
+  Functions.startTimeout(guildClient)
 }
 
 /**
@@ -373,7 +383,7 @@ function parse (result, guildClient, userClient) {
   if (!guildClient || !guildClient.settings.voice) return
   guildClient.logger.info(`Received results: ${result.text}, ${result.intents}`)
 
-  // Checks that the user's voice has been parsed to some degree
+  // Checks that the user's voice has been parsed by Wit.ai
   if (!result || !result.intents || !result.intents[0] || result.intents[0].confidence < Config.CONFIDENCE_THRESHOLD) {
     guildClient.logger.debug('Rejected voice command')
     guildClient.logger.debug(result)
@@ -381,6 +391,7 @@ function parse (result, guildClient, userClient) {
     return
   }
 
+  // Parse out the command intents and queries
   const commandName = result.intents[0].name.toLowerCase()
   const args = result.entities['wit$search_query:search_query'][0].body.toLowerCase().split(' ')
   guildClient.logger.debug(`Understood command as ${commandName} and arguments as ${args}`)
@@ -425,10 +436,7 @@ function ack (index, hotword, guildClient, userClient) {
       userClient.settings.impressions)}**`,
     guildClient)
 
-  // Start the expiration timer
-  guildClient.logger.info('Starting expiration timer')
-  guildClient.lastCalled = Date.now()
-  setTimeout(() => { Functions.cleanupGuildClient(guildClient, botClient) }, Config.TIMEOUT + 500)
+  Functions.startTimeout(guildClient)
 }
 
 // Setting up more callbacks

@@ -1,4 +1,3 @@
-const Common = require('../../common')
 const Emojis = require('../../emojis')
 const { Embeds, Functions } = require('../../bot-util')
 
@@ -25,7 +24,7 @@ function queuedPlay (video, guildClient) {
     guildClient.lastCalled = Date.now()
     logger.debug('Starting expiration timer')
     setTimeout(() => {
-      Functions.cleanupGuildClient(guildClient, Common.botClient)
+      Functions.cleanupGuildClient(guildClient)
     }, Config.TIMEOUT + 500)
     return
   }
