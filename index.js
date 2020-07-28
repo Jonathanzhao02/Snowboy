@@ -126,6 +126,35 @@ function createMemberClient (member, guildClient) {
 }
 
 /**
+ * Gets or creates userClient, guildClient, and memberClient from a Message object.
+ *
+ * @param {Discord.Message} message The Message to fetch all information from.
+ * @returns {Object} Returns an Object containing all three clients.
+ */
+async function getClientsFromMessage (message) {
+  // Create a new userConstruct if the User is not currently tracked, loading settings from database
+  let userClient = botClient.userClients.get(message.author.id)
+  if (!userClient) userClient = await createUserClient(message.author)
+
+  // If message is a DM (no Guild associated), only return the userClient
+  if (!message.guild) return { userClient: userClient }
+
+  // Create a new guildClient if the Guild is not currently tracked, loading settings from database
+  let guildClient = botClient.guildClients.get(message.guild.id)
+  if (!guildClient) guildClient = await createGuildClient(message.guild, message.channel, message.member.voice.channel)
+
+  // Create a new member if the GuildMember is not currently tracked, loading settings from database
+  let memberClient = guildClient.members.get(userClient.id)
+  if (!memberClient) memberClient = createMemberClient(message.member, guildClient)
+
+  return {
+    userClient: userClient,
+    guildClient: guildClient,
+    memberClient: memberClient
+  }
+}
+
+/**
  * Creates a processed audio stream listening to a GuildMember.
  *
  * Returned stream is formatted 16kHz, mono, 16-bit, little-endian, signed integers.
@@ -293,33 +322,16 @@ function formatList (list) {
 async function onMessage (msg) {
   // If it is an automated message of some sort, return
   if (msg.author.bot || msg.system) return
-
-  // Create a new userConstruct if the User is not currently tracked, loading settings from database
-  let userClient = botClient.userClients.get(msg.author.id)
-  if (!userClient) userClient = await createUserClient(msg.author)
+  const { userClient, guildClient, memberClient } = await getClientsFromMessage(msg)
 
   // If it is in Snowboy's DMs, log a new bug report and start the 24 hour cooldown.
-  if (!msg.guild) {
+  if (!guildClient) {
     logBug(msg, userClient)
     return
   }
 
-  // Create a new guildClient if the Guild is not currently tracked, loading settings from database
-  let guildClient = botClient.guildClients.get(msg.guild.id)
-  if (!guildClient) guildClient = await createGuildClient(msg.guild, msg.channel, msg.member.voice.channel)
-
-  // Create a new member if the GuildMember is not currently tracked, loading settings from database
-  if (!guildClient.members.get(userClient.id)) createMemberClient(msg.member, guildClient)
-
-  // Parse out command name and arguments
-  const args = msg.content.slice(guildClient.settings.prefix.length).trim().split(/ +/)
-  const commandName = args.shift().toLowerCase()
-
   // If the message is not a command for Snowboy, return
   if (!msg.content.startsWith(guildClient.settings.prefix)) return
-
-  // If there is no TextChannel associated with the guildClient, associate the current one
-  if (!guildClient.textChannel) guildClient.textChannel = msg.channel
 
   // Check that Snowboy has all necessary permissions in text channel and voice channel
   const missingPermissions = checkPermissions(guildClient)
@@ -330,6 +342,13 @@ async function onMessage (msg) {
     Functions.sendMsg(msg.channel, formatList(missingPermissions), guildClient)
     return
   }
+
+  // If there is no TextChannel associated with the guildClient, associate the current one
+  if (!guildClient.textChannel) guildClient.textChannel = msg.channel
+
+  // Parse out command name and arguments
+  const args = msg.content.slice(guildClient.settings.prefix.length).trim().split(/ +/)
+  const commandName = args.shift().toLowerCase()
 
   // If Snowboy is currently connected in the guild, and the GuildMember tries to run a restricted command (affects Snowboy's behavior
   // in the voice channel) in another text channel, notify the GuildMember and return
@@ -509,6 +528,8 @@ botClient.on('guildCreate', guild => {
 
 // On discord.js error
 botClient.on('error', error => {
+  console.log('CLIENT ERROR: Exiting')
+  console.log(error)
   const promise = new Promise((resolve, reject) => {
     const guilds = Array.from(botClient.guildClients)
     guilds.forEach((guildClient, index, array) => {
@@ -528,7 +549,6 @@ botClient.on('error', error => {
   promise.then(() => Heapdump.writeSnapshot(`./logs/${new Date().toISOString()}_CLI.heapdump`, (err, filename) => {
     logger.error('Client exception')
     logger.error(error)
-    console.log(error)
     if (err) process.exit(1)
     logger.debug(`Heapdump written to ${filename}`)
     botClient.destroy()
@@ -538,10 +558,11 @@ botClient.on('error', error => {
 
 // On uncaught exception
 process.on('uncaughtException', error => {
+  console.log('UNCAUGHT EXCEPTION: Exiting')
+  console.log(error)
   Heapdump.writeSnapshot(`./logs/${new Date().toISOString()}_ERR.heapdump`, (err, filename) => {
     logger.error('Uncaught exception')
     logger.error(error)
-    console.log(error)
     botClient.destroy()
     if (err) process.exit(1)
     logger.debug(`Heapdump written to ${filename}`)
@@ -551,11 +572,13 @@ process.on('uncaughtException', error => {
 
 // On unhandled promise rejection
 process.on('unhandledRejection', (error, promise) => {
+  console.log('UNHANDLED REJECTION: Exiting')
+  console.log(error)
+  console.log(promise)
   Heapdump.writeSnapshot(`./logs/${new Date().toISOString()}_REJ.heapdump`, (err, filename) => {
     logger.error('Unhandled promise rejection')
     logger.error(promise)
     logger.error(error)
-    console.log(error)
     botClient.destroy()
     if (err) process.exit(1)
     logger.debug(`Heapdump written to ${filename}`)
@@ -565,6 +588,7 @@ process.on('unhandledRejection', (error, promise) => {
 
 // On process termination (exits normally)
 process.on('SIGTERM', signal => {
+  console.log('Received SIGTERM signal')
   logger.info(`Process ${process.pid} received a SIGTERM signal`)
   botClient.destroy()
   process.exit(0)
@@ -572,6 +596,7 @@ process.on('SIGTERM', signal => {
 
 // On process interrupt
 process.on('SIGINT', signal => {
+  console.log('Received SIGINT signal')
   logger.info(`Process ${process.pid} has been interrupted`)
   const promise = new Promise((resolve, reject) => {
     const guilds = Array.from(botClient.guildClients)
