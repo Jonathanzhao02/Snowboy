@@ -4,28 +4,25 @@ const { Functions } = require('../../bot-util')
 /**
  * Resumes the current song.
  *
- * @param {Object} guildClient The guildClient of the server with song playback.
- * @param {Object} userClient Unused parameter.
+ * @param {Object} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
  */
-function resume (guildClient, userClient, args) {
-  const logger = guildClient.logger.child({ user: userClient.id })
+function resume (memberClient, args) {
+  const logger = memberClient.logger
   logger.info('Received resume command')
-  if (!guildClient.playing) {
+  if (!memberClient.guildClient.playing) {
     logger.debug('Not playing anything')
     Functions.sendMsg(
-      guildClient.textChannel,
-      `${Emojis.error} ***Nothing currently playing!***`,
-      guildClient
+      memberClient.guildClient.textChannel,
+      `${Emojis.error} ***Nothing currently playing!***`
     )
     return
   }
   logger.debug('Resuming music')
-  guildClient.connection.dispatcher.resume()
+  memberClient.guildClient.connection.dispatcher.resume()
   Functions.sendMsg(
-    guildClient.textChannel,
-    `${Emojis.playing} **Resuming!**`,
-    guildClient
+    memberClient.guildClient.textChannel,
+    `${Emojis.playing} **Resuming!**`
   )
   logger.debug('Successfully resumed music')
 }

@@ -5,28 +5,36 @@ const { Responses, Functions } = require('../../bot-util')
 /**
  * Leaves the VoiceChannel.
  *
- * @param {Object} guildClient The guildClient of the server.
- * @param {Object?} userClient The userClient of the user who requested Snowboy to leave.
+ * @param {Object} client The client who requested this command. (could be guildClient or memberClient)
  * @param {String[]} args Unused parameter.
  */
-function leave (guildClient, userClient, args) {
-  const logger = userClient ? guildClient.logger.child({ user: userClient.id }) : guildClient.logger
-  if (!guildClient) {
-    Common.logger.warn('Attempted to leave, but no guildClient found')
+function leave (client, args) {
+  if (!client) {
+    Common.logger.warn('Attempted to leave, but no client found!')
     return
   }
+  const logger = client.logger
   logger.info('Received leave command')
 
-  if (userClient) {
+  // Gets the guildClient from the passed in client
+  const guildClient = client.guildClient ? client.guildClient : client
+
+  // If the passed object is a memberClient
+  if (client.member) {
     if (!guildClient.connection) {
       logger.debug('Not connected')
-      Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***I am not connected to a voice channel!***`, guildClient)
+      Functions.sendMsg(
+        guildClient.textChannel,
+        `${Emojis.error} ***I am not connected to a voice channel!***`
+      )
       return
     }
 
-    Functions.sendMsg(guildClient.textChannel,
-      `${Emojis.farewell} **${Responses.farewells[Functions.random(Responses.farewells.length)]},** <@${userClient.id}>!`,
-      guildClient)
+    Functions.sendMsg(
+      guildClient.textChannel,
+      `${Emojis.farewell} **${Responses.farewells[Functions.random(Responses.farewells.length)]},** <@${client.id}>!`,
+      guildClient.settings.mentions
+    )
   }
 
   logger.debug('Leaving')

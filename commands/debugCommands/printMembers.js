@@ -1,15 +1,14 @@
 /**
  * Prints the members map to console.
  *
- * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {Object} userClient Unused parameter.
+ * @param {Object} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
  * @param {Discord.Message} msg Unused parameter.
  */
-function printMembers (guildClient, userClient, args, msg) {
-  const logger = guildClient.logger.child({ user: userClient.id })
+function printMembers (memberClient, args, msg) {
+  const logger = memberClient.logger
   logger.info('Received print members command')
-  console.log(guildClient.memberClients)
+  console.log(memberClient.guildClient.memberClients)
 }
 
 module.exports = {

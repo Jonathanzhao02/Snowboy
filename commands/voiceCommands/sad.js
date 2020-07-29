@@ -7,23 +7,23 @@ const Config = require('../../config')
 /**
  * Makes Snowboy sad.
  *
- * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {Object} userClient The userClient of the user who requested the command.
+ * @param {Object} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
  */
-function insult (guildClient, userClient, args) {
-  const logger = guildClient.logger.child({ user: userClient.id })
+function insult (memberClient, args) {
+  const logger = memberClient.logger
   logger.info('Received insult command')
   Functions.sendMsg(
-    guildClient.textChannel,
+    memberClient.guildClient.textChannel,
     `${Emojis.sad} *Okay...*`,
-    guildClient
+    memberClient.guildClient
   )
   Functions.updateImpression(
     Common.uKeyv,
-    userClient.id, userClient,
+    memberClient.id,
+    memberClient.userClient,
     Config.ImpressionValues.SAD_VALUE,
-    userClient.settings.impressions
+    memberClient.userClient.settings.impressions
   )
 }
 

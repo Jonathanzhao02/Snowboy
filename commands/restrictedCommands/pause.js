@@ -4,21 +4,26 @@ const { Functions } = require('../../bot-util')
 /**
  * Pauses the current song.
  *
- * @param {Object} guildClient The guildClient of the server with song playback.
- * @param {Object} userClient Unused parameter.
+ * @param {Object} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
  */
-function pause (guildClient, userClient, args) {
-  const logger = guildClient.logger.child({ user: userClient.id })
+function pause (memberClient, args) {
+  const logger = memberClient.logger
   logger.info('Received pause command')
-  if (!guildClient.playing) {
+  if (!memberClient.guildClient.playing) {
     logger.debug('Not playing anything')
-    Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Nothing currently playing!***`, guildClient)
+    Functions.sendMsg(
+      memberClient.guildClient.textChannel,
+      `${Emojis.error} ***Nothing currently playing!***`
+    )
     return
   }
   logger.debug('Pausing music')
-  guildClient.connection.dispatcher.pause()
-  Functions.sendMsg(guildClient.textChannel, `${Emojis.pause} ***Paused the music***`, guildClient)
+  memberClient.guildClient.connection.dispatcher.pause()
+  Functions.sendMsg(
+    memberClient.guildClient.textChannel,
+    `${Emojis.pause} ***Paused the music***`
+  )
   logger.debug('Successfully paused music')
 }
 

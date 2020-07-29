@@ -4,27 +4,32 @@ const { Functions } = require('../../bot-util')
 /**
  * Loops or stops looping current song queue.
  *
- * @param {Object} guildClient The guildClient of the server with song playback.
- * @param {Object} userClient Unused parameter.
+ * @param {Object} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
  */
-function loopQueue (guildClient, userClient, args) {
-  const logger = guildClient.logger.child({ user: userClient.id })
+function loopQueue (memberClient, args) {
+  const logger = memberClient.logger
   logger.info('Received loopqueue command')
-  if (!guildClient.playing) {
+  if (!memberClient.guildClient.playing) {
     logger.debug('Not playing anything')
-    Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Nothing currently playing!***`, guildClient)
+    Functions.sendMsg(
+      memberClient.guildClient.textChannel,
+      `${Emojis.error} ***Nothing currently playing!***`
+    )
     return
   }
-  if (guildClient.loopState === 2) {
+  if (memberClient.guildClient.loopState === 2) {
     logger.debug('Stopping queue loop')
-    guildClient.loopState = 0
-    Functions.sendMsg(guildClient.textChannel, `${Emojis.loop} **No longer looping the queue!**`, guildClient)
+    memberClient.guildClient.loopState = 0
   } else {
     logger.debug('Looping queue')
-    guildClient.loopState = 2
-    Functions.sendMsg(guildClient.textChannel, `${Emojis.loop} **Now looping the queue!**`, guildClient)
+    memberClient.guildClient.loopState = 2
   }
+
+  Functions.sendMsg(
+    memberClient.guildClient.textChannel,
+    `${Emojis.loop} **${memberClient.guildClient.loopState === 0 ? 'No longer' : 'Now'} looping the song!**`
+  )
 }
 
 module.exports = {

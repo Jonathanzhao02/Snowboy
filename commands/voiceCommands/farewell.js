@@ -4,26 +4,25 @@ const { Responses, Functions } = require('../../bot-util')
 /**
  * Disconnects and says goodbye to a user.
  *
- * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {Object} userClient The userClient of the user who requested the command.
+ * @param {Object} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
  */
-function farewell (guildClient, userClient, args) {
-  const logger = guildClient.logger.child({ user: userClient.id })
+function farewell (memberClient, args) {
+  const logger = memberClient.logger
   logger.info('Received farewell command')
-  const userVoiceState = guildClient.memberClients.get(userClient.id).member.voice
+  const userVoiceState = memberClient.member.voice
   if (userVoiceState) userVoiceState.setChannel(null)
 
-  if (guildClient && guildClient.memberClients.get(userClient.id)) {
-    guildClient.memberClients.get(userClient.id).snowClient.stop()
-    guildClient.memberClients.delete(userClient.id)
+  if (memberClient.guildClient) {
+    memberClient.snowClient.stop()
+    memberClient.guildClient.memberClients.delete(memberClient.id)
     Functions.sendMsg(
-      guildClient.textChannel,
-      `${Emojis.farewell} **${Responses.farewells[Functions.random(Responses.farewells.length)]},** <@${userClient.id}>!`,
-      guildClient
+      memberClient.guildClient.textChannel,
+      `${Emojis.farewell} **${Responses.farewells[Functions.random(Responses.farewells.length)]},** <@${memberClient.id}>!`,
+      memberClient.guildClient.settings.mentions
     )
   } else {
-    logger.warn(`No member construct found for ${userClient.id}`)
+    logger.warn('No guildClient found!')
   }
 }
 

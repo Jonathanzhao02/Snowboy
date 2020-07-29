@@ -115,9 +115,12 @@ async function createGuildClient (guild, textChannel, voiceChannel) {
 function createMemberClient (member, guildClient) {
   guildClient.logger.info(`Creating new member construct for ${member.displayName}`)
   const memberConstruct = {
-    id: member.id,
-    snowClient: undefined,
-    member: member
+    id: member.id, // the id of the member associated with this memberClient
+    snowClient: undefined, // the SnowClient listening to the member of this memberClient
+    member: member, // the GuildMember object of the member associated with this memberClient
+    userClient: botClient.userClients.get(member.id), // the userClient associated with this member
+    guildClient: guildClient, // the guildClient associated with this member
+    logger: guildClient.logger.child({ userId: member.id }) // the logger to be used for this memberClient
   }
 
   guildClient.logger.debug(memberConstruct)
@@ -242,17 +245,20 @@ async function onSpeaking (member, speaking) {
   // through all necessary streams
   if (!memberClient.snowClient) {
     childLogger.info(`Creating SnowClient for ${member.displayName}`)
-    const newClient = new SnowClient(guildClient, userClient.id, userClient.settings.sensitivity)
-    newClient.setLogger(childLogger.child({ user: userClient.id }))
+    const newClient = new SnowClient(memberClient, userClient.settings.sensitivity)
+    newClient.setLogger(memberClient.logger)
     newClient.on('hotword', ack)
     newClient.on('result', parse)
-    newClient.on('busy', (guildClient, userClient) => Functions.sendMsg(guildClient.textChannel,
+    newClient.on('busy', (guildClient, userClient) => Functions.sendMsg(
+      guildClient.textChannel,
       `***I'm still working on your last request, <@${userClient.id}>!***`,
-      guildClient))
+      guildClient.settings.mentions
+    ))
     newClient.on('error', msg => {
-      Functions.sendMsg(guildClient.textChannel,
-        `${Emojis.error} ***Error:*** \`${msg}\``,
-        guildClient)
+      Functions.sendMsg(
+        guildClient.textChannel,
+        `${Emojis.error} ***Error:*** \`${msg}\``
+      )
     })
     newClient.start(createAudioStream(member, guildClient.connection.receiver))
     memberClient.snowClient = newClient
@@ -271,7 +277,9 @@ function logBug (msg, userClient) {
   logger.info(`Received message in DM: ${msg}`)
   if (Date.now() - userClient.lastReport < 86400000) {
     logger.info(`Rejected bug report from ${msg.author.username}`)
-    Functions.sendMsg(msg.channel, '**Please only send a bug report every 24 hours!**')
+    Functions.sendMsg(
+      msg.channel, '**Please only send a bug report every 24 hours!**'
+    )
   } else {
     logger.info(`Accepting bug report from ${msg.author.username}`)
     userClient.lastReport = Date.now()
@@ -281,7 +289,10 @@ function logBug (msg, userClient) {
     file.write('\n')
     file.write(`${msg.author.username}#${msg.author.discriminator}`)
     file.close()
-    Functions.sendMsg(msg.channel, '***Logged.*** **Thank you for your submission!**')
+    Functions.sendMsg(
+      msg.channel,
+      '***Logged.*** **Thank you for your submission!**'
+    )
   }
 }
 
@@ -342,7 +353,7 @@ function formatList (list) {
 async function onMessage (msg) {
   // If it is an automated message of some sort, return
   if (msg.author.bot || msg.system) return
-  const { userClient, guildClient } = await createClientsFromMessage(msg)
+  const { userClient, guildClient, memberClient } = await createClientsFromMessage(msg)
 
   // If it is in Snowboy's DMs, log a new bug report and start the 24 hour cooldown.
   if (!guildClient) {
@@ -356,10 +367,14 @@ async function onMessage (msg) {
   // Check that Snowboy has all necessary permissions in text channel and voice channel
   const missingPermissions = checkPermissions(guildClient)
   if (missingPermissions) {
-    Functions.sendMsg(msg.channel,
-      `${Emojis.error} ***Please ensure I have all the following permissions! I won't completely work otherwise!***`,
-      guildClient)
-    Functions.sendMsg(msg.channel, formatList(missingPermissions), guildClient)
+    Functions.sendMsg(
+      msg.channel,
+      `${Emojis.error} ***Please ensure I have all the following permissions! I won't completely work otherwise!***`
+    )
+    Functions.sendMsg(
+      msg.channel,
+      formatList(missingPermissions)
+    )
     return
   }
 
@@ -376,35 +391,47 @@ async function onMessage (msg) {
   // If the Guild is sending commands too fast, notify and return
   if (msg.createdAt.getTime() - guildClient.lastCalled < 1000) {
     guildClient.logger.info('Rejecting message, too fast')
-    Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Please only send one command a second!***`, guildClient)
+    Functions.sendMsg(
+      guildClient.textChannel,
+      `${Emojis.error} ***Please only send one command a second!***`
+    )
     return
   }
 
   // If Snowboy is currently connected in the guild, and the GuildMember tries to run a restricted command (affects Snowboy's behavior
   // in the voice channel) in another text channel, notify the GuildMember and return
   if (msg.channel.id !== guildClient.textChannel.id && guildClient.connection && Commands.restrictedCommands.get(commandName)) {
-    Functions.sendMsg(msg.channel, `${Emojis.error} ***Sorry, I am not actively listening to this channel!***`, guildClient)
+    Functions.sendMsg(
+      msg.channel,
+      `${Emojis.error} ***Sorry, I am not actively listening to this channel!***`
+    )
     return
   // If Snowboy is currently connected in the guild, and the GuildMember tries to run a restricted command without being in the active
   // voice channel, notify the GuildMember and return
   } else if (guildClient.connection && msg.member.voice.channelID !== guildClient.voiceChannel.id && Commands.restrictedCommands.get(commandName)) {
-    Functions.sendMsg(msg.channel, `${Emojis.error} ***Sorry, you are not in my voice channel!***`, guildClient)
+    Functions.sendMsg(
+      msg.channel,
+      `${Emojis.error} ***Sorry, you are not in my voice channel!***`
+    )
     return
   }
 
   // Check all relevant command maps for the current command name, and execute it
   if (Commands.biCommands.get(commandName)) {
-    Commands.biCommands.get(commandName).execute(guildClient, userClient, args)
+    Commands.biCommands.get(commandName).execute(memberClient, args)
   } else if (Commands.restrictedCommands.get(commandName)) {
-    Commands.restrictedCommands.get(commandName).execute(guildClient, userClient, args)
+    Commands.restrictedCommands.get(commandName).execute(memberClient, args)
   } else if (Commands.textOnlyCommands.get(commandName)) {
-    Commands.textOnlyCommands.get(commandName).execute(guildClient, userClient, args, msg)
-  } else if (Config.DEBUG_IDS.includes(userClient.id) && Commands.debugCommands.get(commandName)) {
-    Commands.debugCommands.get(commandName).execute(guildClient, userClient, args, msg)
+    Commands.textOnlyCommands.get(commandName).execute(memberClient, args, msg)
+  } else if (Config.DEBUG_IDS.includes(memberClient.id) && Commands.debugCommands.get(commandName)) {
+    Commands.debugCommands.get(commandName).execute(memberClient, args, msg)
   } else if (Commands.eastereggCommands.get(commandName)) {
-    Commands.eastereggCommands.get(commandName).execute(guildClient, userClient, args)
+    Commands.eastereggCommands.get(commandName).execute(memberClient, args)
   } else {
-    Functions.sendMsg(msg.channel, `${Emojis.confused} ***Sorry, I don't understand.***`, guildClient)
+    Functions.sendMsg(
+      msg.channel,
+      `${Emojis.confused} ***Sorry, I don't understand.***`
+    )
   }
 
   Functions.startTimeout(guildClient)
@@ -417,42 +444,43 @@ async function onMessage (msg) {
  * Wit to available commands.
  *
  * @param {Object} result The JSON object returned by Wit.
- * @param {Object} guildClient The guildClient handling this server.
- * @param {String} userClient The userClient of the speaker.
+ * @param {Object} memberClient The memberClient of the member triggered the hotword.
  */
-function parse (result, guildClient, userClient) {
-  if (!guildClient || !guildClient.settings.voice) return
-  guildClient.logger.info(`Received results: ${result.text}, ${result.intents}`)
+function parse (result, memberClient) {
+  if (!memberClient || !memberClient.guildClient.settings.voice) return
+  memberClient.logger.info(`Received results: ${result.text}, ${result.intents}`)
 
   // Checks that the user's voice has been parsed by Wit.ai
   if (!result || !result.intents || !result.intents[0] || result.intents[0].confidence < Config.CONFIDENCE_THRESHOLD) {
-    guildClient.logger.debug('Rejected voice command')
-    guildClient.logger.debug(result)
-    Functions.sendMsg(guildClient.textChannel, `${Emojis.unknown} ***Sorry, I didn't catch that...***`, guildClient)
+    memberClient.logger.debug('Rejected voice command')
+    memberClient.logger.debug(result)
+    Functions.sendMsg(
+      memberClient.guildClient.textChannel,
+      `${Emojis.unknown} ***Sorry, I didn't catch that...***`
+    )
     return
   }
 
   // Parse out the command intents and queries
   const commandName = result.intents[0].name.toLowerCase()
   const args = result.entities['wit$search_query:search_query'][0].body.toLowerCase().split(' ')
-  guildClient.logger.debug(`Understood command as ${commandName} and arguments as ${args}`)
+  memberClient.logger.debug(`Understood command as ${commandName} and arguments as ${args}`)
 
   // Checks all relevant command maps
   if (Commands.biCommands.get(commandName)) {
-    Commands.biCommands.get(commandName).execute(guildClient, userClient, args)
+    Commands.biCommands.get(commandName).execute(memberClient, args)
   } else if (Commands.restrictedCommands.get(commandName)) {
-    Commands.restrictedCommands.get(commandName).execute(guildClient, userClient, args)
+    Commands.restrictedCommands.get(commandName).execute(memberClient, args)
   } else if (Commands.voiceOnlyCommands.get(commandName)) {
-    Commands.voiceOnlyCommands.get(commandName).execute(guildClient, userClient, args)
+    Commands.voiceOnlyCommands.get(commandName).execute(memberClient, args)
   } else if (Commands.eastereggCommands.get(commandName)) {
-    Commands.eastereggCommands.get(commandName).execute(guildClient, userClient, args)
+    Commands.eastereggCommands.get(commandName).execute(memberClient, args)
   } else {
     Functions.sendMsg(
-      guildClient.textChannel,
-      `${Emojis.confused} ***Sorry, I don't understand*** "\`${result.text}\`"`,
-      guildClient
+      memberClient.guildClient.textChannel,
+      `${Emojis.confused} ***Sorry, I don't understand*** "\`${result.text}\`"`
     )
-    guildClient.logger.warn(`No command found for ${commandName}!`)
+    memberClient.logger.warn(`No command found for ${commandName}!`)
   }
 }
 
@@ -464,20 +492,21 @@ function parse (result, guildClient, userClient) {
  *
  * @param {Number} index The index of the detected hotword in the model. Always 0.
  * @param {String} hotword The detected hotword. Always 'snowboy'.
- * @param {Object} guildClient The guildClient handling this server.
- * @param {String} userClient The userClient of the speaker.
+ * @param {Object} memberClient The memberClient of the member who triggered the hotword.
  */
-function ack (index, hotword, guildClient, userClient) {
-  if (!guildClient.connection) return
-  guildClient.logger.info(`Received hotword from ${userClient.id}`)
-  Functions.sendMsg(guildClient.textChannel,
+function ack (index, hotword, memberClient) {
+  if (!memberClient.guildClient.connection) return
+  memberClient.logger.info('Received hotword from')
+  Functions.sendMsg(
+    memberClient.guildClient.textChannel,
     `**${Responses.getResponse('hotword',
-      userClient.impression,
-      [`<@${userClient.id}>`],
-      userClient.settings.impressions)}**`,
-    guildClient)
+      memberClient.userClient.impression,
+      [`<@${memberClient.id}>`],
+      memberClient.userClient.settings.impressions)}**`,
+    memberClient.guildClient.settings.mentions
+  )
 
-  Functions.startTimeout(guildClient)
+  Functions.startTimeout(memberClient.guildClient)
 }
 
 // Setting up more callbacks
@@ -515,7 +544,10 @@ botClient.on('voiceStateUpdate', (oldPresence, newPresence) => {
         // Check again that the channel is empty before leaving
         if (oldPresence.channel.members.size === 1) {
           guildClient.logger.info('Leaving channel, only member remaining')
-          Functions.sendMsg(guildClient.textChannel, `${Emojis.sad} I'm leaving, I'm all by myself!`, guildClient)
+          Functions.sendMsg(
+            guildClient.textChannel,
+            `${Emojis.sad} I'm leaving, I'm all by myself!`
+          )
           Commands.restrictedCommands.get('leave').execute(guildClient)
         }
       }, Config.ALONE_TIMEOUT + 500)
@@ -556,8 +588,7 @@ botClient.on('error', error => {
       guildClient[1].logger.debug('Sending error message')
       Functions.sendMsg(
         guildClient[1].textChannel,
-        `${Emojis.skull} ***Sorry, I ran into some fatal error. Hopefully I come back soon!***`,
-        guildClient[1]
+        `${Emojis.skull} ***Sorry, I ran into some fatal error. Hopefully I come back soon!***`
       ).then(() => {
         if (index === array.length - 1) resolve()
       })
@@ -624,8 +655,7 @@ process.on('SIGINT', signal => {
       if (guildClient[1]) guildClient[1].logger.debug('Sending interrupt message')
       Functions.sendMsg(
         guildClient[1].textChannel,
-        `${Emojis.joyful} ***Sorry, I'm going down for updates and maintenance! See you soon!***`,
-        guildClient[1]
+        `${Emojis.joyful} ***Sorry, I'm going down for updates and maintenance! See you soon!***`
       ).then(() => {
         if (index === array.length - 1) resolve()
       })

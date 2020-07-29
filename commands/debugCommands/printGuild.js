@@ -1,15 +1,14 @@
 /**
  * Prints a guildClient to console.
  *
- * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {Object} userClient Unused parameter.
+ * @param {Object} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
  * @param {Discord.Message} msg Unused parameter.
  */
-function printGuild (guildClient, userClient, args, msg) {
-  const logger = guildClient.logger.child({ user: userClient.id })
+function printGuild (memberClient, args, msg) {
+  const logger = memberClient.logger
   logger.info('Received print guild command')
-  console.log(guildClient)
+  console.log(memberClient.guildClient)
 }
 
 module.exports = {

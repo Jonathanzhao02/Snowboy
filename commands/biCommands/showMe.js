@@ -6,21 +6,26 @@ const Imgsearch = require('g-i-s')
 /**
  * Searches up and prints the top result of an image search query.
  *
- * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {Object} userClient The userClient of the user who requested the search.
+ * @param {Object} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args The search query.
  */
-function showMe (guildClient, userClient, args) {
-  const logger = guildClient.logger.child({ user: userClient.id })
+function showMe (memberClient, args) {
+  const logger = memberClient.logger
   logger.info('Received showme command')
   if (!args || args.length === 0) {
     logger.debug('No query found')
-    Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***I need something to search up!***`, guildClient)
+    Functions.sendMsg(
+      memberClient.guildClient.textChannel,
+      `${Emojis.error} ***I need something to search up!***`
+    )
     return
   }
 
   const query = args.join(' ')
-  Functions.sendMsg(guildClient.textChannel, `${Emojis.search} ***Searching*** \`${query}\``, guildClient)
+  Functions.sendMsg(
+    memberClient.guildClient.textChannel,
+    `${Emojis.search} ***Searching*** \`${query}\``
+  )
   logger.debug(`Searching up ${query}`)
   Imgsearch(query, (error, results) => {
     if (error) throw error
@@ -29,12 +34,11 @@ function showMe (guildClient, userClient, args) {
     logger.debug('Received result')
     logger.debug(result)
     Functions.sendMsg(
-      guildClient.textChannel,
+      memberClient.guildClient.textChannel,
       Embeds.createImageEmbed(
         result,
-        guildClient.memberClients.get(userClient.id).member.displayName
-      ),
-      guildClient
+        memberClient.member.displayName
+      )
     )
   })
 }

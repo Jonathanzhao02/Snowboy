@@ -6,16 +6,15 @@ const Config = require('../../config')
 /**
  * Sets the impression of a member.
  *
- * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {Object} userClient The userClient of the user who requested the command.
+ * @param {Object} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args The arguments passed with the command.
  * @param {Discord.Message} msg The sent Message that may contain mentions.
  */
-function setImpression (guildClient, userClient, args, msg) {
-  const logger = guildClient.logger.child({ user: userClient.id })
+function setImpression (memberClient, args, msg) {
+  const logger = memberClient.logger
   logger.info('Received set impression command')
   let val = args[0]
-  let id = userClient.id
+  let id = memberClient.id
   // If insufficient arguments, return
   if (args.length === 0 || args.length >= 3) return
   // If passed in 2 arguments, sets the mentioned user's impression to a value
@@ -24,12 +23,14 @@ function setImpression (guildClient, userClient, args, msg) {
     id = member.id
     val = args[1]
   }
-  const memberClient = guildClient.memberClients.get(id)
+  memberClient = memberClient.guildClient.memberClients.get(id)
   // Ensures a member is found, and that the value is a number between the maximum and minimum values
   if (!memberClient || isNaN(val) || val > Config.ImpressionThresholds.MAX_IMPRESSION || val < Config.ImpressionThresholds.MIN_IMPRESSION) return
-  const usrClient = Common.botClient.userClients.get(id)
-  Functions.updateImpression(Common.uKeyv, id, usrClient, val - usrClient.impression)
-  Functions.sendMsg(guildClient.textChannel, `Set impression of \`${memberClient.member.displayName}\` to \`${val}\``, guildClient)
+  Functions.updateImpression(Common.uKeyv, id, memberClient.userClient, val - memberClient.userClient.impression)
+  Functions.sendMsg(
+    memberClient.guildClient.textChannel,
+    `Set impression of \`${memberClient.member.displayName}\` to \`${val}\``
+  )
 }
 
 module.exports = {

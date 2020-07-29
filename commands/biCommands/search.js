@@ -6,28 +6,25 @@ const Gsearch = require('../../web_apis/gsearch')
 /**
  * Searches up and prints the top result of a search query.
  *
- * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {Object} userClient The userClient of the user who requested the search.
+ * @param {Object} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args The search query.
  */
-function search (guildClient, userClient, args) {
-  const logger = guildClient.logger.child({ user: userClient.id })
+function search (memberClient, args) {
+  const logger = memberClient.logger
   logger.info('Received search command')
   if (!args || args.length === 0) {
     logger.debug('No query found')
     Functions.sendMsg(
-      guildClient.textChannel,
-      `${Emojis.error} ***I need something to search up!***`,
-      guildClient
+      memberClient.guildClient.textChannel,
+      `${Emojis.error} ***I need something to search up!***`
     )
     return
   }
 
   const query = args.join(' ')
   Functions.sendMsg(
-    guildClient.textChannel,
-    `${Emojis.search} ***Searching*** \`${query}\``,
-    guildClient
+    memberClient.guildClient.textChannel,
+    `${Emojis.search} ***Searching*** \`${query}\``
   )
 
   logger.debug(`Searching up ${query}`)
@@ -35,12 +32,11 @@ function search (guildClient, userClient, args) {
     logger.debug('Received result')
     logger.debug(result)
     Functions.sendMsg(
-      guildClient.textChannel,
+      memberClient.guildClient.textChannel,
       Embeds.createSearchEmbed(
         result,
-        guildClient.memberClients.get(userClient.id).member.displayName
-      ),
-      guildClient
+        memberClient.member.displayName
+      )
     )
   })
 }

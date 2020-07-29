@@ -1,30 +1,28 @@
 const Common = require('../../common')
 const Emojis = require('../../emojis')
 const { Responses, Functions } = require('../../bot-util')
-
 const Config = require('../../config')
 
 /**
  * Greets a user.
  *
- * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {Object} userClient The userClient of the user who requested the command.
+ * @param {Object} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
  */
-function greet (guildClient, userClient, args) {
-  const logger = guildClient.logger.child({ user: userClient.id })
+function greet (memberClient, args) {
+  const logger = memberClient.logger
   logger.info('Received greet command')
   Functions.sendMsg(
-    guildClient.textChannel,
-    `${Emojis.greeting} **${Responses.greetings[Functions.random(Responses.greetings.length)]},** <@${userClient.id}>!`,
-    guildClient
+    memberClient.guildClient.textChannel,
+    `${Emojis.greeting} **${Responses.greetings[Functions.random(Responses.greetings.length)]},** <@${memberClient.id}>!`,
+    memberClient.guildClient.settings.mentions
   )
   Functions.updateImpression(
     Common.uKeyv,
-    userClient.id,
-    userClient,
+    memberClient.id,
+    memberClient.userClient,
     Config.ImpressionValues.GREET_VALUE,
-    userClient.settings.impressions
+    memberClient.userClient.settings.impressions
   )
 }
 

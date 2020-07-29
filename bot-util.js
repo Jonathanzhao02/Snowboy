@@ -318,6 +318,18 @@ async function replaceAsync (str, regex, asyncFn) {
 }
 
 /**
+ * Function to asynchronously iterate over an array.
+ *
+ * @param {Array} ar The Array to be iterated over.
+ * @param {Function} asyncFn The asynchronous function to be called.
+ */
+async function forEachAsync (ar, asyncFn) {
+  for (let i = 0; i < ar.length; i++) {
+    await asyncFn(ar[i], i, ar)
+  }
+}
+
+/**
  * Replaces the mentions in a message with their display name.
  *
  * @param {String[] | String} msg The message(s) to be formatted.
@@ -326,8 +338,8 @@ async function replaceAsync (str, regex, asyncFn) {
  */
 async function replaceMentions (msg, guild) {
   if (msg instanceof Array) {
-    msg.forEach(async (val, index, array) => {
-      array[index] = await replaceMentions(val, guild)
+    await forEachAsync(msg, async (val, index) => {
+      msg[index] = await replaceMentions(val, guild)
     })
     return msg
   } else if (msg instanceof Discord.MessageEmbed) {
@@ -369,18 +381,15 @@ function getClientsFromMember (member) {
  * Sends a message through the text channel.
  *
  * @param {Discord.TextChannel} textChannel The TextChannel to send the message to.
- * @param {String|Discord.MessageEmbed} msg The message to be sent.
- * @param {Object?} guildClient The guildClient associated with the TextChannel server.
+ * @param {String | Discord.MessageEmbed} msg The message to be sent.
+ * @param {Boolean?} mentions Whether mentions should be replaced with names.
  * @param {Object?} opts Any additional options to send the message with.
- * @returns {Discord.Message|Discord.Message[]} Returns the message(s) sent.
+ * @returns {Discord.Message | Discord.Message[]} Returns the message(s) sent.
  */
-async function sendMsg (textChannel, msg, guildClient, opts) {
-  if (guildClient) {
-    guildClient.logger.debug('Attempting to send message')
-    guildClient.logger.debug(msg)
-  }
+async function sendMsg (textChannel, msg, mentions, opts) {
+  Common.logger.debug(`Attempting to send ${msg} to ${textChannel}`)
   if (!textChannel) return
-  if (guildClient && !guildClient.settings.mentions) msg = await replaceMentions(msg, guildClient.guild)
+  if (mentions === false) msg = await replaceMentions(msg, textChannel.guild)
   let msgs
   if (opts) msgs = await textChannel.send(msg, opts)
   else msgs = await textChannel.send(msg)
