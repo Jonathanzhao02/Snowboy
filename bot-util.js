@@ -286,32 +286,45 @@ function updateImpression (keyv, key, client, value, useImpressions) {
 }
 
 /**
- * Finds the GuildMember object associated with an identifier of some sort within a Guild.
+ * Finds the GuildMember object associated with a mention string.
  *
- * @param {String} str The identifier. Could be nickname, username, mention.
+ * @param {String} str The mention string.
  * @param {Discord.Guild} guild The Guild whose members cache is to be searched.
  * @returns {Discord.GuildMember} Returns the first GuildMember associated with that identifier.
  */
-function findMember (str, guild) {
+async function findMember (str, guild) {
   const mentionId = str.match(/^<@!?(\d+)>$/)
-  let id
-  if (mentionId) id = mentionId[1]
+  if (!mentionId) return
+  return await guild.members.fetch(mentionId[1])
+}
 
-  return guild.members.cache.find(u =>
-    u.user.username === str ||
-    u.displayName === str ||
-    (u.nickname && u.nickname === str) ||
-    (id && u.id === id))
+/**
+ * Function to asynchronously replace mentions in a message.
+ *
+ * Ripped from StackOverflow.
+ *
+ * @param {String} str The string to replace.
+ * @param {RegExp} regex The regular expression to match.
+ * @param {Function} asyncFn The asynchronous function to run.
+ */
+async function replaceAsync (str, regex, asyncFn) {
+  const promises = []
+  str.replace(regex, (match, ...args) => {
+    const promise = asyncFn(match, ...args)
+    promises.push(promise)
+  })
+  const data = await Promise.all(promises)
+  return str.replace(regex, () => data.shift())
 }
 
 /**
  * Replaces the mentions in a message with their display name.
  *
- * @param {String} msg The message to be formatted.
+ * @param {String[] | String} msg The message(s) to be formatted.
  * @param {Discord.Guild} guild The Guild whose members cache is to be searched for display names.
- * @returns {String} Returns the formatted string.
+ * @returns {String[] | String} Returns the formatted message(s).
  */
-function replaceMentions (msg, guild) {
+async function replaceMentions (msg, guild) {
   if (msg instanceof Array) {
     msg.forEach((val, index, array) => {
       array[index] = replaceMentions(val, guild)
@@ -321,7 +334,7 @@ function replaceMentions (msg, guild) {
     return msg
   } else {
     const regex = /<@!?(\d+)>/gi
-    return msg.replace(regex, match => findMember(match, guild).displayName)
+    return replaceAsync(msg, regex, async match => { return (await findMember(match, guild)).displayName })
   }
 }
 
@@ -340,7 +353,7 @@ async function sendMsg (textChannel, msg, guildClient, opts) {
     guildClient.logger.debug(msg)
   }
   if (!textChannel) return
-  if (guildClient && !guildClient.settings.mentions) msg = replaceMentions(msg, guildClient.guild)
+  if (guildClient && !guildClient.settings.mentions) msg = await replaceMentions(msg, guildClient.guild)
   let msgs
   if (opts) msgs = await textChannel.send(msg, opts)
   else msgs = await textChannel.send(msg)

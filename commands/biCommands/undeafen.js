@@ -11,8 +11,7 @@ const { Functions } = require('../../bot-util')
 function undeafen (guildClient, userClient, args) {
   const logger = guildClient.logger.child({ user: userClient.id })
   logger.info(`Setting deafen state of ${userClient.id} to \`${false}\``)
-  const voiceStates = guildClient.textChannel.guild.voiceStates.cache
-  const userVoiceState = voiceStates.find(state => state.id === userClient.id)
+  const userVoiceState = guildClient.memberClients.get(userClient.id).member.voice
   if (userVoiceState) userVoiceState.setDeaf(false)
   Functions.sendMsg(
     guildClient.textChannel,

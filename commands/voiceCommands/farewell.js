@@ -11,8 +11,7 @@ const { Responses, Functions } = require('../../bot-util')
 function farewell (guildClient, userClient, args) {
   const logger = guildClient.logger.child({ user: userClient.id })
   logger.info('Received farewell command')
-  const voiceStates = guildClient.textChannel.guild.voiceStates.cache
-  const userVoiceState = voiceStates.find(state => state.id === userClient.id)
+  const userVoiceState = guildClient.memberClients.get(userClient.id).member.voice
   if (userVoiceState) userVoiceState.setChannel(null)
 
   if (guildClient && guildClient.memberClients.get(userClient.id)) {

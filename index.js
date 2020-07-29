@@ -307,7 +307,6 @@ function checkPermissions (guildClient) {
 
   if (guildClient.voiceChannel) {
     const voicePermissions = guildClient.guild.me.permissionsIn(guildClient.voiceChannel)
-    console.log(voicePermissions.toArray())
     const voiceMissingPermissions = new Discord.Permissions(voicePermissions.missing([
       Discord.Permissions.FLAGS.VIEW_CHANNEL,
       Discord.Permissions.FLAGS.CONNECT,
