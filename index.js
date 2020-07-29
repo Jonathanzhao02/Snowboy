@@ -126,12 +126,12 @@ function createMemberClient (member, guildClient) {
 }
 
 /**
- * Gets or creates userClient, guildClient, and memberClient from a Message object.
+ * Creates or fetches existing userClient, guildClient, and memberClient from a Message object.
  *
  * @param {Discord.Message} message The Message to fetch all information from.
  * @returns {Object} Returns an Object containing all three clients.
  */
-async function getClientsFromMessage (message) {
+async function createClientsFromMessage (message) {
   logger.info(`Fetching clients for ${message}`)
   // Create a new userConstruct if the User is not currently tracked, loading settings from database
   let userClient = botClient.userClients.get(message.author.id)
@@ -156,14 +156,14 @@ async function getClientsFromMessage (message) {
 }
 
 /**
- * Gets or creates userClient and memberClient from a GuildMember object.
+ * Creates or fetches existing userClient and memberClient from a GuildMember object.
  *
  * Also returns the guildClient, if it exists.
  *
  * @param {Discord.GuildMember} member The GuildMember to fetch all information from.
  * @returns {Object} Returns an Object containing all three clients.
  */
-async function getClientsFromMember (member) {
+async function createClientsFromMember (member) {
   logger.info(`Fetching clients for ${member}`)
   // Create a new userConstruct if the User is not currently tracked, loading settings from database
   let userClient = botClient.userClients.get(member.id)
@@ -234,7 +234,7 @@ function createAudioStream (member, receiver) {
  */
 async function onSpeaking (member, speaking) {
   if (!member || speaking.equals(0) || member.id === botClient.user.id) return
-  const { userClient, guildClient, memberClient } = getClientsFromMember(member)
+  const { userClient, guildClient, memberClient } = createClientsFromMember(member)
   if (!guildClient || member.voice.channelID !== guildClient.voiceChannel.id || !guildClient.settings.voice) return
   const childLogger = guildClient.logger
 
@@ -342,7 +342,7 @@ function formatList (list) {
 async function onMessage (msg) {
   // If it is an automated message of some sort, return
   if (msg.author.bot || msg.system) return
-  const { userClient, guildClient } = await getClientsFromMessage(msg)
+  const { userClient, guildClient } = await createClientsFromMessage(msg)
 
   // If it is in Snowboy's DMs, log a new bug report and start the 24 hour cooldown.
   if (!guildClient) {
@@ -370,6 +370,16 @@ async function onMessage (msg) {
   const args = msg.content.slice(guildClient.settings.prefix.length).trim().split(/ +/)
   const commandName = args.shift().toLowerCase()
 
+  guildClient.logger.info(`Received ${msg.content}`)
+  guildClient.logger.debug(`Understood command as ${commandName} and arguments as ${args}`)
+
+  // If the Guild is sending commands too fast, notify and return
+  if (msg.createdAt.getTime() - guildClient.lastCalled < 1000) {
+    guildClient.logger.info('Rejecting message, too fast')
+    Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Please only send one command a second!***`, guildClient)
+    return
+  }
+
   // If Snowboy is currently connected in the guild, and the GuildMember tries to run a restricted command (affects Snowboy's behavior
   // in the voice channel) in another text channel, notify the GuildMember and return
   if (msg.channel.id !== guildClient.textChannel.id && guildClient.connection && Commands.restrictedCommands.get(commandName)) {
@@ -379,16 +389,6 @@ async function onMessage (msg) {
   // voice channel, notify the GuildMember and return
   } else if (guildClient.connection && msg.member.voice.channelID !== guildClient.voiceChannel.id && Commands.restrictedCommands.get(commandName)) {
     Functions.sendMsg(msg.channel, `${Emojis.error} ***Sorry, you are not in my voice channel!***`, guildClient)
-    return
-  }
-
-  guildClient.logger.info(`Received ${msg.content}`)
-  guildClient.logger.debug(`Understood command as ${commandName} and arguments as ${args}`)
-
-  // If the Guild is sending commands too fast, notify and return
-  if (msg.createdAt.getTime() - guildClient.lastCalled < 1000) {
-    guildClient.logger.info('Rejecting message, too fast')
-    Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Please only send one command a second!***`, guildClient)
     return
   }
 

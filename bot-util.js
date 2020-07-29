@@ -339,6 +339,33 @@ async function replaceMentions (msg, guild) {
 }
 
 /**
+ * Gets userClient, guildClient, and memberClient from a GuildMember, if they exist.
+ *
+ * @param {Discord.GuildMember} member The GuildMember to fetch the clients for.
+ * @returns {Object} Returns an object containing all existing clients.
+ */
+function getClientsFromMember (member) {
+  Common.logger.info(`Fetching clients for ${member}`)
+  // Get the userClient
+  const userClient = Common.botClient.userClients.get(member.id)
+  if (!userClient) Common.logger.warn(`No userClient found for ${member.id}!`)
+
+  // Get the guildClient
+  const guildClient = Common.botClient.guildClients.get(member.guild.id)
+  if (!guildClient) Common.logger.warn(`No guildClient found for ${member.guild.id}!`)
+
+  // Get the memberClient
+  const memberClient = guildClient.memberClients.get(userClient.id)
+  if (!memberClient) Common.logger.warn(`No memberClient found for ${member.id}!`)
+
+  return {
+    userClient: userClient,
+    guildClient: guildClient,
+    memberClient: memberClient
+  }
+}
+
+/**
  * Sends a message through the text channel.
  *
  * @param {Discord.TextChannel} textChannel The TextChannel to send the message to.
@@ -434,6 +461,7 @@ module.exports = {
     random: random,
     updateImpression: updateImpression,
     findMember: findMember,
+    getClientsFromMember: getClientsFromMember,
     sendMsg: sendMsg,
     startTimeout: startTimeout,
     cleanupGuildClient: cleanupGuildClient,
