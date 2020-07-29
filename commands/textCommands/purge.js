@@ -65,7 +65,7 @@ function purge (guildClient, userClient, args, msg, total, snowflake) {
         break
       // Delete the messages of the mentioned user
       default:
-        mmbr = Functions.findMember(args[0], guildClient.guild)
+        if (msg.mentions && msg.mentions.members) mmbr = msg.mentions.members.array()[0]
         if (!mmbr) {
           logger.debug(`Rejected user due to invalid user: ${args[0]}`)
           Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***Could not find user \`${args[0]}\`***`, guildClient)

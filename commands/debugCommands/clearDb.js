@@ -7,8 +7,9 @@ const { Functions } = require('../../bot-util')
  * @param {Object} guildClient The guildClient of the server the user is in.
  * @param {Object} userClient Unused parameter.
  * @param {String[]} args Unused parameter.
+ * @param {Discord.Message} msg Unused parameter.
  */
-function clearDb (guildClient, userClient, args) {
+function clearDb (guildClient, userClient, args, msg) {
   const logger = guildClient.logger.child({ user: userClient.id })
   logger.info('Received clear database command')
   Common.gKeyv.clear()

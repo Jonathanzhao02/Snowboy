@@ -400,7 +400,7 @@ async function onMessage (msg) {
   } else if (Commands.textOnlyCommands.get(commandName)) {
     Commands.textOnlyCommands.get(commandName).execute(guildClient, userClient, args, msg)
   } else if (Config.DEBUG_IDS.includes(userClient.id) && Commands.debugCommands.get(commandName)) {
-    Commands.debugCommands.get(commandName).execute(guildClient, userClient, args)
+    Commands.debugCommands.get(commandName).execute(guildClient, userClient, args, msg)
   } else if (Commands.eastereggCommands.get(commandName)) {
     Commands.eastereggCommands.get(commandName).execute(guildClient, userClient, args)
   } else {
