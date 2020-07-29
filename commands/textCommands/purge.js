@@ -42,8 +42,7 @@ function purge (memberClient, args, msg, total, snowflake) {
   }
   let filter = m => m.author.id === Common.botClient.user.id
   let mmbr
-  logger.debug('Received args')
-  logger.debug(args)
+  logger.debug('Received args: %o', args)
 
   if (args[0]) {
     switch (args[0]) {
@@ -94,7 +93,7 @@ function purge (memberClient, args, msg, total, snowflake) {
     logger.trace('Fetched messages')
     // Bulk delete all fetched messages that pass through the filter
     guildClient.textChannel.bulkDelete(messages.filter(filter)).then(deletedMessages => {
-      logger.trace('Deleting fetches messages')
+      logger.trace('Deleting fetched messages')
       total += deletedMessages.size
 
       // If deleted messages, continue deleting recursively

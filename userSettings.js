@@ -76,7 +76,7 @@ class UserSettings {
    * @static
    * @param {Keyv} db The Keyv database to load from.
    * @param {String} usrId The user ID of the UserSettings object.
-   * @returns {Settings} Returns the Settings or undefined if the user is not found.
+   * @returns {Settings} Returns the Settings or null if the user is not found.
    */
   static async load (db, usrId) {
     const obj = await db.get(`${usrId}:settings`)

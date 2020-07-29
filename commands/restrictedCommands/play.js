@@ -128,7 +128,7 @@ async function queue (memberClient, video, query) {
  *
  * @param {String} query The search query.
  * @param {Object} logger The logger for logging.
- * @returns {Object} A videoConstruct if a result is found, else undefined
+ * @returns {Object} A videoConstruct if a result is found, else null
  */
 async function querySearch (query, logger) {
   logger.info(`Searching query ${query}`)
@@ -166,7 +166,7 @@ async function querySearch (query, logger) {
  *
  * @param {String} url The URL.
  * @param {Object} logger The logger for logging.
- * @returns {Object} A videoConstruct if a result is found, else undefined
+ * @returns {Object} A videoConstruct if a result is found, else null
  */
 async function urlSearch (url, logger) {
   logger.info(`Searching URL ${url}`)

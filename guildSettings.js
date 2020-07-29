@@ -86,7 +86,7 @@ class GuildSettings {
    * @static
    * @param {Keyv} db The Keyv database to load from.
    * @param {String} gldId The guild ID of the GuildSettings object.
-   * @returns {GuildSettings} Returns the GuildSettings or undefined if the guild is not found.
+   * @returns {GuildSettings} Returns the GuildSettings or null if the guild is not found.
    */
   static async load (db, gldId) {
     const obj = await db.get(`${gldId}:settings`)

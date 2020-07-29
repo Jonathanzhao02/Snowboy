@@ -474,6 +474,7 @@ module.exports = {
     sendMsg: sendMsg,
     startTimeout: startTimeout,
     cleanupGuildClient: cleanupGuildClient,
-    playSilence: playSilence
+    playSilence: playSilence,
+    forEachAsync: forEachAsync
   }
 }

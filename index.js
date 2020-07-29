@@ -25,7 +25,7 @@ const logger = Pino({
   serializers: {
     err: Pino.stdSerializers.err
   }
-}, Pino.destination(`./logs/${new Date().toISOString()}.log`))
+}, Pino.destination('./logs/latest.log'))
 
 const botClient = new Discord.Client()
 botClient.guildClients = new Map() // to keep track of individual active guilds
@@ -83,7 +83,7 @@ async function createGuildClient (guild, textChannel, voiceChannel) {
     id: guild.id, // the id of the guild
     textChannel: textChannel, // text channel to listen to for commands
     voiceChannel: voiceChannel, // voice channel bot is interested in
-    connection: undefined, // connection to the voice channel
+    connection: null, // connection to the voice channel
     songQueue: [], // song queue
     loopState: 0, // 0 = no loop, 1 = song loop, 2 = queue loop
     memberClients: new Map(), // information about guildmembers including id, snowclients, guildmember, and impression with snowboy
@@ -94,7 +94,7 @@ async function createGuildClient (guild, textChannel, voiceChannel) {
     delete: false, // set to true to mark guild for deletion upon disconnect
     purging: false, // whether the purging command is currently active
     settings: await GuildSettings.load(gKeyv, guild.id), // custom settings for the current guild
-    timeoutId: undefined, // the id of the current timeout interval function
+    timeoutId: null, // the id of the current timeout interval function
     logger: logger.child({ guild: guild.id, name: guild.name }) // pino logger
   }
 
@@ -116,7 +116,7 @@ function createMemberClient (member, guildClient) {
   guildClient.logger.info(`Creating new member construct for ${member.displayName}`)
   const memberConstruct = {
     id: member.id, // the id of the member associated with this memberClient
-    snowClient: undefined, // the SnowClient listening to the member of this memberClient
+    snowClient: null, // the SnowClient listening to the member of this memberClient
     member: member, // the GuildMember object of the member associated with this memberClient
     userClient: botClient.userClients.get(member.id), // the userClient associated with this member
     guildClient: guildClient, // the guildClient associated with this member
@@ -237,7 +237,7 @@ function createAudioStream (member, receiver) {
  */
 async function onSpeaking (member, speaking) {
   if (!member || speaking.equals(0) || member.id === botClient.user.id) return
-  const { userClient, guildClient, memberClient } = createClientsFromMember(member)
+  const { userClient, guildClient, memberClient } = await createClientsFromMember(member)
   if (!guildClient || member.voice.channelID !== guildClient.voiceChannel.id || !guildClient.settings.voice) return
   const childLogger = guildClient.logger
 
@@ -249,10 +249,10 @@ async function onSpeaking (member, speaking) {
     newClient.setLogger(memberClient.logger)
     newClient.on('hotword', ack)
     newClient.on('result', parse)
-    newClient.on('busy', (guildClient, userClient) => Functions.sendMsg(
-      guildClient.textChannel,
-      `***I'm still working on your last request, <@${userClient.id}>!***`,
-      guildClient.settings.mentions
+    newClient.on('busy', (memberClient) => Functions.sendMsg(
+      memberClient.guildClient.textChannel,
+      `***I'm still working on your last request, <@${memberClient.id}>!***`,
+      memberClient.guildClient.settings.mentions
     ))
     newClient.on('error', msg => {
       Functions.sendMsg(
@@ -300,7 +300,7 @@ function logBug (msg, userClient) {
  * Checks permissions in a guild and returns any missing.
  *
  * @param {Object} guildClient The guildClient of the server where permissions are required.
- * @returns {String[]?} The array of missing text/voice permissions or undefined if all permissions are granted.
+ * @returns {String[]?} The array of missing text/voice permissions or null if all permissions are granted.
  */
 function checkPermissions (guildClient) {
   if (guildClient.guild.me.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR)) return
@@ -528,7 +528,7 @@ botClient.on('voiceStateUpdate', (oldPresence, newPresence) => {
       if (snowClient) {
         snowClient.stop()
       }
-      guildClient.memberClients.get(userId).snowClient = undefined
+      guildClient.memberClients.get(userId).snowClient = null
     }
 
     // If the bot has been disconnected, clean up the guildClient
@@ -584,14 +584,13 @@ botClient.on('error', error => {
   console.log(error)
   const promise = new Promise((resolve, reject) => {
     const guilds = Array.from(botClient.guildClients)
-    guilds.forEach((guildClient, index, array) => {
-      guildClient[1].logger.debug('Sending error message')
-      Functions.sendMsg(
-        guildClient[1].textChannel,
+    Functions.forEachAsync(guilds, async (pair, index, array) => {
+      if (pair[1]) pair[1].logger.debug('Sending error message')
+      await Functions.sendMsg(
+        pair[1].textChannel,
         `${Emojis.skull} ***Sorry, I ran into some fatal error. Hopefully I come back soon!***`
-      ).then(() => {
-        if (index === array.length - 1) resolve()
-      })
+      )
+      if (index === array.length - 1) resolve()
     })
 
     if (guilds.length === 0) resolve()
@@ -651,14 +650,13 @@ process.on('SIGINT', signal => {
   logger.info(`Process ${process.pid} has been interrupted`)
   const promise = new Promise((resolve, reject) => {
     const guilds = Array.from(botClient.guildClients)
-    guilds.forEach((guildClient, index, array) => {
-      if (guildClient[1]) guildClient[1].logger.debug('Sending interrupt message')
-      Functions.sendMsg(
-        guildClient[1].textChannel,
+    Functions.forEachAsync(guilds, async (pair, index, array) => {
+      if (pair[1]) pair[1].logger.debug('Sending interrupt message')
+      await Functions.sendMsg(
+        pair[1].textChannel,
         `${Emojis.joyful} ***Sorry, I'm going down for updates and maintenance! See you soon!***`
-      ).then(() => {
-        if (index === array.length - 1) resolve()
-      })
+      )
+      if (index === array.length - 1) resolve()
     })
 
     if (guilds.length === 0) resolve()
@@ -693,3 +691,12 @@ if (process.argv.includes('-t') || process.argv.includes('--test')) {
 } else {
   botClient.login(process.env.SNOWBOY_BOT_TOKEN)
 }
+
+/**
+ * TODO:
+ * Replace all memberClient commands with just member, and take advantage of the Functions.getClientsFromMember command
+ * Replace forEach in errors with forEachAsync
+ * Also change SnowClient to use member instead of memberClient
+ * Change client constructs into actual objects instead of just make-believe objects
+ * Refactor leave command into separate general 'leave' in bot-util for leaving guilds and the command itself
+ */

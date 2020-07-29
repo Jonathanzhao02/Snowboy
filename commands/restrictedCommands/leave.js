@@ -51,8 +51,8 @@ function leave (client, args) {
   guildClient.memberClients.clear()
   logger.trace('Leaving channel')
   guildClient.voiceChannel.leave()
-  guildClient.voiceChannel = undefined
-  guildClient.connection = undefined
+  guildClient.voiceChannel = null
+  guildClient.connection = null
   guildClient.loopState = 0
   logger.debug('Successfully left')
 }

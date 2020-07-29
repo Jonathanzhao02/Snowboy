@@ -159,7 +159,7 @@ class SnowClient {
     this.stream.unpipe(this.detector)
     this.stream.removeAllListeners()
     this.stream.destroy()
-    this.stream = undefined
+    this.stream = null
   }
 }
 
