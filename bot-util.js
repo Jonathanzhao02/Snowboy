@@ -326,8 +326,8 @@ async function replaceAsync (str, regex, asyncFn) {
  */
 async function replaceMentions (msg, guild) {
   if (msg instanceof Array) {
-    msg.forEach((val, index, array) => {
-      array[index] = replaceMentions(val, guild)
+    msg.forEach(async (val, index, array) => {
+      array[index] = await replaceMentions(val, guild)
     })
     return msg
   } else if (msg instanceof Discord.MessageEmbed) {
