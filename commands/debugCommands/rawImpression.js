@@ -14,7 +14,7 @@ function rawImpression (memberClient, args, msg) {
   let member = memberClient.member
   let userClient = memberClient.userClient
 
-  if (msg.mentions && msg.mentions.members) {
+  if (msg.mentions && msg.mentions.members.length > 0) {
     member = msg.mentions.members.array()[0]
     userClient = Common.botClient.userClients.get(member.id)
   }

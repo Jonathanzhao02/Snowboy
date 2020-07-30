@@ -463,12 +463,10 @@ module.exports = {
   },
   Responses: {
     greetings: greetings,
-    farewells: farewells,
-    getResponse: getResponse
+    farewells: farewells
   },
   Functions: {
     random: random,
-    updateImpression: updateImpression,
     findMember: findMember,
     getClientsFromMember: getClientsFromMember,
     sendMsg: sendMsg,
@@ -476,5 +474,9 @@ module.exports = {
     cleanupGuildClient: cleanupGuildClient,
     playSilence: playSilence,
     forEachAsync: forEachAsync
+  },
+  Impressions: {
+    getResponse: getResponse,
+    updateImpression: updateImpression
   }
 }

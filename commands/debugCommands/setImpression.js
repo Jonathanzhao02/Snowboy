@@ -1,5 +1,5 @@
 const Common = require('../../common')
-const { Functions } = require('../../bot-util')
+const { Functions, Impressions} = require('../../bot-util')
 
 const Config = require('../../config')
 
@@ -18,7 +18,7 @@ function setImpression (memberClient, args, msg) {
   // If insufficient arguments, return
   if (args.length === 0 || args.length >= 3) return
   // If passed in 2 arguments, sets the mentioned user's impression to a value
-  if (args.length === 2 && msg.mentions && msg.mentions.members) {
+  if (args.length === 2 && msg.mentions && msg.mentions.members.length > 0) {
     const member = msg.mentions.members.array()[0]
     id = member.id
     val = args[1]
@@ -26,7 +26,7 @@ function setImpression (memberClient, args, msg) {
   memberClient = memberClient.guildClient.memberClients.get(id)
   // Ensures a member is found, and that the value is a number between the maximum and minimum values
   if (!memberClient || isNaN(val) || val > Config.ImpressionThresholds.MAX_IMPRESSION || val < Config.ImpressionThresholds.MIN_IMPRESSION) return
-  Functions.updateImpression(Common.uKeyv, id, memberClient.userClient, val - memberClient.userClient.impression)
+  Impressions.updateImpression(Common.uKeyv, id, memberClient.userClient, val - memberClient.userClient.impression)
   Functions.sendMsg(
     memberClient.guildClient.textChannel,
     `Set impression of \`${memberClient.member.displayName}\` to \`${val}\``

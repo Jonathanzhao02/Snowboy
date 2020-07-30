@@ -1,6 +1,6 @@
 const Common = require('../../common')
 const Emojis = require('../../emojis')
-const { Functions } = require('../../bot-util')
+const { Functions, Impressions } = require('../../bot-util')
 const Config = require('../../config')
 
 /**
@@ -16,7 +16,7 @@ function compliment (memberClient, args) {
     memberClient.guildClient.textChannel,
     `${Emojis.happy} **Thank you!**`
   )
-  Functions.updateImpression(
+  Impressions.updateImpression(
     Common.uKeyv,
     memberClient.id,
     memberClient.userClient,

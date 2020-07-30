@@ -1,4 +1,4 @@
-const { Responses, Functions } = require('../../bot-util')
+const { Functions, Impressions } = require('../../bot-util')
 
 /**
  * Prints Snowboy's impression of a user.
@@ -11,7 +11,7 @@ function impression (memberClient, args) {
   logger.info('Received impression command')
   Functions.sendMsg(
     memberClient.guildClient.textChannel,
-    Responses.getResponse(
+    Impressions.getResponse(
       'impression',
       memberClient.userClient.impression,
       [`<@${memberClient.id}>`],

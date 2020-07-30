@@ -1,55 +1,20 @@
 const Discord = require('discord.js')
-const Keyv = require('keyv')
 const Resampler = require('node-libsamplerate')
 const Fs = require('fs')
 const SnowClient = require('./snowClient')
 const Streams = require('./streams')
 const Emojis = require('./emojis')
-const Common = require('./common')
 const Commands = require('./commands')
 const GuildSettings = require('./guildSettings')
 const UserSettings = require('./userSettings')
-const Functions = require('./bot-util').Functions
-const Responses = require('./bot-util').Responses
 const Config = require('./config')
-const Env = require('dotenv').config()
-
-if (Env.error) throw Env.error
+const { Functions, Impressions } = require('./bot-util')
+const { botClient, logger, gKeyv, uKeyv } = require('./common')
+const Admin = require('./snowboyDashboard')
+Admin.start()
 
 // Logging
 const Heapdump = require('heapdump')
-const Pino = require('pino')
-
-const defaultLogpath = './logs/latest.log'
-
-if (Fs.existsSync(defaultLogpath)) {
-  Fs.unlinkSync(defaultLogpath)
-}
-
-const logger = Pino({
-  nestedKey: 'objs',
-  serializers: {
-    err: Pino.stdSerializers.err
-  }
-}, Pino.destination(defaultLogpath))
-
-const botClient = new Discord.Client()
-botClient.guildClients = new Map() // to keep track of individual active guilds
-botClient.userClients = new Map() // to keep track of individual user bug reports
-
-const gKeyv = new Keyv(
-  process.argv.includes('-t') || process.argv.includes('--testing') ? 'sqlite://db/testing.db' : 'sqlite://db/snowboy.db',
-  { table: 'guilds' })
-const uKeyv = new Keyv(
-  process.argv.includes('-t') || process.argv.includes('--testing') ? 'sqlite://db/testing.db' : 'sqlite://db/snowboy.db',
-  { table: 'users' })
-gKeyv.on('error', error => { throw error })
-uKeyv.on('error', error => { throw error })
-
-Common.setClient(botClient)
-Common.setGKeyv(gKeyv)
-Common.setUKeyv(uKeyv)
-Common.setLogger(logger)
 
 /**
  * Creates a userClient object and updates the userClients map.
@@ -505,7 +470,7 @@ function ack (index, hotword, memberClient) {
   memberClient.logger.info('Received hotword from')
   Functions.sendMsg(
     memberClient.guildClient.textChannel,
-    `**${Responses.getResponse('hotword',
+    `**${Impressions.getResponse('hotword',
       memberClient.userClient.impression,
       [`<@${memberClient.id}>`],
       memberClient.userClient.settings.impressions)}**`,
@@ -697,17 +662,6 @@ if (process.argv.includes('-t') || process.argv.includes('--test')) {
 } else {
   botClient.login(process.env.SNOWBOY_BOT_TOKEN)
 }
-
-const ipc = require('node-ipc')
-ipc.config.id = 'snowboy'
-ipc.config.retry = 1500
-ipc.config.silent = true
-ipc.serve(() => {
-  ipc.server.on('message', message => {
-    console.log(message)
-  })
-})
-ipc.server.start()
 
 /**
  * TODO:

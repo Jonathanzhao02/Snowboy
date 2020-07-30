@@ -1,6 +1,6 @@
 const Common = require('../../common')
 const Emojis = require('../../emojis')
-const { Functions } = require('../../bot-util')
+const { Functions, Impressions } = require('../../bot-util')
 
 const Config = require('../../config')
 
@@ -18,7 +18,7 @@ function insult (memberClient, args) {
     `${Emojis.sad} *Okay...*`,
     memberClient.guildClient
   )
-  Functions.updateImpression(
+  Impressions.updateImpression(
     Common.uKeyv,
     memberClient.id,
     memberClient.userClient,
