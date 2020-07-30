@@ -698,6 +698,17 @@ if (process.argv.includes('-t') || process.argv.includes('--test')) {
   botClient.login(process.env.SNOWBOY_BOT_TOKEN)
 }
 
+const ipc = require('node-ipc')
+ipc.config.id = 'snowboy'
+ipc.config.retry = 1500
+ipc.config.silent = true
+ipc.serve(() => {
+  ipc.server.on('message', message => {
+    console.log(message)
+  })
+})
+ipc.server.start()
+
 /**
  * TODO:
  * Replace all memberClient commands with just member, and take advantage of the Functions.getClientsFromMember command
