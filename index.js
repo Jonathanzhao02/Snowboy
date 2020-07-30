@@ -20,12 +20,18 @@ if (Env.error) throw Env.error
 const Heapdump = require('heapdump')
 const Pino = require('pino')
 
+const defaultLogpath = './logs/latest.log'
+
+if (Fs.existsSync(defaultLogpath)) {
+  Fs.unlinkSync(defaultLogpath)
+}
+
 const logger = Pino({
   nestedKey: 'objs',
   serializers: {
     err: Pino.stdSerializers.err
   }
-}, Pino.destination('./logs/latest.log'))
+}, Pino.destination(defaultLogpath))
 
 const botClient = new Discord.Client()
 botClient.guildClients = new Map() // to keep track of individual active guilds

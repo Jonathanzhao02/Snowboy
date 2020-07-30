@@ -97,7 +97,7 @@ function purge (memberClient, args, msg, total, snowflake) {
       total += deletedMessages.size
 
       // If deleted messages, continue deleting recursively
-      if (deletedMessages.size > 0) {
+      if (deletedMessages.size > 0 && deletedMessages.last()) {
         logger.debug(`Recursively purging: ${total} messages deleted`)
         purge(memberClient, args, msg, total, deletedMessages.last().id)
       // If no messages deleted, purge command has finished all it can, return
