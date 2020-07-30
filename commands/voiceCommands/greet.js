@@ -14,7 +14,7 @@ function greet (memberClient, args) {
   logger.info('Received greet command')
   Functions.sendMsg(
     memberClient.guildClient.textChannel,
-    `${Emojis.greeting} **${Responses.greetings[Functions.random(Responses.greetings.length)]},** <@${memberClient.id}>!`,
+    `${Emojis.greeting} **${Responses.randomGreeting()},** <@${memberClient.id}>!`,
     memberClient.guildClient.settings.mentions
   )
   Impressions.updateImpression(

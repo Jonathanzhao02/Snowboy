@@ -18,7 +18,7 @@ function farewell (memberClient, args) {
     memberClient.guildClient.memberClients.delete(memberClient.id)
     Functions.sendMsg(
       memberClient.guildClient.textChannel,
-      `${Emojis.farewell} **${Responses.farewells[Functions.random(Responses.farewells.length)]},** <@${memberClient.id}>!`,
+      `${Emojis.farewell} **${Responses.randomFarewell()},** <@${memberClient.id}>!`,
       memberClient.guildClient.settings.mentions
     )
   } else {

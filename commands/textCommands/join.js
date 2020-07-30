@@ -63,7 +63,7 @@ function join (memberClient, args, msg) {
   // Greet the user
   Functions.sendMsg(
     memberClient.guildClient.textChannel,
-    `${Emojis.greeting} **${Responses.greetings[Functions.random(Responses.greetings.length)]},** <@${memberClient.id}>!`,
+    `${Emojis.greeting} **${Responses.randomGreeting()},** <@${memberClient.id}>!`,
     memberClient.guildClient.settings.mentions
   )
 

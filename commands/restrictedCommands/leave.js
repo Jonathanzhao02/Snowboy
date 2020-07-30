@@ -32,7 +32,7 @@ function leave (client, args) {
 
     Functions.sendMsg(
       guildClient.textChannel,
-      `${Emojis.farewell} **${Responses.farewells[Functions.random(Responses.farewells.length)]},** <@${client.id}>!`,
+      `${Emojis.farewell} **${Responses.randomFarewell()},** <@${client.id}>!`,
       guildClient.settings.mentions
     )
   }
