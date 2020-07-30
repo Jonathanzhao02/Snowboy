@@ -330,6 +330,19 @@ async function forEachAsync (ar, asyncFn) {
 }
 
 /**
+ * Formats a list of strings into a fancy array.
+ * @param {String[]} list The list of strings.
+ * @returns {String[]} An array of strings with fancy markdown formatting.
+ */
+function formatList (list) {
+  const msg = []
+  list.forEach(val => {
+    msg.push(`\`${val}\``)
+  })
+  return msg
+}
+
+/**
  * Replaces the mentions in a message with their display name.
  *
  * @param {String[] | String} msg The message(s) to be formatted.
@@ -453,6 +466,48 @@ function playSilence (guildClient) {
   })
 }
 
+/**
+ * Checks permissions in a TextChannel and returns any missing.
+ *
+ * @param {Discord.TextChannel} channel The TextChannel where permissions are required.
+ * @returns {String[]?} The array of missing text permissions or null if all permissions are granted.
+ */
+function checkTextPermissions (channel) {
+  if (channel.guild.me.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR)) return
+  const textPermissions = channel.guild.me.permissionsIn(channel)
+  const textMissingPermissions = new Discord.Permissions(textPermissions.missing([
+    Discord.Permissions.FLAGS.VIEW_CHANNEL,
+    Discord.Permissions.FLAGS.SEND_MESSAGES,
+    Discord.Permissions.FLAGS.MANAGE_MESSAGES,
+    Discord.Permissions.FLAGS.EMBED_LINKS,
+    Discord.Permissions.FLAGS.ATTACH_FILES,
+    Discord.Permissions.FLAGS.READ_MESSAGE_HISTORY
+  ])).toArray()
+
+  if (textMissingPermissions.length > 0) return textMissingPermissions
+}
+
+/**
+ * Checks permissions in a VoiceChannel and returns any missing.
+ *
+ * @param {*} channel The VoiceChannel where permissions are required.
+ * @returns {String[]?} The array of missing voice permissions or null if all permissions are granted.
+ */
+function checkVoicePermissions (channel) {
+  if (channel) {
+    if (channel.guild.me.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR)) return
+    const voicePermissions = channel.guild.me.permissionsIn(channel)
+    const voiceMissingPermissions = new Discord.Permissions(voicePermissions.missing([
+      Discord.Permissions.FLAGS.VIEW_CHANNEL,
+      Discord.Permissions.FLAGS.CONNECT,
+      Discord.Permissions.FLAGS.SPEAK,
+      Discord.Permissions.FLAGS.DEAFEN_MEMBERS
+    ])).toArray()
+
+    if (voiceMissingPermissions.length > 0) return voiceMissingPermissions
+  }
+}
+
 module.exports = {
   Embeds: {
     createVideoEmbed: createVideoEmbed,
@@ -473,7 +528,12 @@ module.exports = {
     startTimeout: startTimeout,
     cleanupGuildClient: cleanupGuildClient,
     playSilence: playSilence,
-    forEachAsync: forEachAsync
+    forEachAsync: forEachAsync,
+    formatList: formatList
+  },
+  Guilds: {
+    checkTextPermissions: checkTextPermissions,
+    checkVoicePermissions: checkVoicePermissions
   },
   Impressions: {
     getResponse: getResponse,

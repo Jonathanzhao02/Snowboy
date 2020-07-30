@@ -1,5 +1,5 @@
 const Emojis = require('../../emojis')
-const { Responses, Functions } = require('../../bot-util')
+const { Responses, Functions, Guilds } = require('../../bot-util')
 
 /**
  * Handles all setup associated with the connection.
@@ -31,9 +31,23 @@ function join (memberClient, args, msg) {
       `${Emojis.error} ***You are not connected to a voice channel!***`
     )
     return
-  // Otherwise, set the guildClient VoiceChannel to the member's
+  // Otherwise, set the guildClient's VoiceChannel to the member's
   } else {
     memberClient.guildClient.voiceChannel = msg.member.voice.channel
+  }
+
+  // Check that Snowboy has all necessary permissions in text channel and voice channel
+  const missingPermissions = Guilds.checkVoicePermissions(memberClient.guildClient.voiceChannel)
+  if (missingPermissions) {
+    Functions.sendMsg(
+      memberClient.guildClient.textChannel,
+      `${Emojis.error} ***Please ensure I have all the following permissions in your voice channel! I won't completely work otherwise!***`
+    )
+    Functions.sendMsg(
+      memberClient.guildClient.textChannel,
+      Functions.formatList(missingPermissions)
+    )
+    return
   }
 
   // If already connected, notify and return

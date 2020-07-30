@@ -8,7 +8,7 @@ const Commands = require('./commands')
 const GuildSettings = require('./guildSettings')
 const UserSettings = require('./userSettings')
 const Config = require('./config')
-const { Functions, Impressions } = require('./bot-util')
+const { Functions, Impressions, Guilds } = require('./bot-util')
 const { botClient, logger, gKeyv, uKeyv } = require('./common')
 const Admin = require('./snowboyDashboard')
 Admin.start()
@@ -44,16 +44,14 @@ async function createUserClient (user) {
  * Creates a guildClient object and updates the guildClients map.
  *
  * @param {Discord.Guild} guild The Guild the guildClient is associated with.
- * @param {Discord.TextChannel} textChannel The TextChannel the guildClient is listening to.
- * @param {Discord.VoiceChannel} voiceChannel The VoiceChannel the guildClient is interested in.
  * @returns {Object} Returns the created guildClient.
  */
-async function createGuildClient (guild, textChannel, voiceChannel) {
+async function createGuildClient (guild) {
   logger.info(`Creating new guild construct for ${guild.name}`)
   const guildConstruct = {
     id: guild.id, // the id of the guild
-    textChannel: textChannel, // text channel to listen to for commands
-    voiceChannel: voiceChannel, // voice channel bot is interested in
+    textChannel: null, // text channel to listen to for commands
+    voiceChannel: null, // voice channel bot is interested in
     connection: null, // connection to the voice channel
     songQueue: [], // song queue
     loopState: 0, // 0 = no loop, 1 = song loop, 2 = queue loop
@@ -100,55 +98,26 @@ function createMemberClient (member, guildClient) {
 }
 
 /**
- * Creates or fetches existing userClient, guildClient, and memberClient from a Message object.
+ * Creates or fetches existing clients for a GuildMember/User object.
  *
- * @param {Discord.Message} message The Message to fetch all information from.
- * @returns {Object} Returns an Object containing all three clients.
- */
-async function createClientsFromMessage (message) {
-  logger.info(`Fetching clients for ${message}`)
-  // Create a new userConstruct if the User is not currently tracked, loading settings from database
-  let userClient = botClient.userClients.get(message.author.id)
-  if (!userClient) userClient = await createUserClient(message.author)
-
-  // If message is a DM (no Guild associated), only return the userClient
-  if (!message.guild) return { userClient: userClient }
-
-  // Create a new guildConstruct if the Guild is not currently tracked, loading settings from database
-  let guildClient = botClient.guildClients.get(message.guild.id)
-  if (!guildClient) guildClient = await createGuildClient(message.guild, message.channel, message.member.voice.channel)
-
-  // Create a new memberConstruct if the GuildMember is not currently tracked, loading settings from database
-  let memberClient = guildClient.memberClients.get(userClient.id)
-  if (!memberClient) memberClient = createMemberClient(message.member, guildClient)
-
-  return {
-    userClient: userClient,
-    guildClient: guildClient,
-    memberClient: memberClient
-  }
-}
-
-/**
- * Creates or fetches existing userClient and memberClient from a GuildMember object.
+ * Only returns the UserClient if object is a User.
+ * Otherwise, returns the userClient, guildClient, and memberClient.
  *
- * Also returns the guildClient, if it exists.
- *
- * @param {Discord.GuildMember} member The GuildMember to fetch all information from.
+ * @param {Discord.GuildMember | Discord.User} member The member to fetch all information from.
  * @returns {Object} Returns an Object containing all three clients.
  */
 async function createClientsFromMember (member) {
   logger.info(`Fetching clients for ${member}`)
   // Create a new userConstruct if the User is not currently tracked, loading settings from database
   let userClient = botClient.userClients.get(member.id)
-  if (!userClient) userClient = await createUserClient(member.user)
+  if (!userClient) userClient = await createUserClient(member.user ? member.user : member)
 
-  // Check a guildClient exists
-  const guildClient = botClient.guildClients.get(member.guild.id)
-  if (!guildClient) {
-    logger.warn(`No guildClient found for ${member.guild.id}!`)
-    return { userClient: userClient }
-  }
+  // If member is a User (no Guild associated), only return the userClient
+  if (!member.guild) return { userClient: userClient }
+
+  // Create a new guildConstruct if the Guild is not currently tracked, loading settings from database
+  let guildClient = botClient.guildClients.get(member.guild.id)
+  if (!guildClient) guildClient = await createGuildClient(member.guild)
 
   // Create a new memberConstruct if the GuildMember is not currently tracked, loading settings from database
   let memberClient = guildClient.memberClients.get(userClient.id)
@@ -262,55 +231,9 @@ function logBug (msg, userClient) {
     file.close()
     Functions.sendMsg(
       msg.channel,
-      '***Logged.*** **Thank you for your submission!**'
+      '***Logged.*** Thank you for your submission!'
     )
   }
-}
-
-/**
- * Checks permissions in a guild and returns any missing.
- *
- * @param {Object} guildClient The guildClient of the server where permissions are required.
- * @returns {String[]?} The array of missing text/voice permissions or null if all permissions are granted.
- */
-function checkPermissions (guildClient) {
-  if (guildClient.guild.me.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR)) return
-  const textPermissions = guildClient.guild.me.permissionsIn(guildClient.textChannel)
-  const textMissingPermissions = new Discord.Permissions(textPermissions.missing([
-    Discord.Permissions.FLAGS.VIEW_CHANNEL,
-    Discord.Permissions.FLAGS.SEND_MESSAGES,
-    Discord.Permissions.FLAGS.MANAGE_MESSAGES,
-    Discord.Permissions.FLAGS.EMBED_LINKS,
-    Discord.Permissions.FLAGS.ATTACH_FILES,
-    Discord.Permissions.FLAGS.READ_MESSAGE_HISTORY
-  ])).toArray()
-
-  if (textMissingPermissions.length > 0) return textMissingPermissions
-
-  if (guildClient.voiceChannel) {
-    const voicePermissions = guildClient.guild.me.permissionsIn(guildClient.voiceChannel)
-    const voiceMissingPermissions = new Discord.Permissions(voicePermissions.missing([
-      Discord.Permissions.FLAGS.VIEW_CHANNEL,
-      Discord.Permissions.FLAGS.CONNECT,
-      Discord.Permissions.FLAGS.SPEAK,
-      Discord.Permissions.FLAGS.DEAFEN_MEMBERS
-    ])).toArray()
-
-    if (voiceMissingPermissions.length > 0) return voiceMissingPermissions
-  }
-}
-
-/**
- * Formats a list of strings into a fancy array.
- * @param {String[]} list The list of strings.
- * @returns {String[]} An array of strings with fancy markdown formatting.
- */
-function formatList (list) {
-  const msg = []
-  list.forEach(val => {
-    msg.push(`\`${val}\``)
-  })
-  return msg
 }
 
 /**
@@ -324,7 +247,7 @@ function formatList (list) {
 async function onMessage (msg) {
   // If it is an automated message of some sort, return
   if (msg.author.bot || msg.system) return
-  const { userClient, guildClient, memberClient } = await createClientsFromMessage(msg)
+  const { userClient, guildClient, memberClient } = await createClientsFromMember(msg.member ? msg.member : msg.author)
 
   // If it is in Snowboy's DMs, log a new bug report and start the 24 hour cooldown.
   if (!guildClient) {
@@ -335,22 +258,22 @@ async function onMessage (msg) {
   // If the message is not a command for Snowboy, return
   if (!msg.content.startsWith(guildClient.settings.prefix)) return
 
-  // Check that Snowboy has all necessary permissions in text channel and voice channel
-  const missingPermissions = checkPermissions(guildClient)
+  // If there is no TextChannel associated with the guildClient, associate the current one
+  if (!guildClient.textChannel || !guildClient.connection) guildClient.textChannel = msg.channel
+
+  // Check that Snowboy has all necessary permissions in text channel
+  const missingPermissions = Guilds.checkTextPermissions(guildClient.textChannel)
   if (missingPermissions) {
     Functions.sendMsg(
       msg.channel,
-      `${Emojis.error} ***Please ensure I have all the following permissions! I won't completely work otherwise!***`
+      `${Emojis.error} ***Please ensure I have all the following permissions in your text channel! I won't completely work otherwise!***`
     )
     Functions.sendMsg(
       msg.channel,
-      formatList(missingPermissions)
+      Functions.formatList(missingPermissions)
     )
     return
   }
-
-  // If there is no TextChannel associated with the guildClient, associate the current one
-  if (!guildClient.textChannel) guildClient.textChannel = msg.channel
 
   // Parse out command name and arguments
   const args = msg.content.slice(guildClient.settings.prefix.length).trim().split(/ +/)
@@ -638,23 +561,6 @@ process.on('SIGINT', signal => {
     process.exit(0)
   })
 })
-
-// Determines log level
-if (process.argv.includes('trace')) {
-  logger.level = 'trace'
-} else if (process.argv.includes('debug')) {
-  logger.level = 'debug'
-} else if (process.argv.includes('info')) {
-  logger.level = 'info'
-} else if (process.argv.includes('warn')) {
-  logger.level = 'warn'
-} else if (process.argv.includes('error')) {
-  logger.level = 'error'
-} else if (process.argv.includes('fatal')) {
-  logger.level = 'fatal'
-} else if (process.argv.includes('silent')) {
-  logger.level = 'silent'
-}
 
 // Switch between testing bot and (future) production bot
 if (process.argv.includes('-t') || process.argv.includes('--test')) {
