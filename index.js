@@ -3,14 +3,13 @@ const Resampler = require('node-libsamplerate')
 const Fs = require('fs')
 const SnowClient = require('./snowClient')
 const Streams = require('./streams')
-const Emojis = require('./emojis')
 const Commands = require('./commands')
 const GuildSettings = require('./guildSettings')
 const UserSettings = require('./userSettings')
-const Config = require('./config')
+const { Emojis, Timeouts, DEBUG_IDS, CONFIDENCE_THRESHOLD } = require('./config')
 const { Functions, Impressions, Guilds } = require('./bot-util')
 const { botClient, logger, gKeyv, uKeyv } = require('./common')
-const Admin = require('./snowboyDashboard')
+const Admin = require('./snowboyWebAdmin')
 Admin.start()
 
 // Logging
@@ -317,7 +316,7 @@ async function onMessage (msg) {
     Commands.restrictedCommands.get(commandName).execute(memberClient, args)
   } else if (Commands.textOnlyCommands.get(commandName)) {
     Commands.textOnlyCommands.get(commandName).execute(memberClient, args, msg)
-  } else if (Config.DEBUG_IDS.includes(memberClient.id) && Commands.debugCommands.get(commandName)) {
+  } else if (DEBUG_IDS.includes(memberClient.id) && Commands.debugCommands.get(commandName)) {
     Commands.debugCommands.get(commandName).execute(memberClient, args, msg)
   } else if (Commands.eastereggCommands.get(commandName)) {
     Commands.eastereggCommands.get(commandName).execute(memberClient, args)
@@ -345,7 +344,7 @@ function parse (result, memberClient) {
   memberClient.logger.info(`Received results: ${result.text}, ${result.intents}`)
 
   // Checks that the user's voice has been parsed by Wit.ai
-  if (!result || !result.intents || !result.intents[0] || result.intents[0].confidence < Config.CONFIDENCE_THRESHOLD) {
+  if (!result || !result.intents || !result.intents[0] || result.intents[0].confidence < CONFIDENCE_THRESHOLD) {
     memberClient.logger.debug('Rejected voice command')
     memberClient.logger.debug(result)
     Functions.sendMsg(
@@ -444,7 +443,7 @@ botClient.on('voiceStateUpdate', (oldPresence, newPresence) => {
           )
           Commands.restrictedCommands.get('leave').execute(guildClient)
         }
-      }, Config.ALONE_TIMEOUT + 500)
+      }, Timeouts.ALONE_TIMEOUT + 500)
     }
 
     // If the bot has disconnected and the guildClient is marked for deletion, delete it

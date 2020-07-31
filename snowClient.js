@@ -2,7 +2,7 @@ const Detector = require('snowboy').Detector
 const Models = require('snowboy').Models
 const Events = require('events')
 const Wit = require('./web_apis/wit')
-const Config = require('./config')
+const { Timeouts } = require('./config')
 
 /**
  * Uses Snowboy for hotword detection, triggering a callback.
@@ -62,7 +62,7 @@ class SnowClient {
    */
   checkBuffer (chunk) {
     if (this.triggered) {
-      if (new Date().getTime() - this.timeSinceLastChunk < Config.SILENCE_QUERY_TIME) {
+      if (new Date().getTime() - this.timeSinceLastChunk < Timeouts.SILENCE_QUERY_TIME) {
         this.timeSinceLastChunk = new Date().getTime()
       }
     }
@@ -114,7 +114,7 @@ class SnowClient {
 
     // Every 50ms, check if the query time has been exceeded, and finish if it has
     const intervalID = setInterval(() => {
-      if (new Date().getTime() - this.timeSinceLastChunk > Config.SILENCE_QUERY_TIME || new Date().getTime() - initialTime > Config.MAX_QUERY_TIME) {
+      if (new Date().getTime() - this.timeSinceLastChunk > Timeouts.SILENCE_QUERY_TIME || new Date().getTime() - initialTime > Timeouts.MAX_QUERY_TIME) {
         clearInterval(intervalID)
         flag.emit('finish')
         this.stream.removeAllListeners()

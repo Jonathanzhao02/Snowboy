@@ -1,6 +1,5 @@
 const Defaults = require('defaults')
-const Emojis = require('./emojis')
-const Config = require('./config')
+const { SettingsValues, Emojis } = require('./config')
 
 /**
  * Contains all available settings options for a user.
@@ -18,8 +17,8 @@ class UserSettings {
   constructor (usrId, options) {
     this.userId = usrId
     options = Defaults(options, {
-      impressions: Config.SettingsValues.DEFAULT_IMPRESSIONS,
-      sensitivity: Config.SettingsValues.DEFAULT_SENSITIVITY
+      impressions: SettingsValues.DEFAULT_IMPRESSIONS,
+      sensitivity: SettingsValues.DEFAULT_SENSITIVITY
     })
 
     Object.assign(this, options)

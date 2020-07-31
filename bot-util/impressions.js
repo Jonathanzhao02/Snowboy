@@ -1,5 +1,4 @@
-const Emojis = require('../emojis')
-const Config = require('../config')
+const { ImpressionThresholds, Emojis } = require('../config')
 const Common = require('../common')
 const random = require('./functions').random
 
@@ -75,13 +74,13 @@ const Relation = {
  * @returns {Number} Returns the index of the likability level.
  */
 function convertToRelation (impression) {
-  if (impression <= Config.ImpressionThresholds.HATE_THRESHOLD) return Relation.HATE
-  if (impression <= Config.ImpressionThresholds.DISLIKE_THRESHOLD) return Relation.DISLIKE
-  if (impression <= Config.ImpressionThresholds.SLIGHT_DISLIKE_THRESHOLD) return Relation.SLIGHT_DISLIKE
-  if (impression <= Config.ImpressionThresholds.NEUTRAL_THRESHOLD) return Relation.NEUTRAL
-  if (impression <= Config.ImpressionThresholds.SLIGHT_LIKE_THRESHOLD) return Relation.SLIGHT_LIKE
-  if (impression <= Config.ImpressionThresholds.LIKE_THRESHOLD) return Relation.LIKE
-  if (impression <= Config.ImpressionThresholds.LOVE_THRESHOLD) return Relation.LOVE
+  if (impression <= ImpressionThresholds.HATE_THRESHOLD) return Relation.HATE
+  if (impression <= ImpressionThresholds.DISLIKE_THRESHOLD) return Relation.DISLIKE
+  if (impression <= ImpressionThresholds.SLIGHT_DISLIKE_THRESHOLD) return Relation.SLIGHT_DISLIKE
+  if (impression <= ImpressionThresholds.NEUTRAL_THRESHOLD) return Relation.NEUTRAL
+  if (impression <= ImpressionThresholds.SLIGHT_LIKE_THRESHOLD) return Relation.SLIGHT_LIKE
+  if (impression <= ImpressionThresholds.LIKE_THRESHOLD) return Relation.LIKE
+  if (impression <= ImpressionThresholds.LOVE_THRESHOLD) return Relation.LOVE
 }
 
 /**
@@ -133,7 +132,7 @@ function getResponse (func, impression, args, useImpressions) {
 function updateImpression (keyv, key, client, value, useImpressions) {
   if (useImpressions === false) return
   Common.logger.info(`Attempting to update impressions for ${key}`)
-  if (client.impression + value > Config.ImpressionThresholds.MAX_IMPRESSION || client.impression + value < Config.ImpressionThresholds.MIN_IMPRESSION) return
+  if (client.impression + value > ImpressionThresholds.MAX_IMPRESSION || client.impression + value < ImpressionThresholds.MIN_IMPRESSION) return
   client.impression += value
   keyv.set(`${key}`, value)
 }

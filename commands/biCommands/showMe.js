@@ -1,4 +1,4 @@
-const Emojis = require('../../emojis')
+const { Emojis } = require('../../config')
 const { Embeds, Functions } = require('../../bot-util')
 
 const Imgsearch = require('g-i-s')

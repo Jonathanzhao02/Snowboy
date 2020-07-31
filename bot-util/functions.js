@@ -1,7 +1,6 @@
 const Discord = require('discord.js')
 const Common = require('../common')
-const Config = require('../config')
-const Emojis = require('../emojis')
+const { Timeouts, Emojis } = require('../config')
 const Streams = require('../streams')
 
 // NOT EXPORTED
@@ -125,7 +124,7 @@ function startTimeout (guildClient) {
   guildClient.logger.info('Starting expiration timer')
   guildClient.lastCalled = Date.now()
   if (guildClient.timeoutId) clearTimeout(guildClient.timeoutId)
-  guildClient.timeoutId = setTimeout(() => { cleanupGuildClient(guildClient) }, Config.TIMEOUT + 500)
+  guildClient.timeoutId = setTimeout(() => { cleanupGuildClient(guildClient) }, Timeouts.TIMEOUT + 500)
 }
 
 /**
@@ -137,7 +136,7 @@ function startTimeout (guildClient) {
  * @param {Object} guildClient The guildClient to be checked for expiration.
  */
 function cleanupGuildClient (guildClient) {
-  if (Date.now() - guildClient.lastCalled >= Config.TIMEOUT) {
+  if (Date.now() - guildClient.lastCalled >= Timeouts.GUILD_TIMEOUT) {
     guildClient.logger.debug('Attempting to clean up guildClient')
     // If the guild is currently connected, is not playing music, and has an active TextChannel,
     // notify, mark the guildClient for deletion, and leave

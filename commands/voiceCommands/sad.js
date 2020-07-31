@@ -1,8 +1,6 @@
 const Common = require('../../common')
-const Emojis = require('../../emojis')
 const { Functions, Impressions } = require('../../bot-util')
-
-const Config = require('../../config')
+const { ImpressionValues, Emojis } = require('../../config')
 
 /**
  * Makes Snowboy sad.
@@ -22,7 +20,7 @@ function insult (memberClient, args) {
     Common.uKeyv,
     memberClient.id,
     memberClient.userClient,
-    Config.ImpressionValues.SAD_VALUE,
+    ImpressionValues.SAD_VALUE,
     memberClient.userClient.settings.impressions
   )
 }

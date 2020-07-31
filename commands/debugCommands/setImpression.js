@@ -1,7 +1,7 @@
 const Common = require('../../common')
 const { Functions, Impressions} = require('../../bot-util')
 
-const Config = require('../../config')
+const { ImpressionThresholds } = require('../../config')
 
 /**
  * Sets the impression of a member.
@@ -25,7 +25,7 @@ function setImpression (memberClient, args, msg) {
   }
   memberClient = memberClient.guildClient.memberClients.get(id)
   // Ensures a member is found, and that the value is a number between the maximum and minimum values
-  if (!memberClient || isNaN(val) || val > Config.ImpressionThresholds.MAX_IMPRESSION || val < Config.ImpressionThresholds.MIN_IMPRESSION) return
+  if (!memberClient || isNaN(val) || val > ImpressionThresholds.MAX_IMPRESSION || val < ImpressionThresholds.MIN_IMPRESSION) return
   Impressions.updateImpression(Common.uKeyv, id, memberClient.userClient, val - memberClient.userClient.impression)
   Functions.sendMsg(
     memberClient.guildClient.textChannel,

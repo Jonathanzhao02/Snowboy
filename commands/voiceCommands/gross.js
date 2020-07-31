@@ -1,7 +1,6 @@
 const Common = require('../../common')
-const Emojis = require('../../emojis')
 const { Functions, Impressions } = require('../../bot-util')
-const Config = require('../../config')
+const { ImpressionValues, Emojis } = require('../../config')
 
 /**
  * Makes Snowboy grossed out.
@@ -21,7 +20,7 @@ function gross (memberClient, args) {
     Common.uKeyv,
     memberClient.id,
     memberClient.userClient,
-    Config.ImpressionValues.GROSS_VALUE,
+    ImpressionValues.GROSS_VALUE,
     memberClient.userClient.settings.impressions
   )
 }

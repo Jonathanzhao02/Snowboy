@@ -1,7 +1,6 @@
 const Common = require('../../common')
-const Emojis = require('../../emojis')
 const { Functions, Impressions } = require('../../bot-util')
-const Config = require('../../config')
+const { ImpressionValues, Emojis } = require('../../config')
 
 /**
  * Makes Snowboy happy.
@@ -20,7 +19,7 @@ function compliment (memberClient, args) {
     Common.uKeyv,
     memberClient.id,
     memberClient.userClient,
-    Config.ImpressionValues.HAPPY_VALUE,
+    ImpressionValues.HAPPY_VALUE,
     memberClient.userClient.settings.impressions
   )
 }

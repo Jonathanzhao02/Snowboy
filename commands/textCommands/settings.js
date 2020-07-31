@@ -1,5 +1,5 @@
 const Common = require('../../common')
-const Emojis = require('../../emojis')
+const { Emojis } = require('../../config')
 const { Embeds, Functions } = require('../../bot-util')
 
 const GuildSettings = require('../../guildSettings')

@@ -2,7 +2,7 @@ const Entities = require('html-entities').Html5Entities
 const Discord = require('discord.js')
 const GuildSettings = require('../guildSettings')
 const UserSettings = require('../userSettings')
-const Emojis = require('../emojis')
+const { Emojis } = require('../config')
 
 /**
  * Creates an embed for a video.

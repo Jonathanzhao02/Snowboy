@@ -1,4 +1,4 @@
-const Emojis = require('../../emojis')
+const { Emojis } = require('../../config')
 const { Functions } = require('../../bot-util')
 
 /**

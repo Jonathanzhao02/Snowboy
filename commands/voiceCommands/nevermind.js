@@ -1,7 +1,6 @@
 const Common = require('../../common')
-const Emojis = require('../../emojis')
 const { Functions, Impressions } = require('../../bot-util')
-const Config = require('../../config')
+const { ImpressionValues, Emojis } = require('../../config')
 
 /**
  * Makes Snowboy mildy irritated that someone called it just to say nevermind.
@@ -21,7 +20,7 @@ function nevermind (memberClient, args) {
     Common.uKeyv,
     memberClient.id,
     memberClient.userClient,
-    Config.ImpressionValues.NEVERMIND_VALUE,
+    ImpressionValues.NEVERMIND_VALUE,
     memberClient.userClient.settings.impressions
   )
 }

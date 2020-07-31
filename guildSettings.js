@@ -1,6 +1,5 @@
 const Defaults = require('defaults')
-const Emojis = require('./emojis')
-const Config = require('./config')
+const { SettingsValues, Emojis } = require('./config')
 
 /**
  * Contains all available settings options for a guildClient.
@@ -19,9 +18,9 @@ class GuildSettings {
   constructor (gldId, options) {
     this.guildId = gldId
     options = Defaults(options, {
-      prefix: Config.SettingsValues.DEFAULT_BOT_PREFIX,
-      voice: Config.SettingsValues.DEFAULT_VOICE,
-      mentions: Config.SettingsValues.DEFAULT_MENTIONS
+      prefix: SettingsValues.DEFAULT_BOT_PREFIX,
+      voice: SettingsValues.DEFAULT_VOICE,
+      mentions: SettingsValues.DEFAULT_MENTIONS
     })
 
     Object.assign(this, options)

@@ -1,7 +1,6 @@
 const Common = require('../../common')
-const Emojis = require('../../emojis')
 const { Responses, Functions, Impressions } = require('../../bot-util')
-const Config = require('../../config')
+const { ImpressionValues, Emojis } = require('../../config')
 
 /**
  * Greets a user.
@@ -21,7 +20,7 @@ function greet (memberClient, args) {
     Common.uKeyv,
     memberClient.id,
     memberClient.userClient,
-    Config.ImpressionValues.GREET_VALUE,
+    ImpressionValues.GREET_VALUE,
     memberClient.userClient.settings.impressions
   )
 }
