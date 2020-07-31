@@ -1,4 +1,4 @@
 module.exports = {
-  gsearch: require('./gsearch'),
-  wit: require('./wit')
+  Gsearch: require('./gsearch'),
+  Wit: require('./wit')
 }
