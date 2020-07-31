@@ -1,7 +1,6 @@
-const Detector = require('snowboy').Detector
-const Models = require('snowboy').Models
-const Events = require('events')
-const Wit = require('./web_apis/wit')
+const { Models, Detector } = require('snowboy')
+const { EventEmitter } = require('events')
+const { Wit } = require('./web-apis')
 const { Timeouts } = require('./config')
 
 /**
@@ -26,7 +25,7 @@ class SnowClient {
     this.stream = null
     this.triggered = false
     this.memberClient = mmbrClnt
-    this.events = new Events.EventEmitter()
+    this.events = new EventEmitter()
 
     const models = new Models()
     models.add({
@@ -91,7 +90,7 @@ class SnowClient {
     this.timeSinceLastChunk = new Date().getTime()
     const initialTime = this.timeSinceLastChunk
 
-    const flag = new Events.EventEmitter()
+    const flag = new EventEmitter()
     // Get the text of the audio stream from Wit.ai
     Wit.getStreamText(this.stream, flag, (finalResult) => {
       this.triggered = false

@@ -9,7 +9,7 @@ const UserSettings = require('./userSettings')
 const { Emojis, Timeouts, DEBUG_IDS, CONFIDENCE_THRESHOLD } = require('./config')
 const { Functions, Impressions, Guilds } = require('./bot-util')
 const { botClient, logger, gKeyv, uKeyv } = require('./common')
-const Admin = require('./snowboyWebAdmin')
+const Admin = require('./snowboy-web-admin')
 Admin.start()
 
 // Logging

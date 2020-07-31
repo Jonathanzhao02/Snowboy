@@ -2,8 +2,7 @@ const Pino = require('pino')
 const Fs = require('fs')
 const Discord = require('discord.js')
 const Keyv = require('keyv')
-const Gsearch = require('./web_apis/gsearch')
-const Wit = require('./web_apis/wit')
+const { Gsearch, Wit } = require('./web-apis')
 
 // Set up environmental variables
 const Env = require('dotenv').config()
