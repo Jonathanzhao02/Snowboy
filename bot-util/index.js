@@ -1,7 +1,7 @@
 module.exports = {
-  Embeds: require('./embeds'),
-  Responses: require('./responses'),
-  Functions: require('./functions'),
-  Guilds: require('./guilds'),
-  Impressions: require('./impressions')
+  Embeds: require('./Embeds'),
+  Responses: require('./Responses'),
+  Functions: require('./Functions'),
+  Guilds: require('./Guilds'),
+  Impressions: require('./Impressions')
 }

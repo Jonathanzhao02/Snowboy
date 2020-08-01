@@ -1,5 +1,5 @@
 const ipc = require('node-ipc')
-const commands = require('./commandMap')
+const commands = require('./CommandMap')
 
 /**
  * Starts the ipc server for dashboard communication.

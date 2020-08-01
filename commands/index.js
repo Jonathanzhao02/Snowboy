@@ -3,12 +3,12 @@ const path = require('path')
 
 // Commands
 const commands = new Map([
-  ['biCommands', { path: './biCommands', map: new Map() }],
-  ['restrictedCommands', { path: './restrictedCommands', map: new Map() }],
-  ['voiceOnlyCommands', { path: './voiceCommands', map: new Map() }],
-  ['textOnlyCommands', { path: './textCommands', map: new Map() }],
-  ['debugCommands', { path: './debugCommands', map: new Map() }],
-  ['eastereggCommands', { path: './eastereggCommands', map: new Map() }]
+  ['bi', { path: './bi', map: new Map() }],
+  ['restricted', { path: './restricted', map: new Map() }],
+  ['voice', { path: './voice', map: new Map() }],
+  ['text', { path: './text', map: new Map() }],
+  ['debug', { path: './debug', map: new Map() }],
+  ['easteregg', { path: './easteregg', map: new Map() }]
 ])
 
 commands.forEach((obj, index) => {

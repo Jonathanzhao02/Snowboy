@@ -1,4 +1,4 @@
-const random = require('./functions').random
+const random = require('./Functions').random
 
 // The list of greetings used for when the bot joins
 const greetings = [

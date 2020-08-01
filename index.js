@@ -293,7 +293,7 @@ async function onMessage (msg) {
 
   // If Snowboy is currently connected in the guild, and the GuildMember tries to run a restricted command (affects Snowboy's behavior
   // in the voice channel) in another text channel, notify the GuildMember and return
-  if (msg.channel.id !== guildClient.textChannel.id && guildClient.connection && Commands.restrictedCommands.get(commandName)) {
+  if (guildClient.connection && msg.channel.id !== guildClient.textChannel.id && Commands.restricted.get(commandName)) {
     Functions.sendMsg(
       msg.channel,
       `${Emojis.error} ***Sorry, I am not actively listening to this channel!***`
@@ -301,7 +301,17 @@ async function onMessage (msg) {
     return
   // If Snowboy is currently connected in the guild, and the GuildMember tries to run a restricted command without being in the active
   // voice channel, notify the GuildMember and return
-  } else if (guildClient.connection && msg.member.voice.channelID !== guildClient.voiceChannel.id && Commands.restrictedCommands.get(commandName)) {
+  } else if (guildClient.connection && msg.member.voice.channelID !== guildClient.voiceChannel.id && Commands.restricted.get(commandName)) {
+    Functions.sendMsg(
+      msg.channel,
+      `${Emojis.error} ***Sorry, you are not in my voice channel!***`
+    )
+    return
+  }
+
+  // If Snowboy is currently connected in the Guild, and the GuildMember tries to run a restricted command while not in the voice channel,
+  // notify and return
+  if (guildClient.connection && Commands.restricted.get(commandName) && msg.member.voice.channelID !== guildClient.voiceChannel.id) {
     Functions.sendMsg(
       msg.channel,
       `${Emojis.error} ***Sorry, you are not in my voice channel!***`
@@ -310,16 +320,16 @@ async function onMessage (msg) {
   }
 
   // Check all relevant command maps for the current command name, and execute it
-  if (Commands.biCommands.get(commandName)) {
-    Commands.biCommands.get(commandName).execute(memberClient, args)
-  } else if (Commands.restrictedCommands.get(commandName)) {
-    Commands.restrictedCommands.get(commandName).execute(memberClient, args)
-  } else if (Commands.textOnlyCommands.get(commandName)) {
-    Commands.textOnlyCommands.get(commandName).execute(memberClient, args, msg)
-  } else if (DEBUG_IDS.includes(memberClient.id) && Commands.debugCommands.get(commandName)) {
-    Commands.debugCommands.get(commandName).execute(memberClient, args, msg)
-  } else if (Commands.eastereggCommands.get(commandName)) {
-    Commands.eastereggCommands.get(commandName).execute(memberClient, args)
+  if (Commands.bi.get(commandName)) {
+    Commands.bi.get(commandName).execute(memberClient, args)
+  } else if (Commands.restricted.get(commandName)) {
+    Commands.restricted.get(commandName).execute(memberClient, args)
+  } else if (Commands.text.get(commandName)) {
+    Commands.text.get(commandName).execute(memberClient, args, msg)
+  } else if (DEBUG_IDS.includes(memberClient.id) && Commands.debug.get(commandName)) {
+    Commands.debug.get(commandName).execute(memberClient, args, msg)
+  } else if (Commands.easteregg.get(commandName)) {
+    Commands.eastergg.get(commandName).execute(memberClient, args)
   } else {
     Functions.sendMsg(
       msg.channel,
@@ -360,14 +370,14 @@ function parse (result, memberClient) {
   memberClient.logger.debug(`Understood command as ${commandName} and arguments as ${args}`)
 
   // Checks all relevant command maps
-  if (Commands.biCommands.get(commandName)) {
-    Commands.biCommands.get(commandName).execute(memberClient, args)
-  } else if (Commands.restrictedCommands.get(commandName)) {
-    Commands.restrictedCommands.get(commandName).execute(memberClient, args)
-  } else if (Commands.voiceOnlyCommands.get(commandName)) {
-    Commands.voiceOnlyCommands.get(commandName).execute(memberClient, args)
-  } else if (Commands.eastereggCommands.get(commandName)) {
-    Commands.eastereggCommands.get(commandName).execute(memberClient, args)
+  if (Commands.bi.get(commandName)) {
+    Commands.bi.get(commandName).execute(memberClient, args)
+  } else if (Commands.restricted.get(commandName)) {
+    Commands.restricted.get(commandName).execute(memberClient, args)
+  } else if (Commands.voice.get(commandName)) {
+    Commands.voice.get(commandName).execute(memberClient, args)
+  } else if (Commands.easteregg.get(commandName)) {
+    Commands.easteregg.get(commandName).execute(memberClient, args)
   } else {
     Functions.sendMsg(
       memberClient.guildClient.textChannel,
@@ -427,7 +437,7 @@ botClient.on('voiceStateUpdate', (oldPresence, newPresence) => {
     // If the bot has been disconnected, clean up the guildClient
     if (userId === botClient.user.id && !newPresence.channelID) {
       guildClient.logger.info('Bot disconnected, cleaning up...')
-      Commands.restrictedCommands.get('leave').execute(guildClient)
+      Commands.restricted.get('leave').execute(guildClient)
     }
 
     // If the bot has been left alone in a channel, wait a few seconds before leaving
@@ -441,7 +451,7 @@ botClient.on('voiceStateUpdate', (oldPresence, newPresence) => {
             guildClient.textChannel,
             `${Emojis.sad} I'm leaving, I'm all by myself!`
           )
-          Commands.restrictedCommands.get('leave').execute(guildClient)
+          Commands.restricted.get('leave').execute(guildClient)
         }
       }, Timeouts.ALONE_TIMEOUT + 500)
     }
