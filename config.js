@@ -14,7 +14,7 @@ const DEFAULT_MENTIONS = true
 const DEFAULT_SENSITIVITY = '0.45'
 
 // Time before Snowboy automatically disconnects due to inactivity
-const TIMEOUT = 1800000
+const GUILD_TIMEOUT = 1800000
 
 // Time before Snowboy automatically disconnects from a channel after being alone
 const ALONE_TIMEOUT = 10000
@@ -51,13 +51,51 @@ const LOVE_THRESHOLD = 100
 const MAX_IMPRESSION = 100
 const MIN_IMPRESSION = -100
 
+// All emojis used for messages
+const EMOJIS = {
+  checkmark: '✅',
+  error: '❌',
+  settings: '⚙️',
+  stats: '📊',
+  ping: '📶',
+  playing: '▶️',
+  pause: '⏸️',
+  loop: '🔁',
+  greeting: '👋',
+  farewell: '👋',
+  mute: '🔇',
+  unmute: '🔊',
+  skip: '⏩',
+  stop: '🛑',
+  queue: '⌛',
+  rabbit: '🐰',
+  search: '🔎',
+  dice: '🎲',
+  heads: '😐',
+  tails: '🐕',
+  trash: '🗑',
+  skull: '💀',
+  unknown: '😕',
+  confused: '🤔',
+  sad: '😔',
+  angry: '😡',
+  weird: '😒',
+  annoyed: '☹️',
+  neutral: '😐',
+  content: '🙂',
+  happy: '😊',
+  joyful: '😄'
+}
+
 module.exports = {
-  TIMEOUT: TIMEOUT,
-  ALONE_TIMEOUT: ALONE_TIMEOUT,
   CONFIDENCE_THRESHOLD: CONFIDENCE_THRESHOLD,
-  MAX_QUERY_TIME: MAX_QUERY_TIME,
-  SILENCE_QUERY_TIME: SILENCE_QUERY_TIME,
   DEBUG_IDS: DEBUG_IDS,
+  Timeouts: {
+    GUILD_TIMEOUT: GUILD_TIMEOUT,
+    ALONE_TIMEOUT: ALONE_TIMEOUT,
+    MAX_QUERY_TIME: MAX_QUERY_TIME,
+    SILENCE_QUERY_TIME: SILENCE_QUERY_TIME,
+  },
   SettingsValues: {
     DEFAULT_BOT_PREFIX: DEFAULT_BOT_PREFIX,
     DEFAULT_IMPRESSIONS: DEFAULT_IMPRESSIONS,
@@ -82,5 +120,6 @@ module.exports = {
     LOVE_THRESHOLD: LOVE_THRESHOLD,
     MAX_IMPRESSION: MAX_IMPRESSION,
     MIN_IMPRESSION: MIN_IMPRESSION
-  }
+  },
+  Emojis: EMOJIS
 }

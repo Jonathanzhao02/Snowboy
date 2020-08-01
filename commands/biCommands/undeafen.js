@@ -1,23 +1,21 @@
-const Emojis = require('../../emojis')
+const { Emojis } = require('../../config')
 const { Functions } = require('../../bot-util')
 
 /**
  * Undeafens a user.
  *
- * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {Object} userClient The userClient of the user who requested to undeafen.
+ * @param {Object} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
  */
-function undeafen (guildClient, userClient, args) {
-  const logger = guildClient.logger.child({ user: userClient.id })
-  logger.info(`Setting deafen state of ${userClient.id} to \`${false}\``)
-  const voiceStates = guildClient.textChannel.guild.voiceStates.cache
-  const userVoiceState = voiceStates.find(state => state.id === userClient.id)
+function undeafen (memberClient, args) {
+  const logger = memberClient.logger
+  logger.info(`Setting deafen state of ${memberClient.id} to \`${false}\``)
+  const userVoiceState = memberClient.member.voice
   if (userVoiceState) userVoiceState.setDeaf(false)
   Functions.sendMsg(
-    guildClient.textChannel,
-    `**${Emojis.unmute} Undeafened <@${userClient.id}>**`,
-    guildClient
+    memberClient.guildClient.textChannel,
+    `**${Emojis.unmute} Undeafened <@${memberClient.id}>**`,
+    memberClient.guildClient.settings.mentions
   )
 }
 

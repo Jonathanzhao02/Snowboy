@@ -1,6 +1,5 @@
 const Defaults = require('defaults')
-const Emojis = require('./emojis')
-const Config = require('./config')
+const { SettingsValues, Emojis } = require('./config')
 
 /**
  * Contains all available settings options for a user.
@@ -18,8 +17,8 @@ class UserSettings {
   constructor (usrId, options) {
     this.userId = usrId
     options = Defaults(options, {
-      impressions: Config.SettingsValues.DEFAULT_IMPRESSIONS,
-      sensitivity: Config.SettingsValues.DEFAULT_SENSITIVITY
+      impressions: SettingsValues.DEFAULT_IMPRESSIONS,
+      sensitivity: SettingsValues.DEFAULT_SENSITIVITY
     })
 
     Object.assign(this, options)
@@ -76,7 +75,7 @@ class UserSettings {
    * @static
    * @param {Keyv} db The Keyv database to load from.
    * @param {String} usrId The user ID of the UserSettings object.
-   * @returns {Settings} Returns the Settings or undefined if the user is not found.
+   * @returns {Settings} Returns the Settings or null if the user is not found.
    */
   static async load (db, usrId) {
     const obj = await db.get(`${usrId}:settings`)

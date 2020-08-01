@@ -4,19 +4,21 @@ const Common = require('../../common')
 /**
  * Prints all the raw impressions of members in a server.
  *
- * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {Object} userClient Unused parameter.
+ * @param {Object} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
+ * @param {Discord.Message} msg Unused parameter.
  */
-function rawImpressions (guildClient, userClient, args) {
-  const logger = guildClient.logger.child({ user: userClient.id })
+function rawImpressions (memberClient, args, msg) {
+  const logger = memberClient.logger
   logger.info('Received raw impressions command')
   const response = ['Raw impressions:']
-  guildClient.members.forEach((mmbr, id) => {
-    const userClient = Common.botClient.userClients.get(id)
-    response.push(`    **${mmbr.member.displayName}**: \`${userClient.impression}\``)
+  Common.botClient.userClients.forEach(userClient => {
+    response.push(`    **${userClient.user.displayName}**: \`${userClient.impression}\``)
   })
-  Functions.sendMsg(guildClient.textChannel, response, guildClient)
+  Functions.sendMsg(
+    memberClient.guildClient.textChannel,
+    response
+  )
 }
 
 module.exports = {

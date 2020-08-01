@@ -1,16 +1,14 @@
-const Detector = require('snowboy').Detector
-const Models = require('snowboy').Models
-const Events = require('events')
-const Wit = require('./web_apis/wit')
-const Config = require('./config')
+const { Models, Detector } = require('snowboy')
+const { EventEmitter } = require('events')
+const { Wit } = require('./web-apis')
+const { Timeouts } = require('./config')
 
 /**
  * Uses Snowboy for hotword detection, triggering a callback.
  *
  * @property {ReadableStream} stream The stream to be piped to the detector.
  * @property {boolean} triggered Whether the client is triggered by a hotword currently.
- * @property {Object} guildClient The guildClient of the server the SnowClient's user is in.
- * @property {Object} userClient The userClient of the SnowClient's user.
+ * @property {Object} memberClient The memberClient of the member this SnowClient is associated with.
  * @property {EventEmitter} events The EventEmitter used for callbacks.
  * @property {Detector} detector The Detector used for Snowboy.
  * @property {Any} logger The logger to use.
@@ -20,16 +18,14 @@ class SnowClient {
   /**
    * Initializes the Snowboy detection.
    *
-   * @param {Object} gldClnt The guildClient of the server the SnowClient's user is in.
-   * @param {Object} usrClnt The userClient of the SnowClient's user.
+   * @param {Object} memberClient The memberClient of the member this SnowClient is associated with.
    * @param {String} sensitivity The sensitivity of the model.
    */
-  constructor (gldClnt, usrClnt, sensitivity) {
+  constructor (mmbrClnt, sensitivity) {
     this.stream = null
     this.triggered = false
-    this.guildClient = gldClnt
-    this.userClient = usrClnt
-    this.events = new Events.EventEmitter()
+    this.memberClient = mmbrClnt
+    this.events = new EventEmitter()
 
     const models = new Models()
     models.add({
@@ -65,7 +61,7 @@ class SnowClient {
    */
   checkBuffer (chunk) {
     if (this.triggered) {
-      if (new Date().getTime() - this.timeSinceLastChunk < Config.SILENCE_QUERY_TIME) {
+      if (new Date().getTime() - this.timeSinceLastChunk < Timeouts.SILENCE_QUERY_TIME) {
         this.timeSinceLastChunk = new Date().getTime()
       }
     }
@@ -85,16 +81,16 @@ class SnowClient {
         this.logger.trace('Emitted busy event')
         this.logger.debug('Already processing query, rejected hotword trigger')
       }
-      this.events.emit('busy', this.guildClient, this.userClient)
+      this.events.emit('busy', this.memberClient)
       return
     }
     // Emit the 'hotword' event and set the timeSinceLastChunk and initialTime values
     if (this.logger) this.logger.trace('Emitted hotword event')
-    this.events.emit('hotword', index, hotword, this.guildClient, this.userClient)
+    this.events.emit('hotword', index, hotword, this.memberClient)
     this.timeSinceLastChunk = new Date().getTime()
     const initialTime = this.timeSinceLastChunk
 
-    const flag = new Events.EventEmitter()
+    const flag = new EventEmitter()
     // Get the text of the audio stream from Wit.ai
     Wit.getStreamText(this.stream, flag, (finalResult) => {
       this.triggered = false
@@ -103,7 +99,7 @@ class SnowClient {
         this.logger.debug('Received result')
         this.logger.debug(finalResult)
       }
-      this.events.emit('result', finalResult, this.guildClient, this.userClient)
+      this.events.emit('result', finalResult, this.memberClient)
     },
     (error) => {
       this.triggered = false
@@ -112,12 +108,12 @@ class SnowClient {
         this.logger.warn('Wit.ai failed')
         this.logger.warn(error)
       }
-      this.events.emit('error', error, this.guildClient, this.userClient)
+      this.events.emit('error', error, this.memberClient)
     })
 
     // Every 50ms, check if the query time has been exceeded, and finish if it has
     const intervalID = setInterval(() => {
-      if (new Date().getTime() - this.timeSinceLastChunk > Config.SILENCE_QUERY_TIME || new Date().getTime() - initialTime > Config.MAX_QUERY_TIME) {
+      if (new Date().getTime() - this.timeSinceLastChunk > Timeouts.SILENCE_QUERY_TIME || new Date().getTime() - initialTime > Timeouts.MAX_QUERY_TIME) {
         clearInterval(intervalID)
         flag.emit('finish')
         this.stream.removeAllListeners()
@@ -162,7 +158,7 @@ class SnowClient {
     this.stream.unpipe(this.detector)
     this.stream.removeAllListeners()
     this.stream.destroy()
-    this.stream = undefined
+    this.stream = null
   }
 }
 

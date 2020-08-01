@@ -1,6 +1,5 @@
 const Defaults = require('defaults')
-const Emojis = require('./emojis')
-const Config = require('./config')
+const { SettingsValues, Emojis } = require('./config')
 
 /**
  * Contains all available settings options for a guildClient.
@@ -19,9 +18,9 @@ class GuildSettings {
   constructor (gldId, options) {
     this.guildId = gldId
     options = Defaults(options, {
-      prefix: Config.SettingsValues.DEFAULT_BOT_PREFIX,
-      voice: Config.SettingsValues.DEFAULT_VOICE,
-      mentions: Config.SettingsValues.DEFAULT_MENTIONS
+      prefix: SettingsValues.DEFAULT_BOT_PREFIX,
+      voice: SettingsValues.DEFAULT_VOICE,
+      mentions: SettingsValues.DEFAULT_MENTIONS
     })
 
     Object.assign(this, options)
@@ -86,7 +85,7 @@ class GuildSettings {
    * @static
    * @param {Keyv} db The Keyv database to load from.
    * @param {String} gldId The guild ID of the GuildSettings object.
-   * @returns {GuildSettings} Returns the GuildSettings or undefined if the guild is not found.
+   * @returns {GuildSettings} Returns the GuildSettings or null if the guild is not found.
    */
   static async load (db, gldId) {
     const obj = await db.get(`${gldId}:settings`)

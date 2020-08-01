@@ -1,22 +1,20 @@
 const Common = require('../../common')
-const Emojis = require('../../emojis')
+const { Emojis } = require('../../config')
 const { Functions } = require('../../bot-util')
 
 /**
  * Prints the stats of Snowboy.
  *
- * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {Object} userClient Unused parameter.
+ * @param {Object} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
  * @param {Discord.Message} msg Unused parameter.
  */
-function stats (guildClient, userClient, args, msg) {
-  const logger = guildClient.logger.child({ user: userClient.id })
+function stats (memberClient, args, msg) {
+  const logger = memberClient.logger
   logger.info('Received stats command')
   Functions.sendMsg(
-    guildClient.textChannel,
-    `${Emojis.stats} **I am currently in \`${Common.botClient.guilds.cache.size}\` servers!**`,
-    guildClient
+    memberClient.guildClient.textChannel,
+    `${Emojis.stats} **I am currently in \`${Common.botClient.guilds.cache.size}\` servers!**`
   )
 }
 

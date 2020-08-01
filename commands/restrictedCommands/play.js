@@ -1,8 +1,5 @@
-const Common = require('../../common')
-const Emojis = require('../../emojis')
+const { Emojis, Timeouts } = require('../../config')
 const { Embeds, Functions } = require('../../bot-util')
-
-const Config = require('../../config')
 const YtdlDiscord = require('ytdl-core-discord')
 const Ytpl = require('ytpl')
 const Ytsearch = require('yt-search')
@@ -25,8 +22,8 @@ function queuedPlay (video, guildClient) {
     guildClient.lastCalled = Date.now()
     logger.debug('Starting expiration timer')
     setTimeout(() => {
-      Functions.cleanupGuildClient(guildClient, Common.botClient)
-    }, Config.TIMEOUT + 500)
+      Functions.cleanupGuildClient(guildClient)
+    }, Timeouts.GUILD_TIMEOUT + 500)
     return
   }
 
@@ -73,7 +70,7 @@ function queuedPlay (video, guildClient) {
   })
 
   // Sends a message detailing the currently playing video
-  const mmbr = guildClient.members.get(video.requester)
+  const mmbr = guildClient.memberClients.get(video.requester)
   if (!mmbr) {
     logger.warn(`No user found for ID ${video.requester}!`)
     return
@@ -90,38 +87,36 @@ function queuedPlay (video, guildClient) {
 /**
  * Queues a song up for playback.
  *
- * @param {Object} guildClient The guildClient of the server of the queue.
- * @param {String} userClient The userClient of the user who requested the song.
+ * @param {Object} memberClient The memberClient of the member who requested the song.
  * @param {Object} video The videoConstruct object of the video.
  */
-async function queue (guildClient, userClient, video, query) {
-  const logger = guildClient.logger
+async function queue (memberClient, video, query) {
+  const logger = memberClient.logger
   if (!video) {
     logger.info('No video results found')
-    Functions.sendMsg(guildClient.textChannel, `${Emojis.sad} ***Could not find any results for \`${query}\`!***`, guildClient)
+    Functions.sendMsg(
+      memberClient.guildClient.textChannel,
+      `${Emojis.sad} ***Could not find any results for \`${query}\`!***`
+    )
     return
   }
-  video.requester = userClient.id
-  guildClient.songQueue.push(video)
+  video.requester = memberClient.id
+  memberClient.guildClient.songQueue.push(video)
 
   // If not playing anything, play this song
-  if (!guildClient.playing && !guildClient.downloading) {
+  if (!memberClient.guildClient.playing && !memberClient.guildClient.downloading) {
     logger.info(`Playing ${video}`)
-    queuedPlay(video, guildClient)
+    queuedPlay(video, memberClient.guildClient)
   // If playing something, just say it's queued
   } else {
     logger.info(`Queued ${video}`)
     if (video.description) {
-      const mmbr = await guildClient.members.get(userClient.id)
-      if (!mmbr) {
-        logger.warn(`No user found for ID ${userClient.id}!`)
-        return
-      }
       video.channel = `${Emojis.queue} Queued! - ${video.channel}`
-      video.position = guildClient.songQueue.length - 1
-      Functions.sendMsg(guildClient.textChannel,
-        Embeds.createVideoEmbed(video, mmbr.member.displayName),
-        guildClient)
+      video.position = memberClient.guildClient.songQueue.length - 1
+      Functions.sendMsg(
+        memberClient.guildClient.textChannel,
+        Embeds.createVideoEmbed(video, memberClient.member.displayName)
+      )
     }
   }
 }
@@ -131,7 +126,7 @@ async function queue (guildClient, userClient, video, query) {
  *
  * @param {String} query The search query.
  * @param {Object} logger The logger for logging.
- * @returns {Object} A videoConstruct if a result is found, else undefined
+ * @returns {Object} A videoConstruct if a result is found, else null
  */
 async function querySearch (query, logger) {
   logger.info(`Searching query ${query}`)
@@ -169,7 +164,7 @@ async function querySearch (query, logger) {
  *
  * @param {String} url The URL.
  * @param {Object} logger The logger for logging.
- * @returns {Object} A videoConstruct if a result is found, else undefined
+ * @returns {Object} A videoConstruct if a result is found, else null
  */
 async function urlSearch (url, logger) {
   logger.info(`Searching URL ${url}`)
@@ -209,24 +204,29 @@ async function urlSearch (url, logger) {
 /**
  * Plays or queues a song or playlist.
  *
- * @param {Object} guildClient The guildClient of the user's server.
- * @param {Object} userClient The userClient of the user requesting a song.
+ * @param {Object} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args The search query for the song.
  */
-function play (guildClient, userClient, args) {
-  const logger = guildClient.logger.child({ user: userClient.id })
+function play (memberClient, args) {
+  const logger = memberClient.logger
   logger.info('Received play command')
   // If not connected, notify and return
-  if (!guildClient.connection) {
+  if (!memberClient.guildClient.connection) {
     logger.debug('Not connected to a voice channel')
-    Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***I am not in a voice channel!***`, guildClient)
+    Functions.sendMsg(
+      memberClient.guildClient.textChannel,
+      `${Emojis.error} ***I am not in a voice channel!***`
+    )
     return
   }
 
   // If no query, notify and return
   if (!args || args.length === 0) {
     logger.debug('No query found')
-    Functions.sendMsg(guildClient.textChannel, `${Emojis.error} ***I need something to play!***`, guildClient)
+    Functions.sendMsg(
+      memberClient.guildClient.textChannel,
+      `${Emojis.error} ***I need something to play!***`
+    )
     return
   }
 
@@ -235,15 +235,21 @@ function play (guildClient, userClient, args) {
 
   // Add each video from Youtube playlist
   if (Ytpl.validateURL(args[0])) {
-    Functions.sendMsg(guildClient.textChannel, `${Emojis.search} ***Searching for*** \`${args[0]}\``, guildClient)
+    Functions.sendMsg(
+      memberClient.guildClient.textChannel,
+      `${Emojis.search} ***Searching for*** \`${args[0]}\``
+    )
     Ytpl(args[0], { limit: 0 }).then(result => {
       const name = result.title
       const vids = result.items
-      Functions.sendMsg(guildClient.textChannel, `${Emojis.checkmark} **Adding \`${vids.length}\` videos from \`${name}\`**`, guildClient)
+      Functions.sendMsg(
+        memberClient.guildClient.textChannel,
+        `${Emojis.checkmark} **Adding \`${vids.length}\` videos from \`${name}\`**`
+      )
 
       vids.forEach(vid => {
         logger.info(`Adding ${vid} to queue as playlist item`)
-        queue(guildClient, userClient, {
+        queue(memberClient, {
           url: vid.url_simple,
           title: vid.title,
           channel: vid.author.name,
@@ -254,15 +260,21 @@ function play (guildClient, userClient, args) {
     })
   // Directly get info from URL
   } else if (YtdlDiscord.validateURL(args[0])) {
-    Functions.sendMsg(guildClient.textChannel, `${Emojis.search} ***Searching for*** \`${args[0]}\``, guildClient)
+    Functions.sendMsg(
+      memberClient.guildClient.textChannel,
+      `${Emojis.search} ***Searching for*** \`${args[0]}\``
+    )
     urlSearch(args[0], logger).then(video => {
-      queue(guildClient, userClient, video, args[0])
+      queue(memberClient, video, args[0])
     })
   // Search query from Youtube
   } else {
-    Functions.sendMsg(guildClient.textChannel, `${Emojis.search} ***Searching for*** \`${query}\``, guildClient)
+    Functions.sendMsg(
+      memberClient.guildClient.textChannel,
+      `${Emojis.search} ***Searching for*** \`${query}\``
+    )
     querySearch(query, logger).then(video => {
-      queue(guildClient, userClient, video, query)
+      queue(memberClient, video, query)
     })
   }
 }

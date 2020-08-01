@@ -1,48 +1,73 @@
-const Gsearch = require('./web_apis/gsearch')
-const Wit = require('./web_apis/wit')
+const Pino = require('pino')
+const Fs = require('fs')
+const Discord = require('discord.js')
+const Keyv = require('keyv')
+const { Gsearch, Wit } = require('./web-apis')
 
+// Set up environmental variables
+const Env = require('dotenv').config()
+if (Env.error) throw Env.error
+
+// Set API keys
 Gsearch.setKey(process.env.GOOGLE_API_TOKEN)
 Wit.setKey(process.env.WIT_API_TOKEN)
 
-/**
- * Sets the bot client used for commands.
- *
- * @param {Discord.Client} client The Client of the bot to be used.
- */
-function setClient (client) {
-  module.exports.botClient = client
+// Create logger
+const defaultLogpath = './logs/latest.log'
+
+if (Fs.existsSync(defaultLogpath)) {
+  Fs.unlinkSync(defaultLogpath)
 }
 
-/**
- * Sets the database used for commands.
- *
- * @param {Keyv} db The Keyv database to be used.
- */
-function setGKeyv (db) {
-  module.exports.gKeyv = db
+const logger = Pino({
+  nestedKey: 'objs',
+  serializers: {
+    err: Pino.stdSerializers.err
+  }
+}, Pino.destination(defaultLogpath))
+
+// Determines log level
+if (process.argv.includes('trace')) {
+  logger.level = 'trace'
+} else if (process.argv.includes('debug')) {
+  logger.level = 'debug'
+} else if (process.argv.includes('info')) {
+  logger.level = 'info'
+} else if (process.argv.includes('warn')) {
+  logger.level = 'warn'
+} else if (process.argv.includes('error')) {
+  logger.level = 'error'
+} else if (process.argv.includes('fatal')) {
+  logger.level = 'fatal'
+} else if (process.argv.includes('silent')) {
+  logger.level = 'silent'
 }
 
-/**
- * Sets the database used for commands.
- *
- * @param {Keyv} db The Keyv database to be used.
- */
-function setUKeyv (db) {
-  module.exports.uKeyv = db
+// Create Discord bot client
+const botClient = new Discord.Client()
+botClient.guildClients = new Map() // to keep track of individual active guilds
+botClient.userClients = new Map() // to keep track of individual user bug reports
+
+// Switch between testing bot and (future) production bot
+if (process.argv.includes('-t') || process.argv.includes('--test')) {
+  botClient.login(process.env.TEST_BOT_TOKEN)
+} else {
+  botClient.login(process.env.SNOWBOY_BOT_TOKEN)
 }
 
-/**
- * Sets the logger used for non-guild-specific functions.
- *
- * @param {Any} lgr The logger to use.
- */
-function setLogger (lgr) {
-  module.exports.logger = lgr
-}
+// Create database connections
+const gKeyv = new Keyv(
+  process.argv.includes('-t') || process.argv.includes('--testing') ? 'sqlite://db/testing.db' : 'sqlite://db/snowboy.db',
+  { table: 'guilds' })
+const uKeyv = new Keyv(
+  process.argv.includes('-t') || process.argv.includes('--testing') ? 'sqlite://db/testing.db' : 'sqlite://db/snowboy.db',
+  { table: 'users' })
+gKeyv.on('error', error => { throw error })
+uKeyv.on('error', error => { throw error })
 
 module.exports = {
-  setClient: setClient,
-  setGKeyv: setGKeyv,
-  setUKeyv: setUKeyv,
-  setLogger: setLogger
+  botClient: botClient,
+  logger: logger,
+  uKeyv: uKeyv,
+  gKeyv: gKeyv
 }

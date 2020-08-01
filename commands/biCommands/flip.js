@@ -1,21 +1,20 @@
-const Emojis = require('../../emojis')
+const { Emojis } = require('../../config')
 const { Functions } = require('../../bot-util')
 
 /**
  * Flips a two-sided coin.
  *
- * @param {Object} guildClient The guildClient of the server the user is in.
- * @param {Object} userClient The userClient of the user who requested the command.
+ * @param {Object} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
  */
-function flip (guildClient, userClient, args) {
-  const logger = guildClient.logger.child({ user: userClient.id })
+function flip (memberClient, args) {
+  const logger = memberClient.logger
   logger.info('Received flip command')
   const result = Functions.random(2)
   Functions.sendMsg(
-    guildClient.textChannel,
-    `${result === 0 ? Emojis.heads : Emojis.tails} **I flipped \`${result === 0 ? 'heads' : 'tails'}\`, <@${userClient.id}>!**`,
-    guildClient
+    memberClient.guildClient.textChannel,
+    `${result === 0 ? Emojis.heads : Emojis.tails} **I flipped \`${result === 0 ? 'heads' : 'tails'}\`, <@${memberClient.id}>!**`,
+    memberClient.guildClient.settings.mentions
   )
 }
 
