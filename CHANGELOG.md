@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.5.0 (PR #28)
+Significant project restructuring.
+* Moved bot-utils into its own folder and split different parts into different folders.
+* Added new 'create' methods for guildClient, userClient, and new memberClient.
+* Added new folder for communication with Snowboy Dashboard web admin.
+* Refactored all commands and SnowClient to accept memberClients.
+* Expanded on testing with `chai` package installation, and created new test folder.
+* Refactored emojis into Config.
+* Fixed permission checking for voice channels and text channels, refactoring into util methods `checkTextPermissions` and `checkVoicePermissions`.
+* Significantly simplified index.js for readability.
+* Refactored expiration timer into separate method `startTimeout`.
+* Fixed `replaceMentions` returning `Promise` for arrays.
+* Moved botClient, logger, database, and dotenv to common.
+* Fixed common not properly exporting common resources.
+
 ## v0.4.0 (PR #27)
 Complete overhaul of Settings, new wrapper object for Users, bug fixes, and small enhancements
 * Added new UserSettings object
