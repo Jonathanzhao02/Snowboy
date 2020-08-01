@@ -40,7 +40,7 @@ function purge (memberClient, args, msg, total, snowflake) {
 
     total = 0
   }
-  let filter = m => m.author.id === Common.botClient.user.id
+  let filter = m => m.author.id === Common.botClient.user.id && m.deletable && !m.deleted
   let mmbr
   logger.debug('Received args: %o', args)
 
@@ -48,7 +48,7 @@ function purge (memberClient, args, msg, total, snowflake) {
     switch (args[0]) {
       // Include commands in the deletion
       case 'true':
-        filter = m => m.author.id === Common.botClient.user.id || m.content.startsWith(guildClient.settings.prefix)
+        filter = m => (m.author.id === Common.botClient.user.id || m.content.startsWith(guildClient.settings.prefix)) && m.deletable && !m.deleted
         break
       // Delete all messages
       case 'all':
@@ -61,12 +61,12 @@ function purge (memberClient, args, msg, total, snowflake) {
           )
           return
         }
-        filter = m => true
+        filter = m => m.deletable && !m.deleted
         break
       // Delete the requester's messages
       case 'me':
         mmbr = msg.member
-        filter = m => m.author.id === msg.author.id
+        filter = m => m.author.id === msg.author.id && m.deletable && !m.deleted
         break
       // Delete the messages of the mentioned user
       default:
@@ -79,7 +79,7 @@ function purge (memberClient, args, msg, total, snowflake) {
           )
           return
         } else {
-          filter = m => m.author.id === mmbr.id
+          filter = m => m.author.id === mmbr.id && m.deletable && !m.deleted
         }
         break
     }
@@ -92,7 +92,7 @@ function purge (memberClient, args, msg, total, snowflake) {
   guildClient.textChannel.messages.fetch({ limit: 100, before: snowflake }).then(messages => {
     logger.trace('Fetched messages')
     // Bulk delete all fetched messages that pass through the filter
-    guildClient.textChannel.bulkDelete(messages.filter(filter)).then(deletedMessages => {
+    guildClient.textChannel.bulkDelete(messages.filter(filter), { filterOld: true }).then(deletedMessages => {
       logger.trace('Deleting fetched messages')
       total += deletedMessages.size
 

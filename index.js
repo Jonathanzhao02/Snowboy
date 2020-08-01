@@ -14,6 +14,7 @@ Admin.start()
 
 // Logging
 const Heapdump = require('heapdump')
+const commands = require('./snowboy-web-admin/commandMap')
 
 /**
  * Creates a userClient object and updates the userClients map.
@@ -22,7 +23,7 @@ const Heapdump = require('heapdump')
  * @returns {Object} Returns the created userClient.
  */
 async function createUserClient (user) {
-  logger.info(`Creating user construct for ${user.username}`)
+  logger.info('Creating user construct for %s', user.username)
   const userConstruct = {
     id: user.id, // the id of the user
     lastReport: 0, // the time of the user's last bug report
@@ -31,7 +32,7 @@ async function createUserClient (user) {
     user: user, // the User object associated with this user
     logger: logger.child({ user: user.id, name: user.username }) // The logger object to be used for this client
   }
-  userConstruct.logger.debug(`Read settings for ${user.id} as ${userConstruct.settings}`)
+  userConstruct.logger.debug('Read settings for user as %o', userConstruct.settings)
   if (!userConstruct.settings) userConstruct.settings = new UserSettings(user.id)
   if (!userConstruct.impression) userConstruct.impression = 0
   userConstruct.logger.debug(userConstruct)
@@ -46,7 +47,7 @@ async function createUserClient (user) {
  * @returns {Object} Returns the created guildClient.
  */
 async function createGuildClient (guild) {
-  logger.info(`Creating new guild construct for ${guild.name}`)
+  logger.info('Creating new guild construct for %s', guild.name)
   const guildConstruct = {
     id: guild.id, // the id of the guild
     textChannel: null, // text channel to listen to for commands
@@ -66,7 +67,7 @@ async function createGuildClient (guild) {
     logger: logger.child({ guild: guild.id, name: guild.name }) // pino logger
   }
 
-  guildConstruct.logger.debug(`Read settings as ${guildConstruct.settings}`)
+  guildConstruct.logger.debug('Read guild settings as %o', guildConstruct.settings)
   if (!guildConstruct.settings) guildConstruct.settings = new GuildSettings(guild.id)
   guildConstruct.logger.debug(guildConstruct)
   botClient.guildClients.set(guild.id, guildConstruct)
@@ -81,7 +82,7 @@ async function createGuildClient (guild) {
  * @return {Object} Returns the created memberClient.
  */
 function createMemberClient (member, guildClient) {
-  guildClient.logger.info(`Creating new member construct for ${member.displayName}`)
+  guildClient.logger.info('Creating new member construct for %s', member.displayName)
   const memberConstruct = {
     id: member.id, // the id of the member associated with this memberClient
     snowClient: null, // the SnowClient listening to the member of this memberClient
@@ -106,7 +107,7 @@ function createMemberClient (member, guildClient) {
  * @returns {Object} Returns an Object containing all three clients.
  */
 async function createClientsFromMember (member) {
-  logger.info(`Fetching clients for ${member}`)
+  logger.info('Fetching clients for %s', member.id)
   // Create a new userConstruct if the User is not currently tracked, loading settings from database
   let userClient = botClient.userClients.get(member.id)
   if (!userClient) userClient = await createUserClient(member.user ? member.user : member)
@@ -138,7 +139,7 @@ async function createClientsFromMember (member) {
  * @returns {ReadableStream} Returns a stream to read audio data from.
  */
 function createAudioStream (member, receiver) {
-  logger.debug(`Attemting to create audio stream for ${member.displayName} in ${member.guild.id}`)
+  logger.debug('Attemting to create audio stream for %s in %s', member.displayName, member.guild.id)
   const audioStream = receiver.createStream(member, {
     mode: 'pcm',
     end: 'manual'
@@ -183,7 +184,7 @@ async function onSpeaking (member, speaking) {
   // If the member is not being listened to, create a new SnowClient and process the audio
   // through all necessary streams
   if (!memberClient.snowClient) {
-    childLogger.info(`Creating SnowClient for ${member.displayName}`)
+    childLogger.info('Creating SnowClient for %s', member.displayName)
     const newClient = new SnowClient(memberClient, userClient.settings.sensitivity)
     newClient.setLogger(memberClient.logger)
     newClient.on('hotword', ack)
@@ -201,7 +202,7 @@ async function onSpeaking (member, speaking) {
     })
     newClient.start(createAudioStream(member, guildClient.connection.receiver))
     memberClient.snowClient = newClient
-    childLogger.info(`Successfully created SnowClient for ${member.displayName}`)
+    childLogger.info('Successfully created SnowClient for %s', member.displayName)
   }
 }
 
@@ -213,16 +214,16 @@ async function onSpeaking (member, speaking) {
  */
 function logBug (msg, userClient) {
   const logger = userClient.logger
-  logger.info(`Received message in DM: ${msg}`)
+  logger.info('Received message in DM: %o', msg)
   if (Date.now() - userClient.lastReport < 86400000) {
-    logger.info(`Rejected bug report from ${msg.author.username}`)
+    logger.info('Rejected bug report from %s', msg.author.username)
     Functions.sendMsg(
       msg.channel, '**Please only send a bug report every 24 hours!**'
     )
   } else {
-    logger.info(`Accepting bug report from ${msg.author.username}`)
+    logger.info('Accepting bug report from %s', msg.author.username)
     userClient.lastReport = Date.now()
-    logger.info(`Read bug report from ${msg.author.username}`)
+    logger.info('Read bug report from %s', msg.author.username)
     const file = Fs.createWriteStream(`./bug_reports/bug_report_${msg.createdAt.toISOString()}_${msg.createdAt.getTime()}.txt`)
     file.write(msg.content)
     file.write('\n')
@@ -278,8 +279,8 @@ async function onMessage (msg) {
   const args = msg.content.slice(guildClient.settings.prefix.length).trim().split(/ +/)
   const commandName = args.shift().toLowerCase()
 
-  guildClient.logger.info(`Received ${msg.content}`)
-  guildClient.logger.debug(`Understood command as ${commandName} and arguments as ${args}`)
+  guildClient.logger.info('Received %s', msg.content)
+  guildClient.logger.debug('Understood command as %s and arguments as %o', commandName, args)
 
   // If the Guild is sending commands too fast, notify and return
   if (msg.createdAt.getTime() - guildClient.lastCalled < 1000) {
@@ -351,7 +352,7 @@ async function onMessage (msg) {
  */
 function parse (result, memberClient) {
   if (!memberClient || !memberClient.guildClient.settings.voice) return
-  memberClient.logger.info(`Received results: ${result.text}, ${result.intents}`)
+  memberClient.logger.info('Received results: %s, %o', result.text, result.intents)
 
   // Checks that the user's voice has been parsed by Wit.ai
   if (!result || !result.intents || !result.intents[0] || result.intents[0].confidence < CONFIDENCE_THRESHOLD) {
@@ -367,7 +368,7 @@ function parse (result, memberClient) {
   // Parse out the command intents and queries
   const commandName = result.intents[0].name.toLowerCase()
   const args = result.entities['wit$search_query:search_query'][0].body.toLowerCase().split(' ')
-  memberClient.logger.debug(`Understood command as ${commandName} and arguments as ${args}`)
+  memberClient.logger.debug('Understood command as %s and arguments as %o', commandName, args)
 
   // Checks all relevant command maps
   if (Commands.bi.get(commandName)) {
@@ -383,7 +384,7 @@ function parse (result, memberClient) {
       memberClient.guildClient.textChannel,
       `${Emojis.confused} ***Sorry, I don't understand*** "\`${result.text}\`"`
     )
-    memberClient.logger.warn(`No command found for ${commandName}!`)
+    memberClient.logger.warn('No command found for %s!', commandName)
   }
 }
 
@@ -426,7 +427,7 @@ botClient.on('voiceStateUpdate', (oldPresence, newPresence) => {
 
     // If user is being listened to, stop listening
     if (guildClient.memberClients.get(userId)) {
-      guildClient.logger.info(`Stopping SnowClient for ${newPresence.member.displayName}`)
+      guildClient.logger.info('Stopping SnowClient for %s', newPresence.member.displayName)
       const snowClient = guildClient.memberClients.get(userId).snowClient
       if (snowClient) {
         snowClient.stop()
@@ -466,13 +467,13 @@ botClient.on('voiceStateUpdate', (oldPresence, newPresence) => {
 
 // Logs that the client is ready in console
 botClient.on('ready', () => {
-  logger.info(`Logged in as ${botClient.user.tag}`)
-  logger.info(`Started up at ${new Date().toString()}`)
+  logger.info('Logged in as %s', botClient.user.tag)
+  logger.info('Started up at %s', new Date().toString())
 })
 
 // Sends greeting message when joining a new guild
 botClient.on('guildCreate', guild => {
-  logger.info(`Joined new guild: ${guild.id} : ${guild.name}`)
+  logger.info('Joined new guild: %s : %s', guild.id, guild.name)
   guild.systemChannel.send('**Hi! Thank you for adding me to the server!**\n' +
   ' - My name is Snowboy. Just say my name while I\'m in your channel to call me.\n' +
   ' - My default prefix is `%`, but you can change that using the `settings` command.\n' +
@@ -503,7 +504,7 @@ botClient.on('error', error => {
     logger.error('Client exception')
     logger.error(error)
     if (err) process.exit(1)
-    logger.debug(`Heapdump written to ${filename}`)
+    logger.debug('Heapdump written to %s', filename)
     botClient.destroy()
     process.exit(1)
   }))
@@ -518,7 +519,7 @@ process.on('uncaughtException', error => {
     logger.error(error)
     botClient.destroy()
     if (err) process.exit(1)
-    logger.debug(`Heapdump written to ${filename}`)
+    logger.debug('Heapdump written to %s', filename)
     process.exit(1)
   })
 })
