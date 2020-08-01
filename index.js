@@ -508,5 +508,4 @@ process.on('SIGINT', signal => {
  * Also change SnowClient to use member instead of memberClient?
  * Refactor leave command into separate general 'leave' in bot-util for leaving guilds and the command itself
  * Refactor Common into Loaders (?)
- * Delete index.js in bot-util and simply have require() use bot-util/(whatever) (no useless export file)
  */

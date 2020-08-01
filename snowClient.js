@@ -1,6 +1,6 @@
 const { Models, Detector } = require('snowboy')
 const { EventEmitter } = require('events')
-const { Wit } = require('./web-apis')
+const Wit = require('./web-apis/Wit')
 const { Timeouts } = require('./config')
 
 /**
