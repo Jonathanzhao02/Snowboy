@@ -53,15 +53,15 @@ function getClientsFromMember (member) {
   Common.logger.info('Fetching clients for %s', member.displayName)
   // Get the userClient
   const userClient = Common.botClient.userClients.get(member.id)
-  if (!userClient) Common.logger.warn(`No userClient found for ${member.id}!`)
+  if (!userClient) Common.logger.warn('No userClient found for %s!', member.displayName)
 
   // Get the guildClient
   const guildClient = Common.botClient.guildClients.get(member.guild.id)
-  if (!guildClient) Common.logger.warn(`No guildClient found for ${member.guild.id}!`)
+  if (!guildClient) Common.logger.warn('No guildClient found for %s!', member.guild.name)
 
   // Get the memberClient
   const memberClient = guildClient.memberClients.get(userClient.id)
-  if (!memberClient) Common.logger.warn(`No memberClient found for ${member.id}!`)
+  if (!memberClient) Common.logger.warn('No memberClient found for %s!', member.displayName)
 
   return {
     userClient: userClient,

@@ -26,7 +26,7 @@ function showMe (memberClient, args) {
     memberClient.guildClient.textChannel,
     `${Emojis.search} ***Searching*** \`${query}\``
   )
-  logger.debug(`Searching up ${query}`)
+  logger.debug('Searching up %s', query)
   Imgsearch(query, (error, results) => {
     if (error) throw error
     const result = results[Functions.random(results.length > 10 ? results.length : 10)]

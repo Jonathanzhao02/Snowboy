@@ -34,7 +34,7 @@ function settings (memberClient, args, msg) {
   const settingName = args.shift().toLowerCase()
   // If no option named what the user passed in, notify and return
   if (!GuildSettings.descriptions[settingName] && !UserSettings.descriptions[settingName]) {
-    logger.debug(`No setting found for ${settingName}`)
+    logger.debug('No setting found for %s', settingName)
     Functions.sendMsg(
       guildClient.textChannel,
       `${Emojis.error} ***Could not find option named \`${settingName}\`***`
@@ -46,7 +46,7 @@ function settings (memberClient, args, msg) {
   if (GuildSettings.descriptions[settingName]) {
     // If only passed in an option name, return information about that option
     if (args.length === 0) {
-      logger.debug(`Printing info about ${settingName}`)
+      logger.debug('Printing info about %s', settingName)
       Functions.sendMsg(
         guildClient.textChannel,
         GuildSettings.descriptions[settingName](guildClient.settings)
@@ -64,7 +64,7 @@ function settings (memberClient, args, msg) {
     }
     // Modify the value of an option
     const val = args.join()
-    logger.debug(`Attempting to set ${settingName} to ${val}`)
+    logger.debug('Attempting to set %s to %s', settingName, val)
     Functions.sendMsg(
       guildClient.textChannel,
       guildClient.settings.set(Common.gKeyv, settingName, val)
@@ -72,7 +72,7 @@ function settings (memberClient, args, msg) {
   // Setting option is for users
   } else {
     if (args.length === 0) {
-      logger.debug(`Printing info about ${settingName}`)
+      logger.debug('Printing info about %s', settingName)
       Functions.sendMsg(
         guildClient.textChannel,
         GuildSettings.descriptions[settingName](guildClient.settings)
@@ -81,7 +81,7 @@ function settings (memberClient, args, msg) {
     }
     // Modify the value of an option
     const val = args.join()
-    logger.debug(`Attempting to set ${settingName} to ${val}`)
+    logger.debug('Attempting to set %s to %s', settingName, val)
     Functions.sendMsg(
       guildClient.textChannel,
       memberClient.userClient.settings.set(Common.uKeyv, settingName, val)

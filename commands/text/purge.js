@@ -72,7 +72,7 @@ function purge (memberClient, args, msg, total, snowflake) {
       default:
         if (msg.mentions && msg.mentions.members.length > 0) mmbr = msg.mentions.members.array()[0]
         if (!mmbr) {
-          logger.debug(`Rejected user due to invalid user: ${args[0]}`)
+          logger.debug('Rejected user due to invalid user: %s', args[0])
           Functions.sendMsg(
             guildClient.textChannel,
             `${Emojis.error} ***Could not find user \`${args[0]}\`***`
@@ -98,11 +98,11 @@ function purge (memberClient, args, msg, total, snowflake) {
 
       // If deleted messages, continue deleting recursively
       if (deletedMessages.size > 0 && deletedMessages.last()) {
-        logger.debug(`Recursively purging: ${total} messages deleted`)
+        logger.debug('Recursively purging: %d messages deleted', total)
         purge(memberClient, args, msg, total, deletedMessages.last().id)
       // If no messages deleted, purge command has finished all it can, return
       } else {
-        logger.debug(`Finished purging: ${total} messages deleted`)
+        logger.debug('Finished purging: %d messages deleted', total)
         guildClient.purging = false
         Functions.sendMsg(
           guildClient.textChannel,

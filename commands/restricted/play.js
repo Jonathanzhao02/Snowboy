@@ -28,7 +28,7 @@ function queuedPlay (video, guildClient) {
   }
 
   // Uses ytdl-core-discord
-  logger.info(`Attempting to download from ${video.url}`)
+  logger.info('Attempting to download from %s', video.url)
   guildClient.downloading = true
   YtdlDiscord(video.url).then(stream => {
     logger.debug('Successfully downloaded video, playing audio')
@@ -73,7 +73,7 @@ function queuedPlay (video, guildClient) {
   // Sends a message detailing the currently playing video
   const mmbr = guildClient.memberClients.get(video.requester)
   if (!mmbr) {
-    logger.warn(`No user found for ID ${video.requester}!`)
+    logger.warn('No user found for ID %s!', video.requester)
     return
   }
   video.channel = `${Emojis.playing} Now Playing! - ${video.channel}`
@@ -106,11 +106,11 @@ async function queue (memberClient, video, query) {
 
   // If not playing anything, play this song
   if (!memberClient.guildClient.playing && !memberClient.guildClient.downloading) {
-    logger.info(`Playing ${video}`)
+    logger.info('Playing %s', video.url)
     queuedPlay(video, memberClient.guildClient)
   // If playing something, just say it's queued
   } else {
-    logger.info(`Queued ${video}`)
+    logger.info('Queued %s', video.url)
     if (video.description) {
       video.channel = `${Emojis.queue} Queued! - ${video.channel}`
       video.position = memberClient.guildClient.songQueue.length - 1
@@ -130,7 +130,7 @@ async function queue (memberClient, video, query) {
  * @returns {Object} A videoConstruct if a result is found, else null
  */
 async function querySearch (query, logger) {
-  logger.info(`Searching query ${query}`)
+  logger.info('Searching query %s', query)
   let result
   // Attempt to get result from Youtube
   try {
@@ -141,7 +141,7 @@ async function querySearch (query, logger) {
   }
 
   if (!result.videos || !result.videos[0]) {
-    logger.debug(`No results found for ${query}`)
+    logger.debug('No results found for %s', query)
     return
   }
 
@@ -168,7 +168,7 @@ async function querySearch (query, logger) {
  * @returns {Object} A videoConstruct if a result is found, else null
  */
 async function urlSearch (url, logger) {
-  logger.info(`Searching URL ${url}`)
+  logger.info('Searching URL %s', url)
   let result
   // Attempt to get info from url
   try {
@@ -178,7 +178,7 @@ async function urlSearch (url, logger) {
   }
 
   if (!result || result.player_response.videoDetails.isPrivate) {
-    logger.debug(`No info found for ${url}`)
+    logger.debug('No info found for %s', url)
     return
   }
 
@@ -232,7 +232,7 @@ function play (memberClient, args) {
   }
 
   const query = args.join(' ')
-  logger.debug(`Searching up ${query}`)
+  logger.debug('Searching up %s', query)
 
   // Add each video from Youtube playlist
   if (Ytpl.validateURL(args[0])) {
@@ -249,7 +249,7 @@ function play (memberClient, args) {
       )
 
       vids.forEach(vid => {
-        logger.info(`Adding ${vid} to queue as playlist item`)
+        logger.info('Adding %s to queue as playlist item', vid.url_simple)
         queue(memberClient, {
           url: vid.url_simple,
           title: vid.title,

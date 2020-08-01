@@ -112,11 +112,11 @@ function format (msg, args) {
  */
 function getResponse (func, impression, args, useImpressions) {
   const relation = convertToRelation(useImpressions ? impression : 0)
-  if (!replies.get(func)) console.error(`No replies for ${func}!`)
+  if (!replies.get(func)) Common.logger.warn('No replies for %s!', func)
   const replyCands = replies.get(func)[relation]
   const replyEmoji = replyEmojis.get(func)[relation]
-  if (!replyCands) console.error(`No index for ${relation}!`)
-  if (!replyEmoji) console.error(`No emoji index for ${relation}!`)
+  if (!replyCands) Common.logger.warn('No index for %d!', relation)
+  if (!replyEmoji) Common.logger.warn('No emoji index for %d!', relation)
   return replyEmoji + ' ' + format(replyCands[random(replyCands.length)], args)
 }
 
@@ -131,7 +131,7 @@ function getResponse (func, impression, args, useImpressions) {
  */
 function updateImpression (keyv, key, client, value, useImpressions) {
   if (useImpressions === false) return
-  Common.logger.info(`Attempting to update impressions for ${key}`)
+  Common.logger.info('Attempting to update impressions for %s', key)
   if (client.impression + value > ImpressionThresholds.MAX_IMPRESSION || client.impression + value < ImpressionThresholds.MIN_IMPRESSION) return
   client.impression += value
   keyv.set(`${key}`, value)

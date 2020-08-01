@@ -26,7 +26,7 @@ function search (memberClient, args) {
     `${Emojis.search} ***Searching*** \`${query}\``
   )
 
-  logger.debug(`Searching up ${query}`)
+  logger.debug('Searching up %s', query)
   Gsearch.search(query, result => {
     logger.debug('Received result')
     logger.debug(result)

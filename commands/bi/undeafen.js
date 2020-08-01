@@ -9,7 +9,7 @@ const { Functions } = require('../../bot-util')
  */
 function undeafen (memberClient, args) {
   const logger = memberClient.logger
-  logger.info(`Setting deafen state of ${memberClient.id} to \`${false}\``)
+  logger.info('Setting deafen state of %s to `false`', memberClient.member.displayName)
   const userVoiceState = memberClient.member.voice
   if (userVoiceState) userVoiceState.setDeaf(false)
   Functions.sendMsg(

@@ -15,7 +15,7 @@ function clearImpressions (memberClient, args, msg) {
   memberClient.guildClient.guild.members.fetch().then(members => {
     members.forEach(pair => {
       const member = pair[1]
-      logger.debug(`Deleting impression of ${member.id}`)
+      logger.debug('Deleting impression of %s', member.id)
       if (Common.botClient.userClients.get(member.id)) {
         Common.botClient.userClients.get(member.id).impression = 0
       }

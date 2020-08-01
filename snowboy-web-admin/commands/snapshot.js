@@ -11,7 +11,7 @@ function snapshot (args) {
   Common.logger.info('Taking heap snapshot!')
   heapdump.writeSnapshot(path.resolve(__dirname, `../../logs/${args ? args[0] : new Date().toISOString()}.heapdump`), (err, filename) => {
     if (err) throw err
-    Common.logger.info(`Saved heap snapshot to ${filename}!`)
+    Common.logger.info('Saved heap snapshot to %s!', filename)
   })
 }
 
