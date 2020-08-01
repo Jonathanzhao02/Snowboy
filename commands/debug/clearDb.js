@@ -1,5 +1,5 @@
-const Common = require('../../common')
-const { Functions } = require('../../bot-util')
+const Common = require('../../bot-util/Common')
+const Functions = require('../../bot-util/Functions')
 
 /**
  * Clears Snowboy's database completely and shuts the bot down.

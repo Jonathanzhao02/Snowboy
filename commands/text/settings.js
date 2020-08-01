@@ -1,9 +1,10 @@
-const Common = require('../../common')
+const Common = require('../../bot-util/Common')
+const Functions = require('../../bot-util/Functions')
+const Embeds = require('../../bot-util/Embeds')
 const { Emojis } = require('../../config')
-const { Embeds, Functions } = require('../../bot-util')
 
-const GuildSettings = require('../../guildSettings')
-const UserSettings = require('../../userSettings')
+const GuildSettings = require('../../GuildSettings')
+const UserSettings = require('../../UserSettings')
 const Discord = require('discord.js')
 
 /**

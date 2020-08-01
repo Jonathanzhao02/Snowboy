@@ -1,5 +1,8 @@
 const { Emojis } = require('../../config')
-const { Responses, Functions, Guilds } = require('../../bot-util')
+const Functions = require('../../bot-util/Functions')
+const Responses = require('../../bot-util/Responses')
+const Guilds = require('../../bot-util/Guilds')
+
 
 /**
  * Handles all setup associated with the connection.

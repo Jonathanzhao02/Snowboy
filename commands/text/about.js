@@ -1,5 +1,6 @@
-const Common = require('../../common')
-const { Embeds, Functions } = require('../../bot-util')
+const Common = require('../../bot-util/Common')
+const Functions = require('../../bot-util/Functions')
+const Embeds = require('../../bot-util/Embeds')
 
 /**
  * Prints the about embed of Snowboy.

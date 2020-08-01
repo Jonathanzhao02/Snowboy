@@ -1,6 +1,7 @@
-const Common = require('../../common')
+const Common = require('../../bot-util/Common')
+const Functions = require('../../bot-util/Functions')
+const Responses = require('../../bot-util/Responses')
 const { Emojis } = require('../../config')
-const { Responses, Functions } = require('../../bot-util')
 
 /**
  * Leaves the VoiceChannel.

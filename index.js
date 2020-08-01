@@ -4,97 +4,19 @@ const Fs = require('fs')
 const SnowClient = require('./snowClient')
 const Streams = require('./streams')
 const Commands = require('./commands')
-const GuildSettings = require('./guildSettings')
-const UserSettings = require('./userSettings')
 const { Emojis, Timeouts, DEBUG_IDS, CONFIDENCE_THRESHOLD } = require('./config')
-const { Functions, Impressions, Guilds } = require('./bot-util')
-const { botClient, logger, gKeyv, uKeyv } = require('./common')
+const Functions = require('../../bot-util/Functions')
+const Impressions = require('../../bot-util/Impressions')
+const Guilds = require('../../bot-util/Guilds')
+const { botClient, logger } = require('./bot-util/Common')
+const UserClient = require('./structures/UserClient')
+const GuildClient = require('./structures/GuildClient')
+const MemberClient = require('./structures/MemberClient')
 const Admin = require('./snowboy-web-admin')
 Admin.start()
 
 // Logging
 const Heapdump = require('heapdump')
-
-/**
- * Creates a userClient object and updates the userClients map.
- *
- * @param {Discord.User} user The User the userClient is associated with.
- * @returns {Object} Returns the created userClient.
- */
-async function createUserClient (user) {
-  logger.info('Creating user construct for %s', user.username)
-  const userConstruct = {
-    id: user.id, // the id of the user
-    lastReport: 0, // the time of the user's last bug report
-    impression: await uKeyv.get(`${user.id}:impression`), // the user's impression level with snowboy
-    settings: await UserSettings.load(uKeyv, user.id), // custom settings for the current user
-    user: user, // the User object associated with this user
-    logger: logger.child({ user: user.id, name: user.username }) // The logger object to be used for this client
-  }
-  userConstruct.logger.debug('Read settings for user as %o', userConstruct.settings)
-  if (!userConstruct.settings) userConstruct.settings = new UserSettings(user.id)
-  if (!userConstruct.impression) userConstruct.impression = 0
-  userConstruct.logger.debug(userConstruct)
-  botClient.userClients.set(user.id, userConstruct)
-  return userConstruct
-}
-
-/**
- * Creates a guildClient object and updates the guildClients map.
- *
- * @param {Discord.Guild} guild The Guild the guildClient is associated with.
- * @returns {Object} Returns the created guildClient.
- */
-async function createGuildClient (guild) {
-  logger.info('Creating new guild construct for %s', guild.name)
-  const guildConstruct = {
-    id: guild.id, // the id of the guild
-    textChannel: null, // text channel to listen to for commands
-    voiceChannel: null, // voice channel bot is interested in
-    connection: null, // connection to the voice channel
-    songQueue: [], // song queue
-    loopState: 0, // 0 = no loop, 1 = song loop, 2 = queue loop
-    memberClients: new Map(), // information about guildmembers including id, snowclients, guildmember, and impression with snowboy
-    playing: false, // whether a song is currently playing
-    downloading: false, // whether a song is currently being downloaded
-    guild: guild, // the corresponding guild
-    lastCalled: Date.now() - 2000, // when the last command was executed
-    delete: false, // set to true to mark guild for deletion upon disconnect
-    purging: false, // whether the purging command is currently active
-    settings: await GuildSettings.load(gKeyv, guild.id), // custom settings for the current guild
-    timeoutId: null, // the id of the current timeout interval function
-    logger: logger.child({ guild: guild.id, name: guild.name }) // pino logger
-  }
-
-  guildConstruct.logger.debug('Read guild settings as %o', guildConstruct.settings)
-  if (!guildConstruct.settings) guildConstruct.settings = new GuildSettings(guild.id)
-  guildConstruct.logger.debug(guildConstruct)
-  botClient.guildClients.set(guild.id, guildConstruct)
-  return guildConstruct
-}
-
-/**
- * Creates a memberClient object and updates the guildClient's member map.
- *
- * @param {Discord.GuildMember} member The GuildMember this memberClient is referring to.
- * @param {Object} guildClient The guildClient this memberClient is assigned to.
- * @return {Object} Returns the created memberClient.
- */
-function createMemberClient (member, guildClient) {
-  guildClient.logger.info('Creating new member construct for %s', member.displayName)
-  const memberConstruct = {
-    id: member.id, // the id of the member associated with this memberClient
-    snowClient: null, // the SnowClient listening to the member of this memberClient
-    member: member, // the GuildMember object of the member associated with this memberClient
-    userClient: botClient.userClients.get(member.id), // the userClient associated with this member
-    guildClient: guildClient, // the guildClient associated with this member
-    logger: guildClient.logger.child({ member: member.id, name: member.displayName }) // the logger to be used for this memberClient
-  }
-
-  guildClient.logger.debug(memberConstruct)
-  guildClient.memberClients.set(member.id, memberConstruct)
-  return memberConstruct
-}
 
 /**
  * Creates or fetches existing clients for a GuildMember/User object.
@@ -109,18 +31,27 @@ async function createClientsFromMember (member) {
   logger.info('Fetching clients for user %s', member.id)
   // Create a new userConstruct if the User is not currently tracked, loading settings from database
   let userClient = botClient.userClients.get(member.id)
-  if (!userClient) userClient = await createUserClient(member.user ? member.user : member)
+  if (!userClient) {
+    userClient = new UserClient(member.user ? member.user : member)
+    await userClient.init()
+  }
 
   // If member is a User (no Guild associated), only return the userClient
   if (!member.guild) return { userClient: userClient }
 
   // Create a new guildConstruct if the Guild is not currently tracked, loading settings from database
   let guildClient = botClient.guildClients.get(member.guild.id)
-  if (!guildClient) guildClient = await createGuildClient(member.guild)
+  if (!guildClient) {
+    guildClient = new GuildClient(member.guild)
+    await guildClient.init()
+  }
 
   // Create a new memberConstruct if the GuildMember is not currently tracked, loading settings from database
   let memberClient = guildClient.memberClients.get(userClient.id)
-  if (!memberClient) memberClient = createMemberClient(member, guildClient)
+  if (!memberClient) {
+    memberClient = new MemberClient(member, guildClient)
+    await memberClient.init()
+  }
 
   return {
     userClient: userClient,
@@ -573,9 +504,9 @@ process.on('SIGINT', signal => {
 
 /**
  * TODO:
- * Replace all memberClient commands with just member, and take advantage of the Functions.getClientsFromMember command
- * Replace forEach in errors with forEachAsync
- * Also change SnowClient to use member instead of memberClient
- * Change client constructs into actual objects instead of just make-believe objects
+ * Replace all memberClient commands with just member, and take advantage of the Functions.getClientsFromMember command?
+ * Also change SnowClient to use member instead of memberClient?
  * Refactor leave command into separate general 'leave' in bot-util for leaving guilds and the command itself
+ * Refactor Common into Loaders (?)
+ * Delete index.js in bot-util and simply have require() use bot-util/(whatever) (no useless export file)
  */

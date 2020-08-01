@@ -1,6 +1,6 @@
+const Common = require('../../bot-util/Common')
 const heapdump = require('heapdump')
 const path = require('path')
-const Common = require('../../common')
 
 /**
  * Takes a snapshot of the heap and writes it to the logs folder.

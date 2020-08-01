@@ -1,5 +1,5 @@
 const Discord = require('discord.js')
-const Common = require('../common')
+const Common = require('./Common')
 
 /**
  * Checks permissions in a TextChannel and returns any missing.

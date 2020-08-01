@@ -1,5 +1,6 @@
 const { Emojis } = require('../../config')
-const { Embeds, Functions } = require('../../bot-util')
+const Functions = require('../../bot-util/Functions')
+const Embeds = require('../../bot-util/Embeds')
 const { Gsearch } = require('../../web-apis')
 
 /**

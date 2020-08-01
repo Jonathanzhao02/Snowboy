@@ -1,4 +1,5 @@
-const { Functions, Impressions } = require('../../bot-util')
+const Functions = require('../../bot-util/Functions')
+const Impressions = require('../../bot-util/Impressions')
 
 /**
  * Prints Snowboy's impression of a user.

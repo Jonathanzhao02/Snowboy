@@ -1,5 +1,5 @@
 const { Emojis } = require('../../config')
-const { Functions } = require('../../bot-util')
+const Functions = require('../../bot-util/Functions')
 
 /**
  * Loops or stops looping current song.

@@ -1,5 +1,5 @@
 const { ImpressionThresholds, Emojis } = require('../config')
-const Common = require('../common')
+const Common = require('./Common')
 const random = require('./Functions').random
 
 // The list of replies used for when a hotword is triggered, ordered by likability

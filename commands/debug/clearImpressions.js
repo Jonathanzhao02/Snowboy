@@ -1,5 +1,5 @@
-const Common = require('../../common')
-const { Functions } = require('../../bot-util')
+const Common = require('../../bot-util/Common')
+const Functions = require('../../bot-util/Functions')
 
 /**
  * Clears the impressions of all tracked users in a server.

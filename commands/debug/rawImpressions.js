@@ -1,5 +1,5 @@
-const { Functions } = require('../../bot-util')
-const Common = require('../../common')
+const Common = require('../../bot-util/Common')
+const Functions = require('../../bot-util/Functions')
 
 /**
  * Prints all the raw impressions of members in a server.

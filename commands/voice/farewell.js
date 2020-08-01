@@ -1,5 +1,6 @@
 const { Emojis } = require('../../config')
-const { Responses, Functions } = require('../../bot-util')
+const Functions = require('../../bot-util/Functions')
+const Responses = require('../../bot-util/Responses')
 
 /**
  * Disconnects and says goodbye to a user.

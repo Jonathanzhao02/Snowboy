@@ -1,6 +1,6 @@
-const Common = require('../../common')
+const Common = require('../../bot-util/Common')
+const Functions = require('../../bot-util/Functions')
 const { Emojis } = require('../../config')
-const { Functions } = require('../../bot-util')
 
 /**
  * Prints the stats of Snowboy.

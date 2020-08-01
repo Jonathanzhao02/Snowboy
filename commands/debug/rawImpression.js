@@ -1,5 +1,5 @@
-const { Functions } = require('../../bot-util')
-const Common = require('../../common')
+const Common = require('../../bot-util/Common')
+const Functions = require('../../bot-util/Functions')
 
 /**
  * Prints the raw impression of a user.
