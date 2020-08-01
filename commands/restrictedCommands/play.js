@@ -1,7 +1,5 @@
-const { Emojis } = require('../../config')
+const { Emojis, Timeouts } = require('../../config')
 const { Embeds, Functions } = require('../../bot-util')
-
-const { Timeouts } = require('../../config')
 const YtdlDiscord = require('ytdl-core-discord')
 const Ytpl = require('ytpl')
 const Ytsearch = require('yt-search')
