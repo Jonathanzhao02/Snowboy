@@ -561,13 +561,6 @@ process.on('SIGINT', signal => {
   })
 })
 
-// Switch between testing bot and (future) production bot
-if (process.argv.includes('-t') || process.argv.includes('--test')) {
-  botClient.login(process.env.TEST_BOT_TOKEN)
-} else {
-  botClient.login(process.env.SNOWBOY_BOT_TOKEN)
-}
-
 /**
  * TODO:
  * Replace all memberClient commands with just member, and take advantage of the Functions.getClientsFromMember command

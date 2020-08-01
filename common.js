@@ -48,6 +48,13 @@ const botClient = new Discord.Client()
 botClient.guildClients = new Map() // to keep track of individual active guilds
 botClient.userClients = new Map() // to keep track of individual user bug reports
 
+// Switch between testing bot and (future) production bot
+if (process.argv.includes('-t') || process.argv.includes('--test')) {
+  botClient.login(process.env.TEST_BOT_TOKEN)
+} else {
+  botClient.login(process.env.SNOWBOY_BOT_TOKEN)
+}
+
 // Create database connections
 const gKeyv = new Keyv(
   process.argv.includes('-t') || process.argv.includes('--testing') ? 'sqlite://db/testing.db' : 'sqlite://db/snowboy.db',
