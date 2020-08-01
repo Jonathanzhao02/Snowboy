@@ -39,19 +39,20 @@ function leave (client, args) {
 
   logger.debug('Leaving')
   logger.trace('Disconnecting')
-  guildClient.connection.disconnect()
-  guildClient.connection.removeAllListeners()
+  guildClient.songQueue = []
   if (guildClient.connection.dispatcher) {
     logger.trace('Ending dispatcher')
     guildClient.connection.dispatcher.end()
-    guildClient.connection.dispatcher.destroy()
   }
   logger.trace('Cleaning up members')
   guildClient.memberClients.forEach(member => { if (member.snowClient) member.snowClient.stop() })
   guildClient.memberClients.clear()
   logger.trace('Leaving channel')
+  guildClient.connection.disconnect()
+  guildClient.connection.removeAllListeners()
   guildClient.voiceChannel.leave()
   guildClient.voiceChannel = null
+  guildClient.textChannel = null
   guildClient.connection = null
   guildClient.loopState = 0
   logger.debug('Successfully left')

@@ -43,6 +43,7 @@ function queuedPlay (video, guildClient) {
         logger.info('Finished song')
         var queue = guildClient.songQueue
         guildClient.playing = false
+        guildClient.downloading = false
         dispatcher.destroy()
         stream.destroy()
 

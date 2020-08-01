@@ -1,5 +1,5 @@
 const Common = require('../../common')
-const { Functions, Impressions} = require('../../bot-util')
+const { Functions, Impressions } = require('../../bot-util')
 const { ImpressionThresholds } = require('../../config')
 
 /**
