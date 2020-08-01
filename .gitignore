@@ -3,6 +3,7 @@
 # manually written in for now. Add any other useless (non-resource or js) files.
 node_modules
 .VS*
+.vs*
 .DS*
 db
 bug_reports
