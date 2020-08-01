@@ -2,6 +2,7 @@ const Discord = require('discord.js')
 const Common = require('../common')
 const { Timeouts, Emojis } = require('../config')
 const Streams = require('../streams')
+const Https = require('https')
 
 // NOT EXPORTED
 
@@ -175,6 +176,15 @@ function playSilence (guildClient) {
   })
 }
 
+function validateURL (url) {
+  return new Promise((resolve, reject) => {
+    Https.request(url, resp => {
+      if (resp.statusCode === 200) resolve()
+      else reject(new Error('Invalid status code'))
+    }).end()
+  })
+}
+
 module.exports = {
   random: random,
   forEachAsync: forEachAsync,
@@ -182,5 +192,6 @@ module.exports = {
   sendMsg: sendMsg,
   startTimeout: startTimeout,
   cleanupGuildClient: cleanupGuildClient,
-  playSilence: playSilence
+  playSilence: playSilence,
+  validateURL: validateURL
 }

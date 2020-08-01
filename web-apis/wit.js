@@ -25,25 +25,25 @@ function getText (pcmData, callback, handler) {
   if (!handler) handler = console.log
   if (!callback) callback = console.log
 
-  var headers = {
+  const headers = {
     Authorization: `Bearer ${accessToken}`,
     'Content-Type': 'audio/raw;encoding=signed-integer;bits=16;rate=16000;endian=little;'
   }
-  var method = 'POST'
-  var apiVersion = '20200513'
-  var path = `/speech?v=${apiVersion}`
-  var host = 'api.wit.ai'
+  const method = 'POST'
+  const apiVersion = '20200513'
+  const path = `/speech?v=${apiVersion}`
+  const host = 'api.wit.ai'
 
-  var options = {
+  const options = {
     host: host,
     path: path,
     headers: headers,
     method: method
   }
 
-  var req = http.request(options, resp => {
+  const req = http.request(options, resp => {
     resp.setEncoding('utf8')
-    var message = ''
+    let message = ''
 
     resp.on('data', chunk => {
       message += chunk
@@ -76,26 +76,26 @@ function getStreamText (stream, flag, callback, handler) {
   if (!handler) handler = console.log
   if (!callback) callback = console.log
 
-  var headers = {
+  const headers = {
     Authorization: `Bearer ${accessToken}`,
     'Content-Type': 'audio/raw;encoding=signed-integer;bits=16;rate=16000;endian=little;',
     'Transfer-encoding': 'chunked'
   }
-  var method = 'POST'
-  var apiVersion = '20200513'
-  var path = `/speech?v=${apiVersion}`
-  var host = 'api.wit.ai'
+  const method = 'POST'
+  const apiVersion = '20200513'
+  const path = `/speech?v=${apiVersion}`
+  const host = 'api.wit.ai'
 
-  var options = {
+  const options = {
     host: host,
     path: path,
     headers: headers,
     method: method
   }
 
-  var req = http.request(options, resp => {
+  const req = http.request(options, resp => {
     resp.setEncoding('utf8')
-    var message = ''
+    let message = ''
 
     resp.on('data', chunk => {
       message += chunk

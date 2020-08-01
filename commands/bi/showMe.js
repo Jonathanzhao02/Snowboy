@@ -27,18 +27,35 @@ function showMe (memberClient, args) {
     `${Emojis.search} ***Searching*** \`${query}\``
   )
   logger.debug('Searching up %s', query)
-  Imgsearch(query, (error, results) => {
+  Imgsearch(query, async (error, results) => {
     if (error) throw error
-    const result = results[Functions.random(results.length > 10 ? results.length : 10)]
-    result.query = query
-    logger.debug('Received result')
-    logger.debug(result)
+
+    while (results.length > 0) {
+      const result = results.shift()
+
+      try {
+        await Functions.validateURL(result.url)
+        result.query = query
+        logger.debug('Received valid result')
+        logger.debug(result)
+        Functions.sendMsg(
+          memberClient.guildClient.textChannel,
+          Embeds.createImageEmbed(
+            result,
+            memberClient.member.displayName
+          )
+        )
+        return
+      } catch (err) {
+        logger.warn(err)
+        logger.debug('Invalid URL %s', result.url)
+      }
+    }
+
+    logger.info('No results found for %s', query)
     Functions.sendMsg(
       memberClient.guildClient.textChannel,
-      Embeds.createImageEmbed(
-        result,
-        memberClient.member.displayName
-      )
+      `${Emojis.error} ***No results found for \`${query}\`!***`
     )
   })
 }
