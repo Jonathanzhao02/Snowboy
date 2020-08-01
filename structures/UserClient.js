@@ -1,5 +1,5 @@
 const UserSettings = require('../UserSettings')
-const Common = require('./bot-util/Common')
+const Common = require('../bot-util/Common')
 const Discord = require('discord.js')
 
 /**
@@ -43,7 +43,7 @@ class UserClient {
     this.logger.debug('Loading impression')
     this.impression = await Common.uKeyv.get(`${this.user.id}:impression`) || 0
     this.logger.debug('Read impression as %d', this.impression)
-    Common.botClient.userClients.set(this.guild.id, this)
+    Common.botClient.userClients.set(this.id, this)
   }
 }
 

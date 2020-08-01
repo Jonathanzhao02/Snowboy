@@ -1,4 +1,4 @@
-const Common = require('./bot-util/Common')
+const Common = require('../bot-util/Common')
 const Discord = require('discord.js')
 
 /**

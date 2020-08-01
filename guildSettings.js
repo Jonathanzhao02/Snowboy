@@ -89,7 +89,7 @@ class GuildSettings {
    */
   static async load (db, key) {
     const obj = await db.get(`${key}:settings`)
-    return new GuildSettings(key, JSON.parse(obj || {}))
+    return new GuildSettings(key, JSON.parse(obj || '{}'))
   }
 }
 

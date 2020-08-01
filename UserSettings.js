@@ -79,7 +79,7 @@ class UserSettings {
    */
   static async load (db, key) {
     const obj = await db.get(`${key}:settings`)
-    return new UserSettings(key, JSON.parse(obj || {}))
+    return new UserSettings(key, JSON.parse(obj || '{}'))
   }
 }
 
