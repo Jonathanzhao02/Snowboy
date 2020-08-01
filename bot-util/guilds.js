@@ -50,7 +50,7 @@ function checkVoicePermissions (channel) {
  * @returns {Object} Returns an object containing all existing clients.
  */
 function getClientsFromMember (member) {
-  Common.logger.info(`Fetching clients for ${member}`)
+  Common.logger.info('Fetching clients for %s', member.displayName)
   // Get the userClient
   const userClient = Common.botClient.userClients.get(member.id)
   if (!userClient) Common.logger.warn(`No userClient found for ${member.id}!`)

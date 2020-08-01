@@ -14,7 +14,6 @@ Admin.start()
 
 // Logging
 const Heapdump = require('heapdump')
-const commands = require('./snowboy-web-admin/commandMap')
 
 /**
  * Creates a userClient object and updates the userClients map.
@@ -89,7 +88,7 @@ function createMemberClient (member, guildClient) {
     member: member, // the GuildMember object of the member associated with this memberClient
     userClient: botClient.userClients.get(member.id), // the userClient associated with this member
     guildClient: guildClient, // the guildClient associated with this member
-    logger: guildClient.logger.child({ userId: member.id }) // the logger to be used for this memberClient
+    logger: guildClient.logger.child({ member: member.id, name: member.displayName }) // the logger to be used for this memberClient
   }
 
   guildClient.logger.debug(memberConstruct)
@@ -107,7 +106,7 @@ function createMemberClient (member, guildClient) {
  * @returns {Object} Returns an Object containing all three clients.
  */
 async function createClientsFromMember (member) {
-  logger.info('Fetching clients for %s', member.id)
+  logger.info('Fetching clients for user %s', member.id)
   // Create a new userConstruct if the User is not currently tracked, loading settings from database
   let userClient = botClient.userClients.get(member.id)
   if (!userClient) userClient = await createUserClient(member.user ? member.user : member)
@@ -139,7 +138,7 @@ async function createClientsFromMember (member) {
  * @returns {ReadableStream} Returns a stream to read audio data from.
  */
 function createAudioStream (member, receiver) {
-  logger.debug('Attemting to create audio stream for %s in %s', member.displayName, member.guild.id)
+  logger.debug('Attemting to create audio stream for %s in %s', member.displayName, member.guild.name)
   const audioStream = receiver.createStream(member, {
     mode: 'pcm',
     end: 'manual'
@@ -535,7 +534,7 @@ process.on('unhandledRejection', (error, promise) => {
     logger.error(error)
     botClient.destroy()
     if (err) process.exit(1)
-    logger.debug(`Heapdump written to ${filename}`)
+    logger.debug('Heapdump written to %s', filename)
     process.exit(1)
   })
 })

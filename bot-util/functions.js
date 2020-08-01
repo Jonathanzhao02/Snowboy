@@ -106,7 +106,7 @@ async function replaceMentions (msg, guild) {
  * @returns {Discord.Message | Discord.Message[]} Returns the message(s) sent.
  */
 async function sendMsg (textChannel, msg, mentions, opts) {
-  Common.logger.debug(`Attempting to send ${msg} to ${textChannel}`)
+  Common.logger.debug('Attempting to send %o to %s', msg, textChannel.name)
   if (!textChannel) return
   if (mentions === false) msg = await replaceMentions(msg, textChannel.guild)
   let msgs
