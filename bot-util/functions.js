@@ -111,7 +111,6 @@ async function sendMsg (textChannel, msg, mentions, opts) {
     return
   }
   Common.logger.debug('Attempting to send %o to %s', msg, textChannel.name)
-  if (!textChannel) return
   if (mentions === false) msg = await replaceMentions(msg, textChannel.guild)
   let msgs
   if (opts) msgs = await textChannel.send(msg, opts)
