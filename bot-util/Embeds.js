@@ -1,7 +1,7 @@
 const Entities = require('html-entities').Html5Entities
 const Discord = require('discord.js')
-const GuildSettings = require('../GuildSettings')
-const UserSettings = require('../UserSettings')
+const GuildSettings = require('../structures/GuildSettings')
+const UserSettings = require('../structures/UserSettings')
 const { Emojis } = require('../config')
 
 /**

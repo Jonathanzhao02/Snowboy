@@ -1,4 +1,4 @@
-const GuildSettings = require('../GuildSettings')
+const GuildSettings = require('./GuildSettings')
 const Common = require('../bot-util/Common')
 const Discord = require('discord.js')
 

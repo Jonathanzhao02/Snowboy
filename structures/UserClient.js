@@ -1,4 +1,4 @@
-const UserSettings = require('../UserSettings')
+const UserSettings = require('./UserSettings')
 const Common = require('../bot-util/Common')
 const Discord = require('discord.js')
 

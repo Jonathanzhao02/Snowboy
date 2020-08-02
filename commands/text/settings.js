@@ -3,8 +3,8 @@ const Functions = require('../../bot-util/Functions')
 const Embeds = require('../../bot-util/Embeds')
 const { Emojis } = require('../../config')
 
-const GuildSettings = require('../../GuildSettings')
-const UserSettings = require('../../UserSettings')
+const GuildSettings = require('../../structures/GuildSettings')
+const UserSettings = require('../../structures/UserSettings')
 const Discord = require('discord.js')
 
 /**

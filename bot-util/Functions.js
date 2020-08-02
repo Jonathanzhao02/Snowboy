@@ -1,7 +1,7 @@
 const Discord = require('discord.js')
 const Common = require('./Common')
 const { Timeouts, Emojis } = require('../config')
-const Streams = require('../streams')
+const Streams = require('../structures/Streams')
 const Https = require('https')
 
 // NOT EXPORTED

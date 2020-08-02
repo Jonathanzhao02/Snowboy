@@ -1,7 +1,7 @@
 const { Models, Detector } = require('snowboy')
 const { EventEmitter } = require('events')
-const Wit = require('./web-apis/Wit')
-const { Timeouts } = require('./config')
+const Wit = require('../web-apis/Wit')
+const { Timeouts } = require('../config')
 
 /**
  * Uses Snowboy for hotword detection, triggering a callback.
