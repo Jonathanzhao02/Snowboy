@@ -2,11 +2,9 @@
 # There is a patch I applied to ytdl-core-discord which will have to be
 # manually written in for now. Add any other useless (non-resource or js) files.
 node_modules
-.VS*
 .vs*
 .DS*
 db
-bug_reports
 logs
 .env
 workspace

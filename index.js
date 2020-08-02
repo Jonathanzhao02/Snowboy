@@ -154,7 +154,7 @@ function logBug (msg, userClient) {
     logger.info('Accepting bug report from %s', msg.author.username)
     userClient.lastReport = Date.now()
     logger.info('Read bug report from %s', msg.author.username)
-    const file = Fs.createWriteStream(`./bug_reports/bug_report_${msg.createdAt.toISOString()}_${msg.createdAt.getTime()}.txt`)
+    const file = Fs.createWriteStream(`./logs/${msg.createdAt.toISOString()}_${msg.createdAt.getTime()}_REPORT.txt`)
     file.write(msg.content)
     file.write('\n')
     file.write(`${msg.author.username}#${msg.author.discriminator}`)
