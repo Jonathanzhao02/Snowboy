@@ -1,7 +1,7 @@
 const { Emojis } = require('../../config')
 const Functions = require('../../bot-util/Functions')
 const Embeds = require('../../bot-util/Embeds')
-const Gsearch = require('../web-apis/Gsearch')
+const Gsearch = require('../../web-apis/Gsearch')
 
 /**
  * Searches up and prints the top result of a search query.

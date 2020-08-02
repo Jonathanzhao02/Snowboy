@@ -1,5 +1,5 @@
 const Defaults = require('defaults')
-const { SettingsValues, Emojis } = require('./config')
+const { SettingsValues, Emojis } = require('../config')
 
 /**
  * Contains all available settings options for a user.

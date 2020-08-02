@@ -52,7 +52,8 @@ function queuedPlay (video, guildClient) {
         if (guildClient.connection) {
           if (guildClient.loopState === 0) {
             logger.info('Moving to next song in queue')
-            queuedPlay(queue.shift(), guildClient)
+            queue.shift()
+            queuedPlay(queue[0], guildClient)
           } else if (guildClient.loopState === 1) {
             logger.info('Looping song')
             queuedPlay(queue[0], guildClient)
