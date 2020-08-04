@@ -10,9 +10,6 @@ const { botClient, logger } = require('./bot-util/Common')
 const Admin = require('./snowboy-web-admin')
 Admin.start()
 
-// Logging
-const Heapdump = require('heapdump')
-
 /**
  * Handles creation of new members or new SnowClients for untracked users
  * if voice commands are enabled.
@@ -325,96 +322,6 @@ botClient.on('guildCreate', guild => {
   ' - If you have trouble remembering my commands, just use the `help` command to list them all out.\n' +
   ' - If you find any bugs with me, feel free to shoot me a DM about it. Please keep the report to one message!\n' +
   '**Please note that I\'m still in testing, so I \\*may\\* shut down frequently!**')
-})
-
-// On discord.js error
-botClient.on('error', error => {
-  console.log('CLIENT ERROR: Exiting')
-  console.log(error)
-  const promise = new Promise((resolve, reject) => {
-    const guilds = Array.from(botClient.guildClients)
-    Functions.forEachAsync(guilds, async (pair, index, array) => {
-      if (pair[1]) pair[1].logger.debug('Sending error message')
-      await Functions.sendMsg(
-        pair[1].textChannel,
-        `${Emojis.skull} ***Sorry, I ran into some fatal error. Hopefully I come back soon!***`
-      )
-      if (index === array.length - 1) resolve()
-    })
-
-    if (guilds.length === 0) resolve()
-  })
-
-  promise.then(() => Heapdump.writeSnapshot(`./logs/${new Date().toISOString()}_CLI.heapdump`, (err, filename) => {
-    logger.error('Client exception')
-    logger.error(error)
-    if (err) process.exit(1)
-    logger.debug('Heapdump written to %s', filename)
-    botClient.destroy()
-    process.exit(1)
-  }))
-})
-
-// On uncaught exception
-process.on('uncaughtException', error => {
-  console.log('UNCAUGHT EXCEPTION: Exiting')
-  console.log(error)
-  Heapdump.writeSnapshot(`./logs/${new Date().toISOString()}_ERR.heapdump`, (err, filename) => {
-    logger.error('Uncaught exception')
-    logger.error(error)
-    botClient.destroy()
-    if (err) process.exit(1)
-    logger.debug('Heapdump written to %s', filename)
-    process.exit(1)
-  })
-})
-
-// On unhandled promise rejection
-process.on('unhandledRejection', (error, promise) => {
-  console.log('UNHANDLED REJECTION: Exiting')
-  console.log(error)
-  console.log(promise)
-  Heapdump.writeSnapshot(`./logs/${new Date().toISOString()}_REJ.heapdump`, (err, filename) => {
-    logger.error('Unhandled promise rejection')
-    logger.error(promise)
-    logger.error(error)
-    botClient.destroy()
-    if (err) process.exit(1)
-    logger.debug('Heapdump written to %s', filename)
-    process.exit(1)
-  })
-})
-
-// On process termination (exits normally)
-process.on('SIGTERM', signal => {
-  console.log('Received SIGTERM signal')
-  logger.info(`Process ${process.pid} received a SIGTERM signal`)
-  botClient.destroy()
-  process.exit(0)
-})
-
-// On process interrupt
-process.on('SIGINT', signal => {
-  console.log('Received SIGINT signal')
-  logger.info(`Process ${process.pid} has been interrupted`)
-  const promise = new Promise((resolve, reject) => {
-    const guilds = Array.from(botClient.guildClients)
-    Functions.forEachAsync(guilds, async (pair, index, array) => {
-      if (pair[1]) pair[1].logger.debug('Sending interrupt message')
-      await Functions.sendMsg(
-        pair[1].textChannel,
-        `${Emojis.joyful} ***Sorry, I'm going down for updates and maintenance! See you soon!***`
-      )
-      if (index === array.length - 1) resolve()
-    })
-
-    if (guilds.length === 0) resolve()
-  })
-
-  promise.then(() => {
-    botClient.destroy()
-    process.exit(0)
-  })
 })
 
 /**
