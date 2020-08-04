@@ -1,8 +1,8 @@
 const Discord = require('discord.js')
 const Common = require('./Common')
-const { Timeouts, Emojis } = require('../config')
 const Streams = require('../structures/Streams')
 const Https = require('https')
+const Resampler = require('node-libsamplerate')
 
 // NOT EXPORTED
 
@@ -120,45 +120,6 @@ async function sendMsg (textChannel, msg, mentions, opts) {
 }
 
 /**
- * Starts the timeout for cleanup of a guildClient.
- *
- * @param {Object} guildClient The guildClient to begin timing out.
- */
-function startTimeout (guildClient) {
-  guildClient.logger.info('Starting expiration timer')
-  guildClient.lastCalled = Date.now()
-  if (guildClient.timeoutId) clearTimeout(guildClient.timeoutId)
-  guildClient.timeoutId = setTimeout(() => { cleanupGuildClient(guildClient) }, Timeouts.TIMEOUT + 500)
-}
-
-/**
- * Deletes a guildClient if it has been inactive for a certain amount of time.
- *
- * If the guildClient has an active voice connection, notify through the TextChannel and mark the guildClient
- * for deletion to be handled by the voiceStateUpdate event before leaving the voice channel.
- *
- * @param {Object} guildClient The guildClient to be checked for expiration.
- */
-function cleanupGuildClient (guildClient) {
-  if (Date.now() - guildClient.lastCalled >= Timeouts.GUILD_TIMEOUT) {
-    guildClient.logger.debug('Attempting to clean up guildClient')
-    // If the guild is currently connected, is not playing music, and has an active TextChannel,
-    // notify, mark the guildClient for deletion, and leave
-    if (guildClient.textChannel && guildClient.connection && !guildClient.playing) {
-      guildClient.logger.debug('Leaving voice channel')
-      sendMsg(guildClient.textChannel,
-        `${Emojis.happy} **It seems nobody needs me right now, so I'll be headed out. Call me when you do!**`,
-        guildClient)
-      guildClient.delete = true
-      guildClient.voiceChannel.leave()
-    } else {
-      guildClient.logger.debug('Deleting guildClient')
-      Common.botClient.guildClients.delete(guildClient.guild.id)
-    }
-  }
-}
-
-/**
  * Plays silence frames in a voice channel.
  *
  * Necessary for 'speaking' event to continue functioning.
@@ -185,13 +146,50 @@ function validateURL (url) {
   })
 }
 
+/**
+ * Creates a processed audio stream listening to a GuildMember.
+ *
+ * Returned stream is formatted 16kHz, mono, 16-bit, little-endian, signed integers.
+ * @param {Discord.GuildMember} member The GuildMember to listen to.
+ * @param {Discord.VoiceReceiver} receiver The receiver to create the connection from.
+ * @returns {ReadableStream} Returns a stream to read audio data from.
+ */
+function createAudioStream (member, receiver) {
+  Common.logger.debug('Attemting to create audio stream for %s in %s', member.displayName, member.guild.name)
+  const audioStream = receiver.createStream(member, {
+    mode: 'pcm',
+    end: 'manual'
+  })
+  // Turns from stereo to mono
+  const transformStream = new Streams.TransformStream()
+  // Turns from 48k to 16k
+  const resample = new Resampler({
+    type: 3,
+    channels: 1,
+    fromRate: 48000,
+    fromDepth: 16,
+    toRate: 16000,
+    toDepth: 16
+  })
+
+  // Ensures proper stream cleanup
+  resample.on('close', () => {
+    transformStream.removeAllListeners()
+    audioStream.removeAllListeners()
+    resample.removeAllListeners()
+    transformStream.destroy()
+    audioStream.destroy()
+    resample.destroy()
+  })
+  return audioStream.pipe(transformStream).pipe(resample)
+}
+
 module.exports = {
   random: random,
   forEachAsync: forEachAsync,
   formatList: formatList,
   sendMsg: sendMsg,
-  startTimeout: startTimeout,
-  cleanupGuildClient: cleanupGuildClient,
   playSilence: playSilence,
-  validateURL: validateURL
+  validateURL: validateURL,
+  createAudioStream: createAudioStream
 }

@@ -1,6 +1,7 @@
 const { Emojis, Timeouts } = require('../../config')
 const Functions = require('../../bot-util/Functions')
 const Embeds = require('../../bot-util/Embeds')
+const Guilds = require('../../bot-util/Guilds')
 const YtdlDiscord = require('ytdl-core-discord')
 const Ytpl = require('ytpl')
 const Ytsearch = require('yt-search')
@@ -23,7 +24,7 @@ function queuedPlay (video, guildClient) {
     guildClient.lastCalled = Date.now()
     logger.debug('Starting expiration timer')
     setTimeout(() => {
-      Functions.cleanupGuildClient(guildClient)
+      Guilds.cleanupGuildClient(guildClient)
     }, Timeouts.GUILD_TIMEOUT + 500)
     return
   }

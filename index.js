@@ -1,102 +1,17 @@
 const Discord = require('discord.js')
-const Resampler = require('node-libsamplerate')
 const Fs = require('fs')
 const SnowClient = require('./structures/SnowClient')
-const Streams = require('./structures/Streams')
 const Commands = require('./commands')
 const { Emojis, Timeouts, DEBUG_IDS, CONFIDENCE_THRESHOLD } = require('./config')
 const Functions = require('./bot-util/Functions')
 const Impressions = require('./bot-util/Impressions')
 const Guilds = require('./bot-util/Guilds')
 const { botClient, logger } = require('./bot-util/Common')
-const UserClient = require('./structures/UserClient')
-const GuildClient = require('./structures/GuildClient')
-const MemberClient = require('./structures/MemberClient')
 const Admin = require('./snowboy-web-admin')
 Admin.start()
 
 // Logging
 const Heapdump = require('heapdump')
-
-/**
- * Creates or fetches existing clients for a GuildMember/User object.
- *
- * Only returns the UserClient if object is a User.
- * Otherwise, returns the userClient, guildClient, and memberClient.
- *
- * @param {Discord.GuildMember | Discord.User} member The member to fetch all information from.
- * @returns {Object} Returns an Object containing all three clients.
- */
-async function createClientsFromMember (member) {
-  logger.info('Fetching clients for user %s', member.id)
-  // Create a new userConstruct if the User is not currently tracked, loading settings from database
-  let userClient = botClient.userClients.get(member.id)
-  if (!userClient) {
-    userClient = new UserClient(member.user ? member.user : member)
-    await userClient.init()
-  }
-
-  // If member is a User (no Guild associated), only return the userClient
-  if (!member.guild) return { userClient: userClient }
-
-  // Create a new guildConstruct if the Guild is not currently tracked, loading settings from database
-  let guildClient = botClient.guildClients.get(member.guild.id)
-  if (!guildClient) {
-    guildClient = new GuildClient(member.guild)
-    await guildClient.init()
-  }
-
-  // Create a new memberConstruct if the GuildMember is not currently tracked, loading settings from database
-  let memberClient = guildClient.memberClients.get(userClient.id)
-  if (!memberClient) {
-    memberClient = new MemberClient(member, guildClient)
-    await memberClient.init()
-  }
-
-  return {
-    userClient: userClient,
-    guildClient: guildClient,
-    memberClient: memberClient
-  }
-}
-
-/**
- * Creates a processed audio stream listening to a GuildMember.
- *
- * Returned stream is formatted 16kHz, mono, 16-bit, little-endian, signed integers.
- * @param {Discord.GuildMember} member The GuildMember to listen to.
- * @param {Discord.VoiceReceiver} receiver The receiver to create the connection from.
- * @returns {ReadableStream} Returns a stream to read audio data from.
- */
-function createAudioStream (member, receiver) {
-  logger.debug('Attemting to create audio stream for %s in %s', member.displayName, member.guild.name)
-  const audioStream = receiver.createStream(member, {
-    mode: 'pcm',
-    end: 'manual'
-  })
-  // Turns from stereo to mono
-  const transformStream = new Streams.TransformStream()
-  // Turns from 48k to 16k
-  const resample = new Resampler({
-    type: 3,
-    channels: 1,
-    fromRate: 48000,
-    fromDepth: 16,
-    toRate: 16000,
-    toDepth: 16
-  })
-
-  // Ensures proper stream cleanup
-  resample.on('close', () => {
-    transformStream.removeAllListeners()
-    audioStream.removeAllListeners()
-    resample.removeAllListeners()
-    transformStream.destroy()
-    audioStream.destroy()
-    resample.destroy()
-  })
-  return audioStream.pipe(transformStream).pipe(resample)
-}
 
 /**
  * Handles creation of new members or new SnowClients for untracked users
@@ -107,7 +22,7 @@ function createAudioStream (member, receiver) {
  */
 async function onSpeaking (member, speaking) {
   if (!member || speaking.equals(0) || member.id === botClient.user.id) return
-  const { userClient, guildClient, memberClient } = await createClientsFromMember(member)
+  const { userClient, guildClient, memberClient } = await Guilds.createClientsFromMember(member)
   if (!guildClient || member.voice.channelID !== guildClient.voiceChannel.id || !guildClient.settings.voice) return
   const childLogger = guildClient.logger
 
@@ -130,7 +45,7 @@ async function onSpeaking (member, speaking) {
         `${Emojis.error} ***Error:*** \`${msg}\``
       )
     })
-    newClient.start(createAudioStream(member, guildClient.connection.receiver))
+    newClient.start(Functions.createAudioStream(member, guildClient.connection.receiver))
     memberClient.snowClient = newClient
     childLogger.info('Successfully created SnowClient for %s', member.displayName)
   }
@@ -177,7 +92,7 @@ function logBug (msg, userClient) {
 async function onMessage (msg) {
   // If it is an automated message of some sort, return
   if (msg.author.bot || msg.system) return
-  const { userClient, guildClient, memberClient } = await createClientsFromMember(msg.member ? msg.member : msg.author)
+  const { userClient, guildClient, memberClient } = await Guilds.createClientsFromMember(msg.member ? msg.member : msg.author)
 
   // If it is in Snowboy's DMs, log a new bug report and start the 24 hour cooldown.
   if (!guildClient) {
@@ -268,7 +183,7 @@ async function onMessage (msg) {
     )
   }
 
-  Functions.startTimeout(guildClient)
+  Guilds.startTimeout(guildClient)
 }
 
 /**
@@ -340,7 +255,7 @@ function ack (index, hotword, memberClient) {
     memberClient.guildClient.settings.mentions
   )
 
-  Functions.startTimeout(memberClient.guildClient)
+  Guilds.startTimeout(memberClient.guildClient)
 }
 
 // Setting up more callbacks
@@ -508,4 +423,5 @@ process.on('SIGINT', signal => {
  * Also change SnowClient to use member instead of memberClient?
  * Refactor leave command into separate general 'leave' in bot-util for leaving guilds and the command itself
  * Refactor Common into Loaders (?)
+ * Inject dependencies into commands through services?
  */

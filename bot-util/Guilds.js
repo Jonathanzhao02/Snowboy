@@ -1,5 +1,10 @@
 const Discord = require('discord.js')
+const UserClient = require('../structures/UserClient')
+const GuildClient = require('../structures/GuildClient')
+const MemberClient = require('../structures/MemberClient')
 const Common = require('./Common')
+const Functions = require('./Functions')
+const { Timeouts, Emojis } = require('../config')
 
 /**
  * Checks permissions in a TextChannel and returns any missing.
@@ -70,8 +75,92 @@ function getClientsFromMember (member) {
   }
 }
 
+/**
+ * Creates or fetches existing clients for a GuildMember/User object.
+ *
+ * Only returns the UserClient if object is a User.
+ * Otherwise, returns the userClient, guildClient, and memberClient.
+ *
+ * @param {Discord.GuildMember | Discord.User} member The member to fetch all information from.
+ * @returns {Object} Returns an Object containing all three clients.
+ */
+async function createClientsFromMember (member) {
+  Common.logger.info('Fetching clients for user %s', member.id)
+  // Create a new userConstruct if the User is not currently tracked, loading settings from database
+  let userClient = Common.botClient.userClients.get(member.id)
+  if (!userClient) {
+    userClient = new UserClient(member.user ? member.user : member)
+    await userClient.init()
+  }
+
+  // If member is a User (no Guild associated), only return the userClient
+  if (!member.guild) return { userClient: userClient }
+
+  // Create a new guildConstruct if the Guild is not currently tracked, loading settings from database
+  let guildClient = Common.botClient.guildClients.get(member.guild.id)
+  if (!guildClient) {
+    guildClient = new GuildClient(member.guild)
+    await guildClient.init()
+  }
+
+  // Create a new memberConstruct if the GuildMember is not currently tracked, loading settings from database
+  let memberClient = guildClient.memberClients.get(userClient.id)
+  if (!memberClient) {
+    memberClient = new MemberClient(member, guildClient)
+    await memberClient.init()
+  }
+
+  return {
+    userClient: userClient,
+    guildClient: guildClient,
+    memberClient: memberClient
+  }
+}
+
+/**
+ * Starts the timeout for cleanup of a guildClient.
+ *
+ * @param {Object} guildClient The guildClient to begin timing out.
+ */
+function startTimeout (guildClient) {
+  guildClient.logger.info('Starting expiration timer')
+  guildClient.lastCalled = Date.now()
+  if (guildClient.timeoutId) clearTimeout(guildClient.timeoutId)
+  guildClient.timeoutId = setTimeout(() => { cleanupGuildClient(guildClient) }, Timeouts.TIMEOUT + 500)
+}
+
+/**
+ * Deletes a guildClient if it has been inactive for a certain amount of time.
+ *
+ * If the guildClient has an active voice connection, notify through the TextChannel and mark the guildClient
+ * for deletion to be handled by the voiceStateUpdate event before leaving the voice channel.
+ *
+ * @param {Object} guildClient The guildClient to be checked for expiration.
+ */
+function cleanupGuildClient (guildClient) {
+  if (Date.now() - guildClient.lastCalled >= Timeouts.GUILD_TIMEOUT) {
+    guildClient.logger.debug('Attempting to clean up guildClient')
+    // If the guild is currently connected, is not playing music, and has an active TextChannel,
+    // notify, mark the guildClient for deletion, and leave
+    if (guildClient.textChannel && guildClient.connection && !guildClient.playing) {
+      guildClient.logger.debug('Leaving voice channel')
+      Functions.sendMsg(guildClient.textChannel,
+        `${Emojis.happy} **It seems nobody needs me right now, so I'll be headed out. Call me when you do!**`,
+        guildClient)
+      guildClient.delete = true
+      guildClient.voiceChannel.leave()
+    } else {
+      guildClient.logger.debug('Deleting guildClient')
+      Common.botClient.guildClients.delete(guildClient.guild.id)
+    }
+  }
+}
+
 module.exports = {
   checkTextPermissions: checkTextPermissions,
   checkVoicePermissions: checkVoicePermissions,
-  getClientsFromMember: getClientsFromMember
+  getClientsFromMember: getClientsFromMember,
+  createClientsFromMember: createClientsFromMember,
+  startTimeout: startTimeout,
+  cleanupGuildClient: cleanupGuildClient
 }
