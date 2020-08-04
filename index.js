@@ -18,7 +18,5 @@ if (process.argv.includes('-t') || process.argv.includes('--test')) {
  * TODO:
  * Replace all memberClient commands with just member, and take advantage of the Functions.getClientsFromMember command?
  * Also change SnowClient to use member instead of memberClient?
- * Refactor leave command into separate general 'leave' in bot-util for leaving guilds and the command itself
- * Refactor Common into Loaders (?)
  * Inject dependencies into commands through services?
  */

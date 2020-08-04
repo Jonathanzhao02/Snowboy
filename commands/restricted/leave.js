@@ -1,62 +1,39 @@
 const Common = require('../../bot-util/Common')
 const Functions = require('../../bot-util/Functions')
+const Guilds = require('../../bot-util/Guilds')
 const Responses = require('../../bot-util/Responses')
 const { Emojis } = require('../../config')
 
 /**
  * Leaves the VoiceChannel.
  *
- * @param {Object} client The client who requested this command. (could be guildClient or memberClient)
+ * @param {MemberClient} memberClient The client who requested this command. (could be guildClient or memberClient)
  * @param {String[]} args Unused parameter.
  */
-function leave (client, args) {
-  if (!client) {
+function leave (memberClient, args) {
+  if (!memberClient) {
     Common.logger.warn('Attempted to leave, but no client found!')
     return
   }
-  const logger = client.logger
+  const logger = memberClient.logger
   logger.info('Received leave command')
 
-  // Gets the guildClient from the passed in client
-  const guildClient = client.guildClient ? client.guildClient : client
-
-  // If the passed object is a memberClient
-  if (client.member) {
-    if (!guildClient.connection) {
-      logger.debug('Not connected')
-      Functions.sendMsg(
-        guildClient.textChannel,
-        `${Emojis.error} ***I am not connected to a voice channel!***`
-      )
-      return
-    }
-
+  // If successfully left
+  if (Guilds.leaveVoiceChannel(memberClient.guildClient)) {
+    logger.info('Successfully left')
     Functions.sendMsg(
-      guildClient.textChannel,
-      `${Emojis.farewell} **${Responses.randomFarewell()},** <@${client.id}>!`,
-      guildClient.settings.mentions
+      memberClient.guildClient.textChannel,
+      `${Emojis.farewell} **${Responses.randomFarewell()},** <@${memberClient.id}>!`,
+      memberClient.guildClient.settings.mentions
+    )
+  // If could not leave for some reason
+  } else {
+    logger.info('Could not leave')
+    Functions.sendMsg(
+      memberClient.guildClient.textChannel,
+      `${Emojis.error} ***I am not connected to a voice channel!***`
     )
   }
-
-  logger.debug('Leaving')
-  logger.trace('Disconnecting')
-  guildClient.songQueue = []
-  if (guildClient.connection.dispatcher) {
-    logger.trace('Ending dispatcher')
-    guildClient.connection.dispatcher.end()
-  }
-  logger.trace('Cleaning up members')
-  guildClient.memberClients.forEach(member => { if (member.snowClient) member.snowClient.stop() })
-  guildClient.memberClients.clear()
-  logger.trace('Leaving channel')
-  guildClient.connection.disconnect()
-  guildClient.connection.removeAllListeners()
-  guildClient.voiceChannel.leave()
-  guildClient.voiceChannel = null
-  guildClient.textChannel = null
-  guildClient.connection = null
-  guildClient.loopState = 0
-  logger.debug('Successfully left')
 }
 
 module.exports = {

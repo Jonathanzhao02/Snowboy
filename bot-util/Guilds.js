@@ -156,11 +156,40 @@ function cleanupGuildClient (guildClient) {
   }
 }
 
+function leaveVoiceChannel (guildClient) {
+  if (!guildClient.connection) {
+    Common.logger.debug('Not connected')
+    return false
+  }
+
+  Common.logger.debug('Leaving')
+  Common.logger.trace('Disconnecting')
+  guildClient.songQueue = []
+  if (guildClient.connection.dispatcher) {
+    Common.logger.trace('Ending dispatcher')
+    guildClient.connection.dispatcher.end()
+  }
+  Common.logger.trace('Cleaning up members')
+  guildClient.memberClients.forEach(member => { if (member.snowClient) member.snowClient.stop() })
+  guildClient.memberClients.clear()
+  Common.logger.trace('Leaving channel')
+  guildClient.connection.disconnect()
+  guildClient.connection.removeAllListeners()
+  guildClient.voiceChannel.leave()
+  guildClient.voiceChannel = null
+  guildClient.textChannel = null
+  guildClient.connection = null
+  guildClient.loopState = 0
+  Common.logger.debug('Successfully left')
+  return true
+}
+
 module.exports = {
   checkTextPermissions: checkTextPermissions,
   checkVoicePermissions: checkVoicePermissions,
   getClientsFromMember: getClientsFromMember,
   createClientsFromMember: createClientsFromMember,
   startTimeout: startTimeout,
-  cleanupGuildClient: cleanupGuildClient
+  cleanupGuildClient: cleanupGuildClient,
+  leaveVoiceChannel: leaveVoiceChannel
 }
