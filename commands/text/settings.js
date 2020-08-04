@@ -76,7 +76,7 @@ function settings (memberClient, args, msg) {
       logger.debug('Printing info about %s', settingName)
       Functions.sendMsg(
         guildClient.textChannel,
-        GuildSettings.descriptions[settingName](guildClient.settings)
+        UserSettings.descriptions[settingName](memberClient.userClient.settings)
       )
       return
     }

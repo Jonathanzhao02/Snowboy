@@ -7,7 +7,7 @@ const Common = require('../bot-util/Common')
 const env = require('dotenv').config()
 if (env.error) throw env.error
 
-module.exports = async function (client) {
+module.exports = function (client) {
   Discord(client, Common)
   Logger(Common)
   Keyv(Common)

@@ -1,5 +1,5 @@
-const fs = require('fs')
-const path = require('path')
+const Fs = require('fs')
+const Path = require('path')
 
 // Commands
 const commands = new Map([
@@ -12,7 +12,7 @@ const commands = new Map([
 ])
 
 commands.forEach((obj, index) => {
-  const cmds = fs.readdirSync(path.resolve(__dirname, obj.path)).filter(file => file.endsWith('.js'))
+  const cmds = Fs.readdirSync(Path.resolve(__dirname, obj.path)).filter(file => file.endsWith('.js'))
   cmds.forEach(file => {
     const command = require(`${obj.path}/${file}`)
     if (command.aliases) {

@@ -10,7 +10,7 @@ module.exports = function (Common) {
     heapdump.writeSnapshot(`./logs/${new Date().toISOString()}_ERR.heapdump`, (err, filename) => {
       Common.logger.error('Uncaught exception')
       Common.logger.error(error)
-      Common.client.destroy()
+      Common.botClient.destroy()
       if (err) process.exit(1)
       Common.logger.debug('Heapdump written to %s', filename)
       process.exit(1)
@@ -26,7 +26,7 @@ module.exports = function (Common) {
       Common.logger.error('Unhandled promise rejection')
       Common.logger.error(promise)
       Common.logger.error(error)
-      Common.client.destroy()
+      Common.botClient.destroy()
       if (err) process.exit(1)
       Common.logger.debug('Heapdump written to %s', filename)
       process.exit(1)
@@ -37,7 +37,7 @@ module.exports = function (Common) {
   process.on('SIGTERM', signal => {
     console.log('Received SIGTERM signal')
     Common.logger.info(`Process ${process.pid} received a SIGTERM signal`)
-    Common.client.destroy()
+    Common.botClient.destroy()
     process.exit(0)
   })
 
@@ -46,7 +46,7 @@ module.exports = function (Common) {
     console.log('Received SIGINT signal')
     Common.logger.info(`Process ${process.pid} has been interrupted`)
     const promise = new Promise((resolve, reject) => {
-      const guilds = Array.from(Common.client.guildClients)
+      const guilds = Array.from(Common.botClient.guildClients)
       Functions.forEachAsync(guilds, async (pair, index, array) => {
         if (pair[1]) pair[1].logger.debug('Sending interrupt message')
         await Functions.sendMsg(
@@ -60,7 +60,7 @@ module.exports = function (Common) {
     })
 
     promise.then(() => {
-      Common.client.destroy()
+      Common.botClient.destroy()
       process.exit(0)
     })
   })

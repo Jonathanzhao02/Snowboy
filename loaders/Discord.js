@@ -7,12 +7,5 @@ module.exports = function (client, Common) {
     throw error
   })
 
-  // Switch between testing bot and (future) production bot
-  if (process.argv.includes('-t') || process.argv.includes('--test')) {
-    client.login(process.env.TEST_BOT_TOKEN)
-  } else {
-    client.login(process.env.SNOWBOY_BOT_TOKEN)
-  }
-
-  Common.set('client', client)
+  Common.set('botClient', client)
 }
