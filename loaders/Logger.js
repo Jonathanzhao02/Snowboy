@@ -1,9 +1,15 @@
 const Pino = require('pino')
 const Fs = require('fs')
+const Path = require('path')
 
 module.exports = function (Common) {
   // Create logger
-  const defaultLogpath = './logs/latest.log'
+  const defaultLogdir = Path.resolve(__dirname, '../logs')
+  const defaultLogpath = Path.resolve(__dirname, '../logs/latest.log')
+
+  if (!Fs.existsSync(defaultLogdir)) {
+    Fs.mkdirSync(defaultLogdir)
+  }
 
   if (Fs.existsSync(defaultLogpath)) {
     Fs.unlinkSync(defaultLogpath)
