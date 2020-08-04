@@ -155,7 +155,7 @@ function validateURL (url) {
  * @returns {ReadableStream} Returns a stream to read audio data from.
  */
 function createAudioStream (member, receiver) {
-  Common.logger.debug('Attemting to create audio stream for %s in %s', member.displayName, member.guild.name)
+  Common.logger.debug('Attempting to create audio stream for %s in %s', member.displayName, member.guild.name)
   const audioStream = receiver.createStream(member, {
     mode: 'pcm',
     end: 'manual'
