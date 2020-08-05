@@ -4,12 +4,12 @@ const { SettingsValues, Emojis } = require('../config')
 /**
  * Contains all available settings options for a user.
  *
- * @param {String} usrId The ID of the user these settings are applied to.
+ * @param {String} userId The ID of the user these settings are applied to.
  * @param {Object} options The properties to pass in to the UserSettings object.
  * @param {Boolean?} options.impressions Whether the impression system is in use.
  * @param {Number?} options.sensitivity The sensitivity of voice commands.
  */
-function UserSettings (usrId, options) {
+function UserSettings (userId, options) {
   options = Defaults(options, {
     impressions: SettingsValues.DEFAULT_IMPRESSIONS,
     sensitivity: SettingsValues.DEFAULT_SENSITIVITY
@@ -19,7 +19,7 @@ function UserSettings (usrId, options) {
    * The ID of the user these settings are applied to.
    * @type {String}
    */
-  this.userId = usrId
+  this.userId = userId
 
   /**
    * Whether the impression system is in use.

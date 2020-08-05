@@ -21,10 +21,10 @@ class SnowClient {
    * @param {Object} memberClient The memberClient of the member this SnowClient is associated with.
    * @param {String} sensitivity The sensitivity of the model.
    */
-  constructor (mmbrClnt, sensitivity) {
+  constructor (memberClient, sensitivity) {
     this.stream = null
     this.triggered = false
-    this.memberClient = mmbrClnt
+    this.memberClient = memberClient
     this.events = new EventEmitter()
 
     const models = new Models()

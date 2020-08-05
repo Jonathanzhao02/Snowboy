@@ -4,13 +4,13 @@ const { SettingsValues, Emojis } = require('../config')
 /**
  * Contains all available settings options for a guildClient.
  *
- * @param {String} gldId The ID of the guild these settings are applied to.
+ * @param {String} guildId The ID of the guild these settings are applied to.
  * @param {Object} options The properties to pass in to the GuildSettings object.
  * @param {String?} options.prefix The prefix for commands.
  * @param {Boolean?} options.voice Whether voice commands are enabled.
  * @param {Boolean?} options.mentions Whether mentions are enabled.
  */
-function GuildSettings (gldId, options) {
+function GuildSettings (guildId, options) {
   options = Defaults(options, {
     prefix: SettingsValues.DEFAULT_BOT_PREFIX,
     voice: SettingsValues.DEFAULT_VOICE,
@@ -21,7 +21,7 @@ function GuildSettings (gldId, options) {
    * The ID of the guild these settings are applied to.
    * @type {String}
    */
-  this.guildId = gldId
+  this.guildId = guildId
 
   /**
    * The prefix for commands.
