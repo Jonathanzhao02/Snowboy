@@ -4,7 +4,7 @@ const Functions = require('../../bot-util/Functions')
 /**
  * Rolls a six-sided die.
  *
- * @param {Object} memberClient The memberClient of the member who requested this command.
+ * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
  */
 function roll (memberClient, args) {

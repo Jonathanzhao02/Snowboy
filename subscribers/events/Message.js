@@ -9,8 +9,8 @@ module.exports = function (client) {
   /**
    * Logs a bug report from Snowboy's personal DMs.
    *
-   * @param {Discord.Message} msg The sent message.
-   * @param {Object} userClient The userClient associated with the User who sent the message.
+   * @param {import('discord.js').Message} msg The sent message.
+   * @param {import('../../structures/UserClient')} userClient The userClient associated with the User who sent the message.
    */
   function logBug (msg, userClient) {
     const logger = userClient.logger
@@ -42,7 +42,7 @@ module.exports = function (client) {
    * Handles bug reports, guildClient and member
    * creation, and the expiration timer.
    *
-   * @param {Discord.Message} msg The sent message.
+   * @param {import('discord.js').Message} msg The sent message.
    */
   async function onMessage (msg) {
     // If it is an automated message of some sort, return

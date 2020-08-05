@@ -7,7 +7,7 @@ const { Emojis } = require('../../config')
 /**
  * Leaves the VoiceChannel.
  *
- * @param {MemberClient} memberClient The client who requested this command. (could be guildClient or memberClient)
+ * @param {import('../../structures/MemberClient')} memberClient The client who requested this command. (could be guildClient or memberClient)
  * @param {String[]} args Unused parameter.
  */
 function leave (memberClient, args) {

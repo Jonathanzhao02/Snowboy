@@ -7,8 +7,8 @@ const Guilds = require('../../bot-util/Guilds')
 /**
  * Handles all setup associated with the connection.
  *
- * @param {Discord.VoiceConnection} connection The VoiceConnection from the VoiceChannel.
- * @param {Object} guildClient The guildClient associated with the server of the connection.
+ * @param {import('discord.js').VoiceConnection} connection The VoiceConnection from the VoiceChannel.
+ * @param {import('../../structures/GuildClient')} guildClient The guildClient associated with the server of the connection.
  */
 function connectionHandler (connection, guildClient) {
   guildClient.logger.info('Successfully connected')
@@ -19,9 +19,9 @@ function connectionHandler (connection, guildClient) {
 /**
  * Makes Snowboy join a VoiceChannel.
  *
- * @param {Object} memberClient The memberClient of the member who requested this command.
+ * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
- * @param {Discord.Message} msg The Message the user sent.
+ * @param {import('discord.js').Message} msg The Message the user sent.
  */
 function join (memberClient, args, msg) {
   const logger = memberClient.logger

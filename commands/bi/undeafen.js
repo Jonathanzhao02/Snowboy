@@ -4,7 +4,7 @@ const Functions = require('../../bot-util/Functions')
 /**
  * Undeafens a user.
  *
- * @param {Object} memberClient The memberClient of the member who requested this command.
+ * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
  */
 function undeafen (memberClient, args) {

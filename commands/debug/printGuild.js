@@ -1,9 +1,9 @@
 /**
  * Prints a guildClient to console.
  *
- * @param {Object} memberClient The memberClient of the member who requested this command.
+ * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
- * @param {Discord.Message} msg Unused parameter.
+ * @param {import('discord.js').Message} msg Unused parameter.
  */
 function printGuild (memberClient, args, msg) {
   const logger = memberClient.logger

@@ -4,9 +4,9 @@ const Functions = require('../../bot-util/Functions')
 /**
  * Prints the ping of the bot to the server.
  *
- * @param {Object} memberClient The memberClient of the member who requested this command.
+ * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
- * @param {Discord.Message} msg The Message the user sent.
+ * @param {import('discord.js').Message} msg The Message the user sent.
  */
 function ping (memberClient, args, msg) {
   const logger = memberClient.logger

@@ -6,13 +6,13 @@ const { Timeouts } = require('../config')
 /**
  * Uses Snowboy and Wit.ai for hotword speech detection, triggering a callback whenever it finishes.
  *
- * @param {MemberClient} memberClient The memberClient of the member this SnowClient is associated with.
+ * @param {import('./MemberClient')} memberClient The memberClient of the member this SnowClient is associated with.
  * @param {String} sensitivity The sensitivity of the model.
  */
 function SnowClient (memberClient, sensitivity) {
   /**
    * The memberClient this SnowClient is associated with.
-   * @type {MemberClient}
+   * @type {import('./MemberClient')}
    */
   this.memberClient = memberClient
 

@@ -6,7 +6,7 @@ const Gsearch = require('../../web-apis/Gsearch')
 /**
  * Searches up and prints the top result of a search query.
  *
- * @param {Object} memberClient The memberClient of the member who requested this command.
+ * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args The search query.
  */
 function search (memberClient, args) {

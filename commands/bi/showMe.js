@@ -7,7 +7,7 @@ const Imgsearch = require('g-i-s')
 /**
  * Searches up and prints the top result of an image search query.
  *
- * @param {Object} memberClient The memberClient of the member who requested this command.
+ * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args The search query.
  */
 function showMe (memberClient, args) {

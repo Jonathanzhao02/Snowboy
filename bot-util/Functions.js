@@ -124,7 +124,7 @@ async function sendMsg (textChannel, msg, mentions, opts) {
  *
  * Necessary for 'speaking' event to continue functioning.
  *
- * @param {Object} guildClient The guildClient associated with the voice channel's server.
+ * @param {import('../structures/GuildClient')} guildClient The guildClient associated with the voice channel's server.
  */
 function playSilence (guildClient) {
   guildClient.logger.debug('Playing silence')

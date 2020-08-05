@@ -6,7 +6,7 @@ const { ImpressionValues, Emojis } = require('../../config')
 /**
  * Makes Snowboy mildy irritated that someone called it just to say nevermind.
  *
- * @param {Object} memberClient The memberClient of the member who requested this command.
+ * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
  */
 function nevermind (memberClient, args) {

@@ -11,8 +11,8 @@ module.exports = function (client) {
    * Handles creation of new members or new SnowClients for untracked users
    * if voice commands are enabled.
    *
-   * @param {Discord.GuildMember} member The speaking GuildMember.
-   * @param {Discord.Speaking} speaking The speaking state of the GuildMember.
+   * @param {import('discord.js').GuildMember} member The speaking GuildMember.
+   * @param {import('discord.js').Speaking} speaking The speaking state of the GuildMember.
    */
   async function onSpeaking (member, speaking) {
     if (!member || speaking.equals(0) || member.id === client.user.id) return
@@ -51,7 +51,7 @@ module.exports = function (client) {
    * Wit to available commands.
    *
    * @param {Object} result The JSON object returned by Wit.
-   * @param {Object} memberClient The memberClient of the member triggered the hotword.
+   * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member triggered the hotword.
    */
   function parse (result, memberClient) {
     if (!memberClient || !memberClient.guildClient.settings.voice) return
@@ -99,7 +99,7 @@ module.exports = function (client) {
    *
    * @param {Number} index The index of the detected hotword in the model. Always 0.
    * @param {String} hotword The detected hotword. Always 'snowboy'.
-   * @param {Object} memberClient The memberClient of the member who triggered the hotword.
+   * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who triggered the hotword.
    */
   function ack (index, hotword, memberClient) {
     if (!memberClient.guildClient.connection) return

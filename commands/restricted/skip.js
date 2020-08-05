@@ -4,7 +4,7 @@ const Functions = require('../../bot-util/Functions')
 /**
  * Skips to the next song in queue by ending the current dispatcher.
  *
- * @param {Object} memberClient The memberClient of the member who requested this command.
+ * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
  */
 function skip (memberClient, args) {

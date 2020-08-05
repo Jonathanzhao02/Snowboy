@@ -126,6 +126,7 @@ function getResponse (func, impression, args, useImpressions) {
  * @param {Keyv} keyv The Keyv database to save to.
  * @param {String} key The key of the user to be updated.
  * @param {Object} client The object containing the impression to be updated.
+ * @param {Number} client.impression The impression level with Snowboy.
  * @param {Number} value The change in the user's impression level.
  * @param {boolean} useImpressions If the impression system is in use or not.
  */

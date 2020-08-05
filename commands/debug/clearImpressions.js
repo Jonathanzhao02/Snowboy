@@ -4,9 +4,9 @@ const Functions = require('../../bot-util/Functions')
 /**
  * Clears the impressions of all tracked users in a server.
  *
- * @param {Object} memberClient The memberClient of the member who requested this command.
+ * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
- * @param {Discord.Message} msg Unused parameter.
+ * @param {import('discord.js').Message} msg Unused parameter.
  */
 function clearImpressions (memberClient, args, msg) {
   const logger = memberClient.logger

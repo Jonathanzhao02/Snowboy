@@ -7,7 +7,7 @@ const { ImpressionValues, Emojis } = require('../../config')
 /**
  * Greets a user.
  *
- * @param {Object} memberClient The memberClient of the member who requested this command.
+ * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
  */
 function greet (memberClient, args) {

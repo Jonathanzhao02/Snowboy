@@ -10,7 +10,7 @@ const Ytsearch = require('yt-search')
  * Plays a song from the queue.
  *
  * @param {Object} video The videoConstruct object representing the video.
- * @param {Object} guildClient The guildClient associated with the server of the playback.
+ * @param {import('../../structures/GuildClient')} guildClient The guildClient associated with the server of the playback.
  */
 function queuedPlay (video, guildClient) {
   const logger = guildClient.logger
@@ -90,7 +90,7 @@ function queuedPlay (video, guildClient) {
 /**
  * Queues a song up for playback.
  *
- * @param {Object} memberClient The memberClient of the member who requested the song.
+ * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested the song.
  * @param {Object} video The videoConstruct object of the video.
  */
 async function queue (memberClient, video, query) {
@@ -128,7 +128,7 @@ async function queue (memberClient, video, query) {
  * Searches YouTube for videos from a query.
  *
  * @param {String} query The search query.
- * @param {Object} logger The logger for logging.
+ * @param {import('pino')} logger The logger for logging.
  * @returns {Object} A videoConstruct if a result is found, else null
  */
 async function querySearch (query, logger) {
@@ -166,7 +166,7 @@ async function querySearch (query, logger) {
  * Searches YouTube for videos from a URL.
  *
  * @param {String} url The URL.
- * @param {Object} logger The logger for logging.
+ * @param {import('pino')} logger The logger for logging.
  * @returns {Object} A videoConstruct if a result is found, else null
  */
 async function urlSearch (url, logger) {
@@ -207,7 +207,7 @@ async function urlSearch (url, logger) {
 /**
  * Plays or queues a song or playlist.
  *
- * @param {Object} memberClient The memberClient of the member who requested this command.
+ * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args The search query for the song.
  */
 function play (memberClient, args) {

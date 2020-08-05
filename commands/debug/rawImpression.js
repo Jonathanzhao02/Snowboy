@@ -4,9 +4,9 @@ const Functions = require('../../bot-util/Functions')
 /**
  * Prints the raw impression of a user.
  *
- * @param {Object} memberClient The memberClient of the member who requested this command.
+ * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args The arguments passed with the command.
- * @param {Discord.Message} msg The sent Message which may contain mentions.
+ * @param {import('discord.js').Message} msg The sent Message which may contain mentions.
  */
 function rawImpression (memberClient, args, msg) {
   const logger = memberClient.logger

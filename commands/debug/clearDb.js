@@ -4,9 +4,9 @@ const Functions = require('../../bot-util/Functions')
 /**
  * Clears Snowboy's database completely and shuts the bot down.
  *
- * @param {Object} memberClient The memberClient of the member who requested this command.
+ * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
- * @param {Discord.Message} msg Unused parameter.
+ * @param {import('discord.js').Message} msg Unused parameter.
  */
 function clearDb (memberClient, args, msg) {
   const logger = memberClient.logger

@@ -5,7 +5,7 @@ const Responses = require('../../bot-util/Responses')
 /**
  * Disconnects and says goodbye to a user.
  *
- * @param {Object} memberClient The memberClient of the member who requested this command.
+ * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
  */
 function farewell (memberClient, args) {

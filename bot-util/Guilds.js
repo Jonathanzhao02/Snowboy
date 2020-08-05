@@ -120,7 +120,7 @@ async function createClientsFromMember (member) {
 /**
  * Starts the timeout for cleanup of a guildClient.
  *
- * @param {Object} guildClient The guildClient to begin timing out.
+ * @param {import('../structures/GuildClient')} guildClient The guildClient to begin timing out.
  */
 function startTimeout (guildClient) {
   guildClient.logger.info('Starting expiration timer')
@@ -135,7 +135,7 @@ function startTimeout (guildClient) {
  * If the guildClient has an active voice connection, notify through the TextChannel and mark the guildClient
  * for deletion to be handled by the voiceStateUpdate event before leaving the voice channel.
  *
- * @param {Object} guildClient The guildClient to be checked for expiration.
+ * @param {import('../structures/GuildClient')} guildClient The guildClient to be checked for expiration.
  */
 function cleanupGuildClient (guildClient) {
   if (Date.now() - guildClient.lastCalled >= Timeouts.GUILD_TIMEOUT) {

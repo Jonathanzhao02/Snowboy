@@ -6,7 +6,7 @@ const { ImpressionValues, Emojis } = require('../../config')
 /**
  * Makes Snowboy grossed out.
  *
- * @param {Object} memberClient The memberClient of the member who requested this command.
+ * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
  */
 function gross (memberClient, args) {

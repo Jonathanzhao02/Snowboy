@@ -11,9 +11,9 @@ const Discord = require('discord.js')
  * 100 messages between recursions, otherwise it will return.
  * Moreover, it can only delete messages up to 2 weeks old.
  *
- * @param {Object} memberClient The memberClient of the member who requested this command.
+ * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Any options sent with the command.
- * @param {Discord.Message} msg The Message the user sent.
+ * @param {import('discord.js').Message} msg The Message the user sent.
  * @param {Number?} total The total number of messages deleted. Passed recursively.
  * @param {String?} snowflake The ID of the latest deleted message. Passed recursively.
  */
