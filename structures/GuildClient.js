@@ -136,7 +136,7 @@ GuildClient.prototype.sendMsg = async function (msg, opts) {
     return
   }
   this.logger.debug('Attempting to send %o to %s', msg, this.textChannel.name)
-  if (this.settings.mentions === false && !(msg instanceof Discord.MessageEmbed)) msg = await Functions.replaceMentions(msg, this.guild)
+  if (this.settings.mentions === false) msg = await Functions.replaceMentions(msg, this.guild)
   return this.textChannel.send(msg, opts)
 }
 

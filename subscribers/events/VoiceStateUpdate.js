@@ -15,9 +15,7 @@ module.exports = function (client) {
       if (guildClient.memberClients.get(userId)) {
         guildClient.logger.info('Stopping SnowClient for %s', newPresence.member.displayName)
         const snowClient = guildClient.memberClients.get(userId).snowClient
-        if (snowClient) {
-          snowClient.stop()
-        }
+        if (snowClient) snowClient.stop()
         guildClient.memberClients.get(userId).snowClient = null
       }
 
