@@ -1,4 +1,3 @@
-const Functions = require('../../bot-util/Functions')
 const Guilds = require('../../bot-util/Guilds')
 const Commands = require('../../commands')
 const Emojis = require('../../config').Emojis
@@ -56,19 +55,6 @@ module.exports = function (client) {
 
     // If there is no TextChannel associated with the guildClient, associate the current one
     if (!guildClient.textChannel || !guildClient.connection) guildClient.textChannel = msg.channel
-
-    // Check that Snowboy has all necessary permissions in text channel
-    const { textPermissions } = guildClient.checkPermissions()
-    if (textPermissions) {
-      if (textPermissions.includes('SEND_MESSAGES')) return
-      guildClient.sendMsg(
-        `${Emojis.error} ***Please ensure I have all the following permissions in your text channel! I won't completely work otherwise!***`
-      )
-      guildClient.sendMsg(
-        Functions.formatList(textPermissions)
-      )
-      return
-    }
 
     // Parse out command name and arguments
     const args = msg.content.slice(guildClient.settings.prefix.length).trim().split(/ +/)

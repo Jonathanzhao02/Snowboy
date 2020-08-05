@@ -36,17 +36,7 @@ function join (memberClient, args, msg) {
     memberClient.guildClient.voiceChannel = msg.member.voice.channel
   }
 
-  // Check that Snowboy has all necessary permissions in text channel and voice channel
-  const { voicePermissions } = memberClient.guildClient.checkPermissions()
-  if (voicePermissions) {
-    memberClient.guildClient.sendMsg(
-      `${Emojis.error} ***Please ensure I have all the following permissions in your voice channel! I won't completely work otherwise!***`
-    )
-    memberClient.guildClient.sendMsg(
-      Functions.formatList(voicePermissions)
-    )
-    return
-  }
+  memberClient.guildClient.checkVoicePermissions()
 
   // If already connected, notify and return
   if (memberClient.guildClient.connection) {

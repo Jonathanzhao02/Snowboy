@@ -3,6 +3,7 @@ const Common = require('../bot-util/Common')
 const Functions = require('../bot-util/Functions')
 const { Timeouts, Emojis } = require('../config')
 const Guilds = require('../bot-util/Guilds')
+const { Guild } = require('discord.js')
 
 /**
  * Wrapper object for a Guild so the bot is more easily able to access related resources.
@@ -137,6 +138,7 @@ GuildClient.prototype.sendMsg = async function (msg, opts) {
     return
   }
   this.logger.debug('Attempting to send %o to %s', msg, this.textChannel.name)
+  this.checkTextPermissions()
   if (this.settings.mentions === false) msg = await Functions.replaceMentions(msg, this.guild)
   return this.textChannel.send(msg, opts)
 }
@@ -209,10 +211,38 @@ GuildClient.prototype.leaveVoiceChannel = function () {
   return true
 }
 
-GuildClient.prototype.checkPermissions = function () {
-  return {
-    textPermissions: Guilds.checkTextPermissions(this.textChannel),
-    voicePermissions: Guilds.checkVoicePermissions(this.voiceChannel)
+/**
+ * Checks the GuildClient has necessary permissions in the bound TextChannel.
+ */
+GuildClient.prototype.checkTextPermissions = function () {
+  // Check that Snowboy has all necessary permissions in text channel
+  const missingPerms = Guilds.checkTextPermissions(this.textChannel)
+  if (missingPerms) {
+    this.logger.debug('Missing permissions: %o', missingPerms)
+    if (missingPerms.includes('SEND_MESSAGES')) return
+    this.sendMsg(
+      [
+        `${Emojis.error} ***Please ensure I have all the following permissions in your text channel! I won't completely work otherwise!***`,
+        Functions.formatList(missingPerms)
+      ]
+    )
+  }
+}
+
+/**
+ * Checks the GuildClient has necessary permissions in the bound VoiceChannel.
+ */
+GuildClient.prototype.checkVoicePermissions = function () {
+  // Check that Snowboy has all necessary permissions in text channel and voice channel
+  const missingPerms = Guilds.checkVoicePermissions(this.voiceChannel)
+  if (missingPerms) {
+    this.logger.debug('Missing permissions: %o', missingPerms)
+    this.sendMsg(
+      [
+        `${Emojis.error} ***Please ensure I have all the following permissions in your voice channel! I won't completely work otherwise!***`,
+        Functions.formatList(missingPerms)
+      ]
+    )
   }
 }
 
