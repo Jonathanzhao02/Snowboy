@@ -25,7 +25,6 @@ module.exports = function (client) {
     if (!memberClient.snowClient) {
       childLogger.info('Creating SnowClient for %s', member.displayName)
       const newClient = new SnowClient(memberClient, userClient.settings.sensitivity)
-      newClient.setLogger(memberClient.logger)
       newClient.on('hotword', ack)
       newClient.on('result', parse)
       newClient.on('busy', (memberClient) => Functions.sendMsg(
