@@ -1,4 +1,3 @@
-const Common = require('../../bot-util/Common')
 const Impressions = require('../../bot-util/Impressions')
 const { ImpressionValues, Emojis } = require('../../config')
 
@@ -15,7 +14,6 @@ function nevermind (memberClient, args) {
     `${Emojis.angry} **Call me only when you need me, <@${memberClient.id}>!**`
   )
   Impressions.updateImpression(
-    Common.uKeyv,
     memberClient.id,
     memberClient.userClient,
     ImpressionValues.NEVERMIND_VALUE,

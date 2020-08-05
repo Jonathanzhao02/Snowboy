@@ -1,5 +1,6 @@
 const Defaults = require('defaults')
 const { SettingsValues, Emojis } = require('../config')
+const Keyv = require('../bot-util/Keyv')
 
 /**
  * Contains all available settings options for a guildClient.
@@ -44,11 +45,9 @@ function GuildSettings (guildId, options) {
 
 /**
  * Saves this Settings object to the Keyv database as a JSON object.
- *
- * @param {Keyv} db The Keyv database to save to.
  */
 GuildSettings.prototype.save = function (db) {
-  db.set(`${this.guildId}:settings`, JSON.stringify(this))
+  Keyv.saveGuildSettings(this.guildId, this)
 }
 
 /**
@@ -56,12 +55,11 @@ GuildSettings.prototype.save = function (db) {
  *
  * Checks that all values are valid before assigning them.
  *
- * @param {Keyv} db The Keyv database to save to.
  * @param {String} name The name of the property being set.
  * @param {String} value The new value of the property.
  * @returns {String} Returns the response to the Settings change.
  */
-GuildSettings.prototype.set = function (db, name, value) {
+GuildSettings.prototype.set = function (name, value) {
   let oldVal
   switch (name) {
     case 'prefix':
@@ -91,7 +89,7 @@ GuildSettings.prototype.set = function (db, name, value) {
     default:
       return `${Emojis.error} ***\`${name}\` is not an option!***`
   }
-  this.save(db)
+  this.save()
   return `${Emojis.checkmark} **Changed \`${name}\` from \`${oldVal}\` to \`${value}\`**\n*Please note some changes (i.e. sensitivity) require Snowboy to rejoin to take effect!*`
 }
 
@@ -99,13 +97,12 @@ GuildSettings.prototype.set = function (db, name, value) {
  * Loads and returns a GuildSettings object from the database.
  *
  * @static
- * @param {Keyv} db The Keyv database to load from.
- * @param {String} key The key of the GuildSettings object.
+ * @param {String} id The ID of the Guild.
  * @returns {GuildSettings} Returns the GuildSettings or default settings if the key is not found.
  */
-GuildSettings.load = async function (db, key) {
-  const obj = await db.get(`${key}:settings`)
-  return new GuildSettings(key, JSON.parse(obj || '{}'))
+GuildSettings.load = async function (id) {
+  const obj = await Keyv.loadGuildSettings(id)
+  return new GuildSettings(id, JSON.parse(obj || '{}'))
 }
 
 GuildSettings.descriptions = {

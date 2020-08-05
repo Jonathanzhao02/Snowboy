@@ -1,5 +1,6 @@
 const UserSettings = require('./UserSettings')
 const Common = require('../bot-util/Common')
+const Keyv = require('../bot-util/Keyv')
 
 /**
  * Wrapper object for a User so that the bot can easily access all necessary resources.
@@ -54,11 +55,11 @@ function UserClient (user) {
 UserClient.prototype.init = async function () {
   this.logger.info('Initializing UserClient')
   this.logger.debug('Loading settings')
-  this.settings = await UserSettings.load(Common.uKeyv, this.user.id)
+  this.settings = await UserSettings.load(this.id)
   this.logger.debug('Read settings as %o', this.settings)
 
   this.logger.debug('Loading impression')
-  this.impression = await Common.uKeyv.get(`${this.user.id}:impression`) || 0
+  this.impression = await Keyv.getImpression(this.id) || 0
   this.logger.debug('Read impression as %d', this.impression)
   Common.botClient.userClients.set(this.id, this)
 }

@@ -1,5 +1,6 @@
 const Defaults = require('defaults')
 const { SettingsValues, Emojis } = require('../config')
+const Keyv = require('../bot-util/Keyv')
 
 /**
  * Contains all available settings options for a user.
@@ -36,11 +37,9 @@ function UserSettings (userId, options) {
 
 /**
  * Saves this Settings object to the Keyv database as a JSON object.
- *
- * @param {Keyv} db The Keyv database to save to.
  */
 UserSettings.prototype.save = function (db) {
-  db.set(`${this.userId}:settings`, JSON.stringify(this))
+  Keyv.saveUserSettings(this.userId, this)
 }
 
 /**
@@ -48,12 +47,11 @@ UserSettings.prototype.save = function (db) {
  *
  * Checks that all values are valid before assigning them.
  *
- * @param {Keyv} db The Keyv database to save to.
  * @param {String} name The name of the property being set.
  * @param {String} value The new value of the property.
  * @returns {String} Returns the response to the Settings change.
  */
-UserSettings.prototype.set = function (db, name, value) {
+UserSettings.prototype.set = function (name, value) {
   let oldVal
   switch (name) {
     case 'impressions':
@@ -75,7 +73,7 @@ UserSettings.prototype.set = function (db, name, value) {
     default:
       return `${Emojis.error} ***\`${name}\` is not an option!***`
   }
-  this.save(db)
+  this.save()
   return `${Emojis.checkmark} **Changed \`${name}\` from \`${oldVal}\` to \`${value}\`**\n*Please note some changes (i.e. sensitivity) require Snowboy to rejoin to take effect!*`
 }
 
@@ -83,13 +81,12 @@ UserSettings.prototype.set = function (db, name, value) {
  * Loads and returns a UserSettings object from the database.
  *
  * @static
- * @param {Keyv} db The Keyv database to load from.
- * @param {String} key The key of the UserSettings object.
+ * @param {String} id The ID of the User.
  * @returns {UserSettings} Returns the UserSettings or default settings if the key is not found.
  */
-UserSettings.load = async function (db, key) {
-  const obj = await db.get(`${key}:settings`)
-  return new UserSettings(key, JSON.parse(obj || '{}'))
+UserSettings.load = async function (id) {
+  const obj = await Keyv.loadUserSettings(id)
+  return new UserSettings(id, JSON.parse(obj || '{}'))
 }
 
 UserSettings.descriptions = {

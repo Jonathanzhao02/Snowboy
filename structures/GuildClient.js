@@ -116,7 +116,7 @@ function GuildClient (guild) {
 GuildClient.prototype.init = async function () {
   this.logger.info('Initializing GuildClient')
   this.logger.debug('Loading settings')
-  this.settings = await GuildSettings.load(Common.gKeyv, this.id)
+  this.settings = await GuildSettings.load(this.id)
   this.logger.debug('Read settings as %o', this.settings)
   Common.botClient.guildClients.set(this.guild.id, this)
 }

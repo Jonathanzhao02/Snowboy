@@ -62,7 +62,7 @@ function settings (memberClient, args, msg) {
     const val = args.join()
     logger.debug('Attempting to set %s to %s', settingName, val)
     memberClient.guildClient.sendMsg(
-      guildClient.settings.set(Common.gKeyv, settingName, val)
+      guildClient.settings.set(settingName, val)
     )
   // Setting option is for users
   } else {
@@ -77,7 +77,7 @@ function settings (memberClient, args, msg) {
     const val = args.join()
     logger.debug('Attempting to set %s to %s', settingName, val)
     memberClient.guildClient.sendMsg(
-      memberClient.userClient.settings.set(Common.uKeyv, settingName, val)
+      memberClient.userClient.settings.set(settingName, val)
     )
   }
 }

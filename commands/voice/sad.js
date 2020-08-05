@@ -1,4 +1,3 @@
-const Common = require('../../bot-util/Common')
 const Impressions = require('../../bot-util/Impressions')
 const { ImpressionValues, Emojis } = require('../../config')
 
@@ -15,7 +14,6 @@ function insult (memberClient, args) {
     `${Emojis.sad} *Okay...*`
   )
   Impressions.updateImpression(
-    Common.uKeyv,
     memberClient.id,
     memberClient.userClient,
     ImpressionValues.SAD_VALUE,

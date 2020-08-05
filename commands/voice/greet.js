@@ -1,4 +1,3 @@
-const Common = require('../../bot-util/Common')
 const Responses = require('../../bot-util/Responses')
 const Impressions = require('../../bot-util/Impressions')
 const { ImpressionValues, Emojis } = require('../../config')
@@ -16,7 +15,6 @@ function greet (memberClient, args) {
     `${Emojis.greeting} **${Responses.randomGreeting()},** <@${memberClient.id}>!`
   )
   Impressions.updateImpression(
-    Common.uKeyv,
     memberClient.id,
     memberClient.userClient,
     ImpressionValues.GREET_VALUE,
