@@ -1,5 +1,35 @@
 # Changelog
 
+## v0.6.0 (PR #29)
+Significant project restructuring part 2.
+* Updated .gitignore to reflect folder changes.
+* Refactored all `.js` files to start with capitalized letters, excluding `index.js`.
+* Changed `Common.js` to have its exports set during runtime.
+* Refactored all objects into a `structures` folder.
+* Added new `Guilds.js` in `bot-util` for guild-related functions.
+  * Refactored `cleanupGuildClient` and `startTimeout` into `Guilds.js`.
+  * Refactored `createAudioStream` and `createClientsFromMember` into `Guilds.js`.
+  * Refactored technical portion of `leave.js` into `Guilds.js`.
+* Improved Pino logging
+  * Removed all console logging in favor of Pino logging.
+  * Fixed object and value logging for Pino.
+  * Simplified Pino logs for better readability.
+* Removed `index.js` from `bot-util`.
+* Changed `showMe.js` to check for 200 HTTPS status code before sending image.
+* Removed 'Commands' from names of all command category folders.
+* Fixed `purge.js` trying to delete non-deletable messages.
+* Simplified `index.js` by refactoring startup processes and client setup to `loaders` and `subscribers`.
+  * `loaders` loads up Keyv connection, Discord client setup, Pino setup, process setup, web API key-setting, and dotenv setup.
+  * `subscribers` creates all the functions related to events the bot client fires and adds listeners.
+* Added new `GuildClient`, `UserClient`, and `MemberClient` objects.
+* Changed `UserSettings` and `GuildSettings` to return default object whenever no settings are found.
+* Removed condition for user only being able to send messages in Snowboy's bound channel.
+* Fixed dispatcher not moving onto the next song correctly.
+* Removed any usages of `var`.
+* Fixed a few typos.
+* Added file and folder creation for missing database or logging directories.
+* Misc. bug fixes.
+
 ## v0.5.0 (PR #28)
 Significant project restructuring.
 * Moved bot-utils into its own folder and split different parts into different folders.
