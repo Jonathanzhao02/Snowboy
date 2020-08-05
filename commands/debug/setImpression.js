@@ -1,4 +1,3 @@
-const Common = require('../../bot-util/Common')
 const Impressions = require('../../bot-util/Impressions')
 const { ImpressionThresholds } = require('../../config')
 

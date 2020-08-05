@@ -2,12 +2,11 @@ const GuildSettings = require('./GuildSettings')
 const Common = require('../bot-util/Common')
 const Functions = require('../bot-util/Functions')
 const { Timeouts, Emojis } = require('../config')
-const Discord = require('discord.js')
 
 /**
  * Wrapper object for a Guild so the bot is more easily able to access related resources.
  *
- * @param {Discord.Guild} guild The Guild this GuildClient is tracking.
+ * @param {import('discord.js').Guild} guild The Guild this GuildClient is tracking.
  */
 function GuildClient (guild) {
   Common.logger.info('Creating new GuildClient for %s', guild.name)
@@ -20,19 +19,19 @@ function GuildClient (guild) {
 
   /**
    * The bound TextChannel.
-   * @type {Discord.TextChannel?}
+   * @type {import('discord.js').TextChannel?}
    */
   this.textChannel = null
 
   /**
    * The connected VoiceChannel.
-   * @type {Discord.VoiceChannel?}
+   * @type {import('discord.js').VoiceChannel?}
    */
   this.voiceChannel = null
 
   /**
    * The active connection to the VoiceChannel.
-   * @type {Discord.VoiceConnection?}
+   * @type {import('discord.js').VoiceConnection?}
    */
   this.connection = null
 
