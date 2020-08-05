@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.6.1 (PR #30)
+Bug fixes and more refactoring.
+* Changed all classes to use prototypes for performance.
+* Fixed JSDoc documentation for most files.
+* Removed duplicate logic from play.js, skip.js.
+* Refactored all GuildClient-related functions into GuildClient (biggest one being sendMsg).
+* Refactored all database-related functions into new Keyv.js in bot-util.
+* Fixed permission error when unable to send messages.
+
 ## v0.6.0 (PR #29)
 Significant project restructuring part 2.
 * Updated .gitignore to reflect folder changes.
