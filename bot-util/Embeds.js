@@ -3,6 +3,7 @@ const Discord = require('discord.js')
 const GuildSettings = require('../structures/GuildSettings')
 const UserSettings = require('../structures/UserSettings')
 const { Emojis } = require('../config')
+const Common = require('./Common')
 
 /**
  * Creates an embed for a video.
@@ -59,10 +60,9 @@ function createImageEmbed (result, username) {
 /**
  * Creates an embed detailing the bot.
  *
- * @param {Discord.Client} botClient The Client of the bot.
  * @returns {Discord.MessageEmbed} Returns a message embed detailing the bot.
  */
-function createAboutEmbed (botClient) {
+function createAboutEmbed () {
   return new Discord.MessageEmbed()
     .setColor('#fffafa')
     .setTitle('__**About The Bot**__')
@@ -74,7 +74,7 @@ function createAboutEmbed (botClient) {
     .addField('For Developers', 'Snowboy was built using NodeJS/Javascript. ' +
     'The different libraries and APIs used for Snowboy include Discord.js, __Wit.ai__, __Snowboy__, Keyv and a few Google Cloud APIs. ' +
     'I\'d highly recommend you to check out the underlined ones, they\'re both excellent, open-source ways to use speech recognition.')
-    .setImage(botClient.user.displayAvatarURL({ size: 2048, format: 'png' }))
+    .setImage(Common.botClient.user.displayAvatarURL({ size: 2048, format: 'png' }))
 }
 
 /**

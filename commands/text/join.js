@@ -7,8 +7,8 @@ const Guilds = require('../../bot-util/Guilds')
 /**
  * Handles all setup associated with the connection.
  *
- * @param {Discord.VoiceConnection} connection The VoiceConnection from the VoiceChannel.
- * @param {Object} guildClient The guildClient associated with the server of the connection.
+ * @param {import('discord.js').VoiceConnection} connection The VoiceConnection from the VoiceChannel.
+ * @param {import('../../structures/GuildClient')} guildClient The guildClient associated with the server of the connection.
  */
 function connectionHandler (connection, guildClient) {
   guildClient.logger.info('Successfully connected')
@@ -19,9 +19,9 @@ function connectionHandler (connection, guildClient) {
 /**
  * Makes Snowboy join a VoiceChannel.
  *
- * @param {Object} memberClient The memberClient of the member who requested this command.
+ * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
- * @param {Discord.Message} msg The Message the user sent.
+ * @param {import('discord.js').Message} msg The Message the user sent.
  */
 function join (memberClient, args, msg) {
   const logger = memberClient.logger
@@ -29,8 +29,7 @@ function join (memberClient, args, msg) {
   // If the user is not connected to a VoiceChannel, notify and return
   if (!msg.member.voice.channel) {
     logger.trace('Member not connected')
-    Functions.sendMsg(
-      memberClient.guildClient.textChannel,
+    memberClient.guildClient.sendMsg(
       `${Emojis.error} ***You are not connected to a voice channel!***`
     )
     return
@@ -42,12 +41,10 @@ function join (memberClient, args, msg) {
   // Check that Snowboy has all necessary permissions in text channel and voice channel
   const missingPermissions = Guilds.checkVoicePermissions(memberClient.guildClient.voiceChannel)
   if (missingPermissions) {
-    Functions.sendMsg(
-      memberClient.guildClient.textChannel,
+    memberClient.guildClient.sendMsg(
       `${Emojis.error} ***Please ensure I have all the following permissions in your voice channel! I won't completely work otherwise!***`
     )
-    Functions.sendMsg(
-      memberClient.guildClient.textChannel,
+    memberClient.guildClient.sendMsg(
       Functions.formatList(missingPermissions)
     )
     return
@@ -56,25 +53,21 @@ function join (memberClient, args, msg) {
   // If already connected, notify and return
   if (memberClient.guildClient.connection) {
     logger.trace('Already connected')
-    Functions.sendMsg(
-      memberClient.guildClient.textChannel,
+    memberClient.guildClient.sendMsg(
       `${Emojis.error} ***I'm already connected to a voice channel!***`
     )
     return
   }
 
   // Greet the user
-  Functions.sendMsg(
-    memberClient.guildClient.textChannel,
-    `${Emojis.greeting} **${Responses.randomGreeting()},** <@${memberClient.id}>!`,
-    memberClient.guildClient.settings.mentions
+  memberClient.guildClient.sendMsg(
+    `${Emojis.greeting} **${Responses.randomGreeting()},** <@${memberClient.id}>!`
   )
 
   // Attempt to join and handle the connection, or error
   logger.trace('Attempting to join')
   memberClient.guildClient.voiceChannel.join().then(connection => connectionHandler(connection, memberClient.guildClient)).catch(e => {
-    Functions.sendMsg(
-      memberClient.guildClient.textChannel,
+    memberClient.guildClient.sendMsg(
       `${Emojis.error} ***Could not connect! \\;(***`
     ).then(() => { throw e })
   })

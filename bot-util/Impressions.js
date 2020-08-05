@@ -1,6 +1,7 @@
 const { ImpressionThresholds, Emojis } = require('../config')
 const Common = require('./Common')
 const random = require('./Functions').random
+const Keyv = require('./Keyv')
 
 // The list of replies used for when a hotword is triggered, ordered by likability
 const hotwordReplies = [
@@ -123,18 +124,18 @@ function getResponse (func, impression, args, useImpressions) {
 /**
  * Updates the impression level of a user.
  *
- * @param {Keyv} keyv The Keyv database to save to.
- * @param {String} key The key of the user to be updated.
+ * @param {String} id The ID of the user to be updated.
  * @param {Object} client The object containing the impression to be updated.
+ * @param {Number} client.impression The impression level with Snowboy.
  * @param {Number} value The change in the user's impression level.
  * @param {boolean} useImpressions If the impression system is in use or not.
  */
-function updateImpression (keyv, key, client, value, useImpressions) {
+function updateImpression (id, client, value, useImpressions) {
   if (useImpressions === false) return
-  Common.logger.info('Attempting to update impressions for %s', key)
+  Common.logger.info('Attempting to update impressions for %s', id)
   if (client.impression + value > ImpressionThresholds.MAX_IMPRESSION || client.impression + value < ImpressionThresholds.MIN_IMPRESSION) return
   client.impression += value
-  keyv.set(`${key}`, value)
+  Keyv.setImpression(id, client.impression)
 }
 
 module.exports = {

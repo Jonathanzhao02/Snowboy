@@ -1,10 +1,9 @@
 const { Emojis } = require('../../config')
-const Functions = require('../../bot-util/Functions')
 
 /**
  * Loops or stops looping current song.
  *
- * @param {Object} memberClient The memberClient of the member who requested this command.
+ * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
  */
 function loop (memberClient, args) {
@@ -12,8 +11,7 @@ function loop (memberClient, args) {
   logger.info('Received loop command')
   if (!memberClient.guildClient.playing) {
     logger.debug('Not playing anything')
-    Functions.sendMsg(
-      memberClient.guildClient.textChannel,
+    memberClient.guildClient.sendMsg(
       `${Emojis.error} ***Nothing currently playing!***`
     )
     return
@@ -27,8 +25,7 @@ function loop (memberClient, args) {
     memberClient.guildClient.loopState = 1
   }
 
-  Functions.sendMsg(
-    memberClient.guildClient.textChannel,
+  memberClient.guildClient.sendMsg(
     `${Emojis.loop} **${memberClient.guildClient.loopState === 0 ? 'No longer' : 'Now'} looping the song!**`
   )
 }

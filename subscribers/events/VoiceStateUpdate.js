@@ -1,5 +1,3 @@
-const Functions = require('../../bot-util/Functions')
-const Guilds = require('../../bot-util/Guilds')
 const Timeouts = require('../../config').Timeouts
 const Emojis = require('../../config').Emojis
 
@@ -17,16 +15,14 @@ module.exports = function (client) {
       if (guildClient.memberClients.get(userId)) {
         guildClient.logger.info('Stopping SnowClient for %s', newPresence.member.displayName)
         const snowClient = guildClient.memberClients.get(userId).snowClient
-        if (snowClient) {
-          snowClient.stop()
-        }
+        if (snowClient) snowClient.stop()
         guildClient.memberClients.get(userId).snowClient = null
       }
 
       // If the bot has been disconnected, clean up the guildClient
       if (userId === client.user.id && !newPresence.channelID) {
         guildClient.logger.info('Bot disconnected, cleaning up...')
-        Guilds.leaveVoiceChannel(guildClient)
+        guildClient.leaveVoiceChannel()
       }
 
       // If the bot has been left alone in a channel, wait a few seconds before leaving
@@ -36,11 +32,10 @@ module.exports = function (client) {
           // Check again that the channel is empty before leaving
           if (oldPresence.channel.members.size === 1) {
             guildClient.logger.info('Leaving channel, only member remaining')
-            Functions.sendMsg(
-              guildClient.textChannel,
+            guildClient.sendMsg(
               `${Emojis.sad} I'm leaving, I'm all by myself!`
             )
-            Guilds.leaveVoiceChannel(guildClient)
+            guildClient.leadVoiceChannel()
           }
         }, Timeouts.ALONE_TIMEOUT + 500)
       }

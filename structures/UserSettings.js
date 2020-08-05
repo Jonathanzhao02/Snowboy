@@ -1,86 +1,92 @@
 const Defaults = require('defaults')
 const { SettingsValues, Emojis } = require('../config')
+const Keyv = require('../bot-util/Keyv')
 
 /**
  * Contains all available settings options for a user.
  *
- * @property {boolean} impressions Whether the impression system is in use.
- * @property {Number} sensitivity The sensitivity of voice commands.
+ * @param {String} userId The ID of the user these settings are applied to.
+ * @param {Object} options The properties to pass in to the UserSettings object.
+ * @param {Boolean?} options.impressions Whether the impression system is in use.
+ * @param {Number?} options.sensitivity The sensitivity of voice commands.
  */
-class UserSettings {
-  /**
-   * Initializes all UserSettings values from defaults or from the options.
-   *
-   * @param {String} usrId The ID of the user these settings are applied to.
-   * @param {Object} options The properties to pass in to the UserSettings object.
-   */
-  constructor (usrId, options) {
-    this.userId = usrId
-    options = Defaults(options, {
-      impressions: SettingsValues.DEFAULT_IMPRESSIONS,
-      sensitivity: SettingsValues.DEFAULT_SENSITIVITY
-    })
-
-    Object.assign(this, options)
-  }
+function UserSettings (userId, options) {
+  options = Defaults(options, {
+    impressions: SettingsValues.DEFAULT_IMPRESSIONS,
+    sensitivity: SettingsValues.DEFAULT_SENSITIVITY
+  })
 
   /**
-   * Saves this Settings object to the Keyv database as a JSON object.
-   *
-   * @param {Keyv} db The Keyv database to save to.
+   * The ID of the user these settings are applied to.
+   * @type {String}
    */
-  save (db) {
-    db.set(`${this.userId}:settings`, JSON.stringify(this))
-  }
+  this.userId = userId
 
   /**
-   * Sets the value of a property in this Settings object and returns a response.
-   *
-   * Checks that all values are valid before assigning them.
-   *
-   * @param {Keyv} db The Keyv database to save to.
-   * @param {String} name The name of the property being set.
-   * @param {String} value The new value of the property.
-   * @returns {String} Returns the response to the Settings change.
+   * Whether the impression system is in use.
+   * @type {Boolean}
    */
-  set (db, name, value) {
-    let oldVal
-    switch (name) {
-      case 'impressions':
-        if (value === 'true' || value === 'false') {
-          oldVal = this.impressions
-          this.impressions = value === 'true'
-        } else {
-          return `${Emojis.error} ***Value can only be \`true\` or \`false\`!***`
-        }
-        break
-      case 'sensitivity':
-        if (!isNaN(value) && value >= 0 && value <= 1) {
-          oldVal = this.sensitivity
-          this.sensitivity = value
-        } else {
-          return `${Emojis.error} ***Value must be a number between 0 and 1!***`
-        }
-        break
-      default:
-        return `${Emojis.error} ***\`${name}\` is not an option!***`
-    }
-    this.save(db)
-    return `${Emojis.checkmark} **Changed \`${name}\` from \`${oldVal}\` to \`${value}\`**\n*Please note some changes (i.e. sensitivity) require Snowboy to rejoin to take effect!*`
-  }
+  this.impressions = options.impressions
 
   /**
-   * Loads and returns a UserSettings object from the database.
-   *
-   * @static
-   * @param {Keyv} db The Keyv database to load from.
-   * @param {String} key The key of the UserSettings object.
-   * @returns {UserSettings} Returns the UserSettings or default settings if the key is not found.
+   * The sensitivity of voice commands.
+   * @type {Number}
    */
-  static async load (db, key) {
-    const obj = await db.get(`${key}:settings`)
-    return new UserSettings(key, JSON.parse(obj || '{}'))
+  this.sensitivity = options.sensitivity
+}
+
+/**
+ * Saves this Settings object to the Keyv database as a JSON object.
+ */
+UserSettings.prototype.save = function (db) {
+  Keyv.saveUserSettings(this.userId, this)
+}
+
+/**
+ * Sets the value of a property in this Settings object and returns a response.
+ *
+ * Checks that all values are valid before assigning them.
+ *
+ * @param {String} name The name of the property being set.
+ * @param {String} value The new value of the property.
+ * @returns {String} Returns the response to the Settings change.
+ */
+UserSettings.prototype.set = function (name, value) {
+  let oldVal
+  switch (name) {
+    case 'impressions':
+      if (value === 'true' || value === 'false') {
+        oldVal = this.impressions
+        this.impressions = value === 'true'
+      } else {
+        return `${Emojis.error} ***Value can only be \`true\` or \`false\`!***`
+      }
+      break
+    case 'sensitivity':
+      if (!isNaN(value) && value >= 0 && value <= 1) {
+        oldVal = this.sensitivity
+        this.sensitivity = value
+      } else {
+        return `${Emojis.error} ***Value must be a number between 0 and 1!***`
+      }
+      break
+    default:
+      return `${Emojis.error} ***\`${name}\` is not an option!***`
   }
+  this.save()
+  return `${Emojis.checkmark} **Changed \`${name}\` from \`${oldVal}\` to \`${value}\`**\n*Please note some changes (i.e. sensitivity) require Snowboy to rejoin to take effect!*`
+}
+
+/**
+ * Loads and returns a UserSettings object from the database.
+ *
+ * @static
+ * @param {String} id The ID of the User.
+ * @returns {UserSettings} Returns the UserSettings or default settings if the key is not found.
+ */
+UserSettings.load = async function (id) {
+  const obj = await Keyv.loadUserSettings(id)
+  return new UserSettings(id, JSON.parse(obj || '{}'))
 }
 
 UserSettings.descriptions = {

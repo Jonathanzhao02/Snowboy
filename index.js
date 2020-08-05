@@ -16,7 +16,5 @@ if (process.argv.includes('-t') || process.argv.includes('--test')) {
 
 /**
  * TODO:
- * Replace all memberClient commands with just member, and take advantage of the Functions.getClientsFromMember command?
- * Also change SnowClient to use member instead of memberClient?
  * Inject dependencies into commands through services?
  */

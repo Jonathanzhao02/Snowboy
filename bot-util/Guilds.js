@@ -3,8 +3,6 @@ const UserClient = require('../structures/UserClient')
 const GuildClient = require('../structures/GuildClient')
 const MemberClient = require('../structures/MemberClient')
 const Common = require('./Common')
-const Functions = require('./Functions')
-const { Timeouts, Emojis } = require('../config')
 
 /**
  * Checks permissions in a TextChannel and returns any missing.
@@ -14,7 +12,7 @@ const { Timeouts, Emojis } = require('../config')
  */
 function checkTextPermissions (channel) {
   if (channel.guild.me.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR)) return
-  const textPermissions = channel.guild.me.permissionsIn(channel)
+  const textPermissions = channel.permissionsFor(channel.guild.me)
   const textMissingPermissions = new Discord.Permissions(textPermissions.missing([
     Discord.Permissions.FLAGS.VIEW_CHANNEL,
     Discord.Permissions.FLAGS.SEND_MESSAGES,
@@ -36,7 +34,7 @@ function checkTextPermissions (channel) {
 function checkVoicePermissions (channel) {
   if (channel) {
     if (channel.guild.me.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR)) return
-    const voicePermissions = channel.guild.me.permissionsIn(channel)
+    const voicePermissions = channel.permissionsFor(channel.guild.me)
     const voiceMissingPermissions = new Discord.Permissions(voicePermissions.missing([
       Discord.Permissions.FLAGS.VIEW_CHANNEL,
       Discord.Permissions.FLAGS.CONNECT,
@@ -117,85 +115,9 @@ async function createClientsFromMember (member) {
   }
 }
 
-/**
- * Starts the timeout for cleanup of a guildClient.
- *
- * @param {Object} guildClient The guildClient to begin timing out.
- */
-function startTimeout (guildClient) {
-  guildClient.logger.info('Starting expiration timer')
-  guildClient.lastCalled = Date.now()
-  if (guildClient.timeoutId) clearTimeout(guildClient.timeoutId)
-  guildClient.timeoutId = setTimeout(() => { cleanupGuildClient(guildClient) }, Timeouts.TIMEOUT + 500)
-}
-
-/**
- * Deletes a guildClient if it has been inactive for a certain amount of time.
- *
- * If the guildClient has an active voice connection, notify through the TextChannel and mark the guildClient
- * for deletion to be handled by the voiceStateUpdate event before leaving the voice channel.
- *
- * @param {Object} guildClient The guildClient to be checked for expiration.
- */
-function cleanupGuildClient (guildClient) {
-  if (Date.now() - guildClient.lastCalled >= Timeouts.GUILD_TIMEOUT) {
-    guildClient.logger.debug('Attempting to clean up guildClient')
-    // If the guild is currently connected, is not playing music, and has an active TextChannel,
-    // notify, mark the guildClient for deletion, and leave
-    if (guildClient.textChannel && guildClient.connection && !guildClient.playing) {
-      guildClient.logger.debug('Leaving voice channel')
-      Functions.sendMsg(guildClient.textChannel,
-        `${Emojis.happy} **It seems nobody needs me right now, so I'll be headed out. Call me when you do!**`,
-        guildClient)
-      guildClient.delete = true
-      guildClient.voiceChannel.leave()
-    } else {
-      guildClient.logger.debug('Deleting guildClient')
-      Common.botClient.guildClients.delete(guildClient.guild.id)
-    }
-  }
-}
-
-/**
- * Leaves a guildClient's voice channel.
- *
- * @param {GuildClient} guildClient The guildClient to disconnect.
- * @returns {Boolean} Whether the disconnect was successful or not.
- */
-function leaveVoiceChannel (guildClient) {
-  if (!guildClient.connection) {
-    Common.logger.debug('Not connected')
-    return false
-  }
-
-  Common.logger.debug('Leaving')
-  Common.logger.trace('Disconnecting')
-  guildClient.songQueue = []
-  if (guildClient.connection.dispatcher) {
-    Common.logger.trace('Ending dispatcher')
-    guildClient.connection.dispatcher.end()
-  }
-  Common.logger.trace('Cleaning up members')
-  guildClient.memberClients.forEach(member => { if (member.snowClient) member.snowClient.stop() })
-  guildClient.memberClients.clear()
-  Common.logger.trace('Leaving channel')
-  guildClient.connection.disconnect()
-  guildClient.connection.removeAllListeners()
-  guildClient.voiceChannel.leave()
-  guildClient.voiceChannel = null
-  guildClient.textChannel = null
-  guildClient.connection = null
-  guildClient.loopState = 0
-  Common.logger.debug('Successfully left')
-  return true
-}
-
 module.exports = {
   checkTextPermissions: checkTextPermissions,
   checkVoicePermissions: checkVoicePermissions,
   getClientsFromMember: getClientsFromMember,
-  createClientsFromMember: createClientsFromMember,
-  startTimeout: startTimeout,
-  cleanupGuildClient: cleanupGuildClient,
-  leaveVoiceChannel: leaveVoiceChannel
+  createClientsFromMember: createClientsFromMember
 }

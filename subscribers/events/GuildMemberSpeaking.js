@@ -11,8 +11,8 @@ module.exports = function (client) {
    * Handles creation of new members or new SnowClients for untracked users
    * if voice commands are enabled.
    *
-   * @param {Discord.GuildMember} member The speaking GuildMember.
-   * @param {Discord.Speaking} speaking The speaking state of the GuildMember.
+   * @param {import('discord.js').GuildMember} member The speaking GuildMember.
+   * @param {import('discord.js').Speaking} speaking The speaking state of the GuildMember.
    */
   async function onSpeaking (member, speaking) {
     if (!member || speaking.equals(0) || member.id === client.user.id) return
@@ -25,17 +25,13 @@ module.exports = function (client) {
     if (!memberClient.snowClient) {
       childLogger.info('Creating SnowClient for %s', member.displayName)
       const newClient = new SnowClient(memberClient, userClient.settings.sensitivity)
-      newClient.setLogger(memberClient.logger)
       newClient.on('hotword', ack)
       newClient.on('result', parse)
-      newClient.on('busy', (memberClient) => Functions.sendMsg(
-        memberClient.guildClient.textChannel,
-        `***I'm still working on your last request, <@${memberClient.id}>!***`,
-        memberClient.guildClient.settings.mentions
+      newClient.on('busy', (memberClient) => guildClient.sendMsg(
+        `***I'm still working on your last request, <@${memberClient.id}>!***`
       ))
       newClient.on('error', msg => {
-        Functions.sendMsg(
-          guildClient.textChannel,
+        guildClient.sendMsg(
           `${Emojis.error} ***Error:*** \`${msg}\``
         )
       })
@@ -52,7 +48,7 @@ module.exports = function (client) {
    * Wit to available commands.
    *
    * @param {Object} result The JSON object returned by Wit.
-   * @param {Object} memberClient The memberClient of the member triggered the hotword.
+   * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member triggered the hotword.
    */
   function parse (result, memberClient) {
     if (!memberClient || !memberClient.guildClient.settings.voice) return
@@ -62,8 +58,7 @@ module.exports = function (client) {
     if (!result || !result.intents || !result.intents[0] || result.intents[0].confidence < CONFIDENCE_THRESHOLD) {
       memberClient.logger.debug('Rejected voice command')
       memberClient.logger.debug(result)
-      Functions.sendMsg(
-        memberClient.guildClient.textChannel,
+      memberClient.guildClient.sendMsg(
         `${Emojis.unknown} ***Sorry, I didn't catch that...***`
       )
       return
@@ -84,8 +79,7 @@ module.exports = function (client) {
     } else if (Commands.easteregg.get(commandName)) {
       Commands.easteregg.get(commandName).execute(memberClient, args)
     } else {
-      Functions.sendMsg(
-        memberClient.guildClient.textChannel,
+      memberClient.guildClient.sendMsg(
         `${Emojis.confused} ***Sorry, I don't understand*** "\`${result.text}\`"`
       )
       memberClient.logger.warn('No command found for %s!', commandName)
@@ -100,21 +94,19 @@ module.exports = function (client) {
    *
    * @param {Number} index The index of the detected hotword in the model. Always 0.
    * @param {String} hotword The detected hotword. Always 'snowboy'.
-   * @param {Object} memberClient The memberClient of the member who triggered the hotword.
+   * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who triggered the hotword.
    */
   function ack (index, hotword, memberClient) {
     if (!memberClient.guildClient.connection) return
     memberClient.logger.info('Received hotword from')
-    Functions.sendMsg(
-      memberClient.guildClient.textChannel,
+    memberClient.guildClient.sendMsg(
       `**${Impressions.getResponse('hotword',
         memberClient.userClient.impression,
         [`<@${memberClient.id}>`],
-        memberClient.userClient.settings.impressions)}**`,
-      memberClient.guildClient.settings.mentions
+        memberClient.userClient.settings.impressions)}**`
     )
 
-    Guilds.startTimeout(memberClient.guildClient)
+    memberClient.guildClient.startTimeout()
   }
 
   client.on('guildMemberSpeaking', onSpeaking)

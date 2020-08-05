@@ -1,12 +1,12 @@
 const Common = require('../../bot-util/Common')
-const Functions = require('../../bot-util/Functions')
+const Keyv = require('../../bot-util/Keyv')
 
 /**
  * Clears the impressions of all tracked users in a server.
  *
- * @param {Object} memberClient The memberClient of the member who requested this command.
+ * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
- * @param {Discord.Message} msg Unused parameter.
+ * @param {import('discord.js').Message} msg Unused parameter.
  */
 function clearImpressions (memberClient, args, msg) {
   const logger = memberClient.logger
@@ -19,10 +19,9 @@ function clearImpressions (memberClient, args, msg) {
       if (Common.botClient.userClients.get(member.id)) {
         Common.botClient.userClients.get(member.id).impression = 0
       }
-      Common.uKeyv.delete(`${member.id}:impression`)
+      Keyv.setImpression(member.id, 0)
     })
-    Functions.sendMsg(
-      memberClient.guildClient.textChannel,
+    memberClient.guildClient.sendMsg(
       'Cleared all guild impressions'
     )
   })

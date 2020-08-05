@@ -98,33 +98,11 @@ async function replaceMentions (msg, guild) {
 }
 
 /**
- * Sends a message through the text channel.
- *
- * @param {Discord.TextChannel} textChannel The TextChannel to send the message to.
- * @param {String | Discord.MessageEmbed} msg The message to be sent.
- * @param {Boolean?} mentions Whether mentions should be replaced with names.
- * @param {Object?} opts Any additional options to send the message with.
- * @returns {Discord.Message | Discord.Message[]} Returns the message(s) sent.
- */
-async function sendMsg (textChannel, msg, mentions, opts) {
-  if (!textChannel) {
-    Common.logger.warn('Attempted to send %o, but no text channel found!', msg)
-    return
-  }
-  Common.logger.debug('Attempting to send %o to %s', msg, textChannel.name)
-  if (mentions === false) msg = await replaceMentions(msg, textChannel.guild)
-  let msgs
-  if (opts) msgs = await textChannel.send(msg, opts)
-  else msgs = await textChannel.send(msg)
-  return msgs
-}
-
-/**
  * Plays silence frames in a voice channel.
  *
  * Necessary for 'speaking' event to continue functioning.
  *
- * @param {Object} guildClient The guildClient associated with the voice channel's server.
+ * @param {import('../structures/GuildClient')} guildClient The guildClient associated with the voice channel's server.
  */
 function playSilence (guildClient) {
   guildClient.logger.debug('Playing silence')
@@ -188,7 +166,7 @@ module.exports = {
   random: random,
   forEachAsync: forEachAsync,
   formatList: formatList,
-  sendMsg: sendMsg,
+  replaceMentions: replaceMentions,
   playSilence: playSilence,
   validateURL: validateURL,
   createAudioStream: createAudioStream

@@ -1,96 +1,108 @@
 const Defaults = require('defaults')
 const { SettingsValues, Emojis } = require('../config')
+const Keyv = require('../bot-util/Keyv')
 
 /**
  * Contains all available settings options for a guildClient.
  *
- * @property {String} prefix The prefix for commands.
- * @property {boolean} voice Whether voice commands are enabled.
- * @property {boolean} mentions Whether mentions are enabled.
+ * @param {String} guildId The ID of the guild these settings are applied to.
+ * @param {Object} options The properties to pass in to the GuildSettings object.
+ * @param {String?} options.prefix The prefix for commands.
+ * @param {Boolean?} options.voice Whether voice commands are enabled.
+ * @param {Boolean?} options.mentions Whether mentions are enabled.
  */
-class GuildSettings {
-  /**
-   * Initializes all GuildSettings values from defaults or from the options.
-   *
-   * @param {String} gldId The ID of the guild these settings are applied to.
-   * @param {Object} options The properties to pass in to the GuildSettings object.
-   */
-  constructor (gldId, options) {
-    this.guildId = gldId
-    options = Defaults(options, {
-      prefix: SettingsValues.DEFAULT_BOT_PREFIX,
-      voice: SettingsValues.DEFAULT_VOICE,
-      mentions: SettingsValues.DEFAULT_MENTIONS
-    })
-
-    Object.assign(this, options)
-  }
+function GuildSettings (guildId, options) {
+  options = Defaults(options, {
+    prefix: SettingsValues.DEFAULT_BOT_PREFIX,
+    voice: SettingsValues.DEFAULT_VOICE,
+    mentions: SettingsValues.DEFAULT_MENTIONS
+  })
 
   /**
-   * Saves this Settings object to the Keyv database as a JSON object.
-   *
-   * @param {Keyv} db The Keyv database to save to.
+   * The ID of the guild these settings are applied to.
+   * @type {String}
    */
-  save (db) {
-    db.set(`${this.guildId}:settings`, JSON.stringify(this))
-  }
+  this.guildId = guildId
 
   /**
-   * Sets the value of a property in this Settings object and returns a response.
-   *
-   * Checks that all values are valid before assigning them.
-   *
-   * @param {Keyv} db The Keyv database to save to.
-   * @param {String} name The name of the property being set.
-   * @param {String} value The new value of the property.
-   * @returns {String} Returns the response to the Settings change.
+   * The prefix for commands.
+   * @type {String}
    */
-  set (db, name, value) {
-    let oldVal
-    switch (name) {
-      case 'prefix':
-        if (value.length < 10) {
-          oldVal = this.prefix
-          this.prefix = value
-        } else {
-          return `${Emojis.error} ***Please keep prefix length to below 10 characters!***`
-        }
-        break
-      case 'voice':
-        if (value === 'true' || value === 'false') {
-          oldVal = this.voice
-          this.voice = value === 'true'
-        } else {
-          return `${Emojis.error} ***Value can only be \`true\` or \`false\`!***`
-        }
-        break
-      case 'mentions':
-        if (value === 'true' || value === 'false') {
-          oldVal = this.mentions
-          this.mentions = value === 'true'
-        } else {
-          return `${Emojis.error} ***Value can only be \`true\` or \`false\`!***`
-        }
-        break
-      default:
-        return `${Emojis.error} ***\`${name}\` is not an option!***`
-    }
-    this.save(db)
-    return `${Emojis.checkmark} **Changed \`${name}\` from \`${oldVal}\` to \`${value}\`**\n*Please note some changes (i.e. sensitivity) require Snowboy to rejoin to take effect!*`
-  }
+  this.prefix = options.prefix
 
   /**
-   * Loads and returns a GuildSettings object from the database.
-   *
-   * @static
-   * @param {Keyv} db The Keyv database to load from.
-   * @param {String} key The key of the GuildSettings object.
-   * @returns {GuildSettings} Returns the GuildSettings or default settings if the key is not found.
+   * Whether voice commands are enabled.
+   * @type {Boolean}
    */
-  static async load (db, key) {
-    const obj = await db.get(`${key}:settings`)
-    return new GuildSettings(key, JSON.parse(obj || '{}'))
+  this.voice = options.voice
+
+  /**
+   * Whether mentions are enabled.
+   * @type {Boolean}
+   */
+  this.mentions = options.mentions
+}
+
+/**
+ * Saves this Settings object to the Keyv database as a JSON object.
+ */
+GuildSettings.prototype.save = function (db) {
+  Keyv.saveGuildSettings(this.guildId, this)
+}
+
+/**
+ * Sets the value of a property in this Settings object and returns a response.
+ *
+ * Checks that all values are valid before assigning them.
+ *
+ * @param {String} name The name of the property being set.
+ * @param {String} value The new value of the property.
+ * @returns {String} Returns the response to the Settings change.
+ */
+GuildSettings.prototype.set = function (name, value) {
+  let oldVal
+  switch (name) {
+    case 'prefix':
+      if (value.length < 10) {
+        oldVal = this.prefix
+        this.prefix = value
+      } else {
+        return `${Emojis.error} ***Please keep prefix length to below 10 characters!***`
+      }
+      break
+    case 'voice':
+      if (value === 'true' || value === 'false') {
+        oldVal = this.voice
+        this.voice = value === 'true'
+      } else {
+        return `${Emojis.error} ***Value can only be \`true\` or \`false\`!***`
+      }
+      break
+    case 'mentions':
+      if (value === 'true' || value === 'false') {
+        oldVal = this.mentions
+        this.mentions = value === 'true'
+      } else {
+        return `${Emojis.error} ***Value can only be \`true\` or \`false\`!***`
+      }
+      break
+    default:
+      return `${Emojis.error} ***\`${name}\` is not an option!***`
   }
+  this.save()
+  return `${Emojis.checkmark} **Changed \`${name}\` from \`${oldVal}\` to \`${value}\`**\n*Please note some changes (i.e. sensitivity) require Snowboy to rejoin to take effect!*`
+}
+
+/**
+ * Loads and returns a GuildSettings object from the database.
+ *
+ * @static
+ * @param {String} id The ID of the Guild.
+ * @returns {GuildSettings} Returns the GuildSettings or default settings if the key is not found.
+ */
+GuildSettings.load = async function (id) {
+  const obj = await Keyv.loadGuildSettings(id)
+  return new GuildSettings(id, JSON.parse(obj || '{}'))
 }
 
 GuildSettings.descriptions = {

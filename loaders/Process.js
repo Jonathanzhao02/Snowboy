@@ -49,8 +49,7 @@ module.exports = function (Common) {
       const guilds = Array.from(Common.botClient.guildClients)
       Functions.forEachAsync(guilds, async (pair, index, array) => {
         if (pair[1]) pair[1].logger.debug('Sending interrupt message')
-        await Functions.sendMsg(
-          pair[1].textChannel,
+        await pair[1].sendMsg(
           `${Emojis.joyful} ***Sorry, I'm going down for updates and maintenance! See you soon!***`
         )
         if (index === array.length - 1) resolve()

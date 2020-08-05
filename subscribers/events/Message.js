@@ -9,17 +9,15 @@ module.exports = function (client) {
   /**
    * Logs a bug report from Snowboy's personal DMs.
    *
-   * @param {Discord.Message} msg The sent message.
-   * @param {Object} userClient The userClient associated with the User who sent the message.
+   * @param {import('discord.js').Message} msg The sent message.
+   * @param {import('../../structures/UserClient')} userClient The userClient associated with the User who sent the message.
    */
   function logBug (msg, userClient) {
     const logger = userClient.logger
     logger.info('Received message in DM: %o', msg)
     if (Date.now() - userClient.lastReport < 86400000) {
       logger.info('Rejected bug report from %s', msg.author.username)
-      Functions.sendMsg(
-        msg.channel, '**Please only send a bug report every 24 hours!**'
-      )
+      msg.channel.send('**Please only send a bug report every 24 hours!**')
     } else {
       logger.info('Accepting bug report from %s', msg.author.username)
       userClient.lastReport = Date.now()
@@ -29,10 +27,7 @@ module.exports = function (client) {
       file.write('\n')
       file.write(`${msg.author.username}#${msg.author.discriminator}`)
       file.close()
-      Functions.sendMsg(
-        msg.channel,
-        '***Logged.*** Thank you for your submission!'
-      )
+      msg.channel.send('***Logged.*** Thank you for your submission!')
     }
   }
 
@@ -42,7 +37,7 @@ module.exports = function (client) {
    * Handles bug reports, guildClient and member
    * creation, and the expiration timer.
    *
-   * @param {Discord.Message} msg The sent message.
+   * @param {import('discord.js').Message} msg The sent message.
    */
   async function onMessage (msg) {
     // If it is an automated message of some sort, return
@@ -64,12 +59,11 @@ module.exports = function (client) {
     // Check that Snowboy has all necessary permissions in text channel
     const missingPermissions = Guilds.checkTextPermissions(guildClient.textChannel)
     if (missingPermissions) {
-      Functions.sendMsg(
-        msg.channel,
+      if (missingPermissions.includes('SEND_MESSAGES')) return
+      guildClient.sendMsg(
         `${Emojis.error} ***Please ensure I have all the following permissions in your text channel! I won't completely work otherwise!***`
       )
-      Functions.sendMsg(
-        msg.channel,
+      guildClient.sendMsg(
         Functions.formatList(missingPermissions)
       )
       return
@@ -85,8 +79,7 @@ module.exports = function (client) {
     // If the Guild is sending commands too fast, notify and return
     if (msg.createdAt.getTime() - guildClient.lastCalled < 1000) {
       guildClient.logger.info('Rejecting message, too fast')
-      Functions.sendMsg(
-        guildClient.textChannel,
+      guildClient.sendMsg(
         `${Emojis.error} ***Please only send one command a second!***`
       )
       return
@@ -95,26 +88,12 @@ module.exports = function (client) {
     // If Snowboy is currently connected in the guild, and the GuildMember tries to run a restricted command (affects Snowboy's behavior
     // in the voice channel) in another text channel, notify the GuildMember and return
     if (guildClient.connection && msg.channel.id !== guildClient.textChannel.id && Commands.restricted.get(commandName)) {
-      Functions.sendMsg(
-        msg.channel,
-        `${Emojis.error} ***Sorry, I am not actively listening to this channel!***`
-      )
+      msg.channel.send(`${Emojis.error} ***Sorry, I am not actively listening to this channel!***`)
       return
     // If Snowboy is currently connected in the guild, and the GuildMember tries to run a restricted command without being in the active
     // voice channel, notify the GuildMember and return
     } else if (guildClient.connection && msg.member.voice.channelID !== guildClient.voiceChannel.id && Commands.restricted.get(commandName)) {
-      Functions.sendMsg(
-        msg.channel,
-        `${Emojis.error} ***Sorry, you are not in my voice channel!***`
-      )
-      return
-    }
-
-    // If Snowboy is currently connected in the Guild, and the GuildMember tries to run a restricted command while not in the voice channel,
-    // notify and return
-    if (guildClient.connection && Commands.restricted.get(commandName) && msg.member.voice.channelID !== guildClient.voiceChannel.id) {
-      Functions.sendMsg(
-        msg.channel,
+      guildClient.sendMsg(
         `${Emojis.error} ***Sorry, you are not in my voice channel!***`
       )
       return
@@ -132,13 +111,12 @@ module.exports = function (client) {
     } else if (Commands.easteregg.get(commandName)) {
       Commands.eastergg.get(commandName).execute(memberClient, args)
     } else {
-      Functions.sendMsg(
-        msg.channel,
+      guildClient.sendMsg(
         `${Emojis.confused} ***Sorry, I don't understand.***`
       )
     }
 
-    Guilds.startTimeout(guildClient)
+    guildClient.startTimeout()
   }
 
   client.on('message', onMessage)
