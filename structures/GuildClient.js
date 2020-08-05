@@ -1,10 +1,12 @@
 const GuildSettings = require('./GuildSettings')
 const Common = require('../bot-util/Common')
+const Functions = require('../bot-util/Functions')
+const Discord = require('discord.js')
 
 /**
  * Wrapper object for a Guild so the bot is more easily able to access related resources.
  *
- * @param {import('discord.js').Guild} guild The Guild this GuildClient is tracking.
+ * @param {Discord.Guild} guild The Guild this GuildClient is tracking.
  */
 function GuildClient (guild) {
   Common.logger.info('Creating new GuildClient for %s', guild.name)
@@ -17,19 +19,19 @@ function GuildClient (guild) {
 
   /**
    * The bound TextChannel.
-   * @type {import('discord.js').TextChannel?}
+   * @type {Discord.TextChannel?}
    */
   this.textChannel = null
 
   /**
    * The connected VoiceChannel.
-   * @type {import('discord.js').VoiceChannel?}
+   * @type {Discord.VoiceChannel?}
    */
   this.voiceChannel = null
 
   /**
    * The active connection to the VoiceChannel.
-   * @type {import('discord.js').VoiceConnection?}
+   * @type {Discord.VoiceConnection?}
    */
   this.connection = null
 
@@ -117,6 +119,24 @@ GuildClient.prototype.init = async function () {
   this.settings = await GuildSettings.load(Common.gKeyv, this.id)
   this.logger.debug('Read settings as %o', this.settings)
   Common.botClient.guildClients.set(this.guild.id, this)
+}
+
+/**
+ * Sends a message through this GuildClient's bound textChannel.
+ *
+ * Also takes into consideration the GuildSettings.
+ *
+ * @param {String | import('discord.js').MessageEmbed} msg The message to send.
+ * @param {Object} opts The options to send the message with.
+ */
+GuildClient.prototype.sendMsg = async function (msg, opts) {
+  if (!this.textChannel) {
+    this.logger.warn('Attempted to send %o, but no text channel found!', msg)
+    return
+  }
+  this.logger.debug('Attempting to send %o to %s', msg, this.textChannel.name)
+  if (this.settings.mentions === false && !(msg instanceof Discord.MessageEmbed)) msg = await Functions.replaceMentions(msg, this.guild)
+  return this.textChannel.send(msg, opts)
 }
 
 module.exports = GuildClient

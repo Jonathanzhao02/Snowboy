@@ -1,5 +1,4 @@
 const Common = require('../../bot-util/Common')
-const Functions = require('../../bot-util/Functions')
 const Impressions = require('../../bot-util/Impressions')
 const { ImpressionValues, Emojis } = require('../../config')
 
@@ -12,10 +11,8 @@ const { ImpressionValues, Emojis } = require('../../config')
 function insult (memberClient, args) {
   const logger = memberClient.logger
   logger.info('Received insult command')
-  Functions.sendMsg(
-    memberClient.guildClient.textChannel,
-    `${Emojis.sad} *Okay...*`,
-    memberClient.guildClient
+  memberClient.guildClient.sendMsg(
+    `${Emojis.sad} *Okay...*`
   )
   Impressions.updateImpression(
     Common.uKeyv,

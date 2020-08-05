@@ -11,10 +11,8 @@ function flip (memberClient, args) {
   const logger = memberClient.logger
   logger.info('Received flip command')
   const result = Functions.random(2)
-  Functions.sendMsg(
-    memberClient.guildClient.textChannel,
-    `${result === 0 ? Emojis.heads : Emojis.tails} **I flipped \`${result === 0 ? 'heads' : 'tails'}\`, <@${memberClient.id}>!**`,
-    memberClient.guildClient.settings.mentions
+  memberClient.guildClient.sendMsg(
+    `${result === 0 ? Emojis.heads : Emojis.tails} **I flipped \`${result === 0 ? 'heads' : 'tails'}\`, <@${memberClient.id}>!**`
   )
 }
 

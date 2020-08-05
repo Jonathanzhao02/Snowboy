@@ -10,10 +10,8 @@ const Functions = require('../../bot-util/Functions')
 function roll (memberClient, args) {
   const logger = memberClient.logger
   logger.info('Received roll command')
-  Functions.sendMsg(
-    memberClient.guildClient.textChannel,
-    `${Emojis.dice} **I rolled a \`${Functions.random(6) + 1}\`, <@${memberClient.id}>!**`,
-    memberClient.guildClient.settings.mentions
+  memberClient.guildClient.sendMsg(
+    `${Emojis.dice} **I rolled a \`${Functions.random(6) + 1}\`, <@${memberClient.id}>!**`
   )
 }
 

@@ -1,5 +1,4 @@
 const { Emojis } = require('../../config')
-const Functions = require('../../bot-util/Functions')
 
 /**
  * Undeafens a user.
@@ -12,10 +11,8 @@ function undeafen (memberClient, args) {
   logger.info('Setting deafen state of %s to `false`', memberClient.member.displayName)
   const userVoiceState = memberClient.member.voice
   if (userVoiceState) userVoiceState.setDeaf(false)
-  Functions.sendMsg(
-    memberClient.guildClient.textChannel,
-    `**${Emojis.unmute} Undeafened <@${memberClient.id}>**`,
-    memberClient.guildClient.settings.mentions
+  memberClient.guildClient.sendMsg(
+    `**${Emojis.unmute} Undeafened <@${memberClient.id}>**`
   )
 }
 

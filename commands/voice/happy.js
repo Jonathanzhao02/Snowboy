@@ -1,5 +1,4 @@
 const Common = require('../../bot-util/Common')
-const Functions = require('../../bot-util/Functions')
 const Impressions = require('../../bot-util/Impressions')
 const { ImpressionValues, Emojis } = require('../../config')
 
@@ -12,8 +11,7 @@ const { ImpressionValues, Emojis } = require('../../config')
 function compliment (memberClient, args) {
   const logger = memberClient.logger
   logger.info('Received compliment command')
-  Functions.sendMsg(
-    memberClient.guildClient.textChannel,
+  memberClient.guildClient.sendMsg(
     `${Emojis.happy} **Thank you!**`
   )
   Impressions.updateImpression(

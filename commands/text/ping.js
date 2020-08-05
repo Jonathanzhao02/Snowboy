@@ -1,5 +1,4 @@
 const { Emojis } = require('../../config')
-const Functions = require('../../bot-util/Functions')
 
 /**
  * Prints the ping of the bot to the server.
@@ -12,8 +11,7 @@ function ping (memberClient, args, msg) {
   const logger = memberClient.logger
   logger.info('Received ping command')
   const latency = Date.now() - msg.createdAt.getTime()
-  Functions.sendMsg(
-    memberClient.guildClient.textChannel,
+  memberClient.guildClient.sendMsg(
     `${Emojis.ping} **Current ping: \`${latency}ms\`**`
   )
 }

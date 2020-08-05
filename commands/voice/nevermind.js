@@ -1,5 +1,4 @@
 const Common = require('../../bot-util/Common')
-const Functions = require('../../bot-util/Functions')
 const Impressions = require('../../bot-util/Impressions')
 const { ImpressionValues, Emojis } = require('../../config')
 
@@ -12,10 +11,8 @@ const { ImpressionValues, Emojis } = require('../../config')
 function nevermind (memberClient, args) {
   const logger = memberClient.logger
   logger.info('Received nevermind command')
-  Functions.sendMsg(
-    memberClient.guildClient.textChannel,
-    `${Emojis.angry} **Call me only when you need me, <@${memberClient.id}>!**`,
-    memberClient.guildClient
+  memberClient.guildClient.sendMsg(
+    `${Emojis.angry} **Call me only when you need me, <@${memberClient.id}>!**`
   )
   Impressions.updateImpression(
     Common.uKeyv,

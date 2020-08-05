@@ -3,7 +3,6 @@ const UserClient = require('../structures/UserClient')
 const GuildClient = require('../structures/GuildClient')
 const MemberClient = require('../structures/MemberClient')
 const Common = require('./Common')
-const Functions = require('./Functions')
 const { Timeouts, Emojis } = require('../config')
 
 /**
@@ -144,9 +143,9 @@ function cleanupGuildClient (guildClient) {
     // notify, mark the guildClient for deletion, and leave
     if (guildClient.textChannel && guildClient.connection && !guildClient.playing) {
       guildClient.logger.debug('Leaving voice channel')
-      Functions.sendMsg(guildClient.textChannel,
-        `${Emojis.happy} **It seems nobody needs me right now, so I'll be headed out. Call me when you do!**`,
-        guildClient)
+      guildClient.sendMsg(
+        `${Emojis.happy} **It seems nobody needs me right now, so I'll be headed out. Call me when you do!**`
+      )
       guildClient.delete = true
       guildClient.voiceChannel.leave()
     } else {

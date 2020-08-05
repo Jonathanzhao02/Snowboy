@@ -1,5 +1,4 @@
 const Common = require('../../bot-util/Common')
-const Functions = require('../../bot-util/Functions')
 const Embeds = require('../../bot-util/Embeds')
 
 /**
@@ -12,8 +11,7 @@ const Embeds = require('../../bot-util/Embeds')
 function about (memberClient, args, msg) {
   const logger = memberClient.logger
   logger.info('Received about command')
-  Functions.sendMsg(
-    memberClient.guildClient.textChannel,
+  memberClient.guildClient.sendMsg(
     Embeds.createAboutEmbed(Common.botClient)
   )
 }

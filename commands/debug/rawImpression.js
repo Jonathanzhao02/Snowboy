@@ -1,5 +1,4 @@
 const Common = require('../../bot-util/Common')
-const Functions = require('../../bot-util/Functions')
 
 /**
  * Prints the raw impression of a user.
@@ -19,8 +18,7 @@ function rawImpression (memberClient, args, msg) {
     userClient = Common.botClient.userClients.get(member.id)
   }
 
-  Functions.sendMsg(
-    memberClient.guildClient.textChannel,
+  memberClient.guildClient.sendMsg(
     `Raw impression of ${member.displayName}: \`${userClient.impression}\``
   )
 }

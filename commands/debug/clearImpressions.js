@@ -1,5 +1,4 @@
 const Common = require('../../bot-util/Common')
-const Functions = require('../../bot-util/Functions')
 
 /**
  * Clears the impressions of all tracked users in a server.
@@ -21,8 +20,7 @@ function clearImpressions (memberClient, args, msg) {
       }
       Common.uKeyv.delete(`${member.id}:impression`)
     })
-    Functions.sendMsg(
-      memberClient.guildClient.textChannel,
+    memberClient.guildClient.sendMsg(
       'Cleared all guild impressions'
     )
   })

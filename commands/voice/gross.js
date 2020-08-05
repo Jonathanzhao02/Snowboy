@@ -1,5 +1,4 @@
 const Common = require('../../bot-util/Common')
-const Functions = require('../../bot-util/Functions')
 const Impressions = require('../../bot-util/Impressions')
 const { ImpressionValues, Emojis } = require('../../config')
 
@@ -12,10 +11,8 @@ const { ImpressionValues, Emojis } = require('../../config')
 function gross (memberClient, args) {
   const logger = memberClient.logger
   logger.info('Received gross command')
-  Functions.sendMsg(
-    memberClient.guildClient.textChannel,
-    `${Emojis.weird} **Not much I can do for you, <@${memberClient.id}>**`,
-    memberClient.guildClient.settings.mentions
+  memberClient.guildClient.sendMsg(
+    `${Emojis.weird} **Not much I can do for you, <@${memberClient.id}>**`
   )
   Impressions.updateImpression(
     Common.uKeyv,

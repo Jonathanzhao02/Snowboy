@@ -1,5 +1,4 @@
 const { Emojis } = require('../../config')
-const Functions = require('../../bot-util/Functions')
 
 /**
  * Stops all song playback and clears the queue.
@@ -12,19 +11,15 @@ function stop (memberClient, args) {
   logger.info('Received stop command')
   if (!memberClient.guildClient.playing) {
     logger.debug('Not playing anything')
-    Functions.sendMsg(
-      memberClient.guildClient.textChannel,
+    memberClient.guildClient.sendMsg(
       `${Emojis.error} ***Nothing currently playing!***`
     )
     return
   }
   logger.debug('Stopping music')
-  memberClient.guildClient.connection.dispatcher.end()
-  Functions.playSilence(memberClient.guildClient)
-  memberClient.guildClient.playing = false
   memberClient.guildClient.songQueue = []
-  Functions.sendMsg(
-    memberClient.guildClient.textChannel,
+  memberClient.guildClient.connection.dispatcher.end()
+  memberClient.guildClient.sendMsg(
     `${Emojis.stop} ***Stopped the music***`
   )
   logger.debug('Successfully stopped music')

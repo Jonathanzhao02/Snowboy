@@ -15,16 +15,14 @@ function showMe (memberClient, args) {
   logger.info('Received showme command')
   if (!args || args.length === 0) {
     logger.debug('No query found')
-    Functions.sendMsg(
-      memberClient.guildClient.textChannel,
+    memberClient.guildClient.sendMsg(
       `${Emojis.error} ***I need something to search up!***`
     )
     return
   }
 
   const query = args.join(' ')
-  Functions.sendMsg(
-    memberClient.guildClient.textChannel,
+  memberClient.guildClient.sendMsg(
     `${Emojis.search} ***Searching*** \`${query}\``
   )
   logger.debug('Searching up %s', query)
@@ -39,8 +37,7 @@ function showMe (memberClient, args) {
         result.query = query
         logger.debug('Received valid result')
         logger.debug(result)
-        Functions.sendMsg(
-          memberClient.guildClient.textChannel,
+        memberClient.guildClient.sendMsg(
           Embeds.createImageEmbed(
             result,
             memberClient.member.displayName
@@ -54,8 +51,7 @@ function showMe (memberClient, args) {
     }
 
     logger.info('No results found for %s', query)
-    Functions.sendMsg(
-      memberClient.guildClient.textChannel,
+    memberClient.guildClient.sendMsg(
       `${Emojis.error} ***No results found for \`${query}\`!***`
     )
   })

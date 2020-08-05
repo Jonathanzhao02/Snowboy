@@ -1,5 +1,4 @@
 const Common = require('../../bot-util/Common')
-const Functions = require('../../bot-util/Functions')
 const Embeds = require('../../bot-util/Embeds')
 const { Emojis } = require('../../config')
 
@@ -26,8 +25,7 @@ function settings (memberClient, args, msg) {
   // If no arguments, print the settings embed with all values
   if (args.length === 0) {
     logger.debug('Printing settings')
-    Functions.sendMsg(
-      guildClient.textChannel,
+    memberClient.guildClient.sendMsg(
       Embeds.createSettingsEmbed(guildClient.settings, memberClient.userClient.settings)
     )
     return
@@ -36,8 +34,7 @@ function settings (memberClient, args, msg) {
   // If no option named what the user passed in, notify and return
   if (!GuildSettings.descriptions[settingName] && !UserSettings.descriptions[settingName]) {
     logger.debug('No setting found for %s', settingName)
-    Functions.sendMsg(
-      guildClient.textChannel,
+    memberClient.guildClient.sendMsg(
       `${Emojis.error} ***Could not find option named \`${settingName}\`***`
     )
     return
@@ -48,8 +45,7 @@ function settings (memberClient, args, msg) {
     // If only passed in an option name, return information about that option
     if (args.length === 0) {
       logger.debug('Printing info about %s', settingName)
-      Functions.sendMsg(
-        guildClient.textChannel,
+      memberClient.guildClient.sendMsg(
         GuildSettings.descriptions[settingName](guildClient.settings)
       )
       return
@@ -57,8 +53,7 @@ function settings (memberClient, args, msg) {
 
     // Check that the user is an administrator
     if (!msg.member.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR, { checkAdmin: true, checkOwner: true })) {
-      Functions.sendMsg(
-        guildClient.textChannel,
+      memberClient.guildClient.sendMsg(
         `${Emojis.error} ***You do not have permission to use this command!***`
       )
       return
@@ -66,16 +61,14 @@ function settings (memberClient, args, msg) {
     // Modify the value of an option
     const val = args.join()
     logger.debug('Attempting to set %s to %s', settingName, val)
-    Functions.sendMsg(
-      guildClient.textChannel,
+    memberClient.guildClient.sendMsg(
       guildClient.settings.set(Common.gKeyv, settingName, val)
     )
   // Setting option is for users
   } else {
     if (args.length === 0) {
       logger.debug('Printing info about %s', settingName)
-      Functions.sendMsg(
-        guildClient.textChannel,
+      memberClient.guildClient.sendMsg(
         UserSettings.descriptions[settingName](memberClient.userClient.settings)
       )
       return
@@ -83,8 +76,7 @@ function settings (memberClient, args, msg) {
     // Modify the value of an option
     const val = args.join()
     logger.debug('Attempting to set %s to %s', settingName, val)
-    Functions.sendMsg(
-      guildClient.textChannel,
+    memberClient.guildClient.sendMsg(
       memberClient.userClient.settings.set(Common.uKeyv, settingName, val)
     )
   }

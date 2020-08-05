@@ -1,5 +1,4 @@
 const Common = require('../../bot-util/Common')
-const Functions = require('../../bot-util/Functions')
 const Responses = require('../../bot-util/Responses')
 const Impressions = require('../../bot-util/Impressions')
 const { ImpressionValues, Emojis } = require('../../config')
@@ -13,10 +12,8 @@ const { ImpressionValues, Emojis } = require('../../config')
 function greet (memberClient, args) {
   const logger = memberClient.logger
   logger.info('Received greet command')
-  Functions.sendMsg(
-    memberClient.guildClient.textChannel,
-    `${Emojis.greeting} **${Responses.randomGreeting()},** <@${memberClient.id}>!`,
-    memberClient.guildClient.settings.mentions
+  memberClient.guildClient.sendMsg(
+    `${Emojis.greeting} **${Responses.randomGreeting()},** <@${memberClient.id}>!`
   )
   Impressions.updateImpression(
     Common.uKeyv,

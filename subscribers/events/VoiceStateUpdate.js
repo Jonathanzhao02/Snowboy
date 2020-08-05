@@ -1,4 +1,3 @@
-const Functions = require('../../bot-util/Functions')
 const Guilds = require('../../bot-util/Guilds')
 const Timeouts = require('../../config').Timeouts
 const Emojis = require('../../config').Emojis
@@ -36,8 +35,7 @@ module.exports = function (client) {
           // Check again that the channel is empty before leaving
           if (oldPresence.channel.members.size === 1) {
             guildClient.logger.info('Leaving channel, only member remaining')
-            Functions.sendMsg(
-              guildClient.textChannel,
+            guildClient.sendMsg(
               `${Emojis.sad} I'm leaving, I'm all by myself!`
             )
             Guilds.leaveVoiceChannel(guildClient)

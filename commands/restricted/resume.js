@@ -1,5 +1,4 @@
 const { Emojis } = require('../../config')
-const Functions = require('../../bot-util/Functions')
 
 /**
  * Resumes the current song.
@@ -12,16 +11,14 @@ function resume (memberClient, args) {
   logger.info('Received resume command')
   if (!memberClient.guildClient.playing) {
     logger.debug('Not playing anything')
-    Functions.sendMsg(
-      memberClient.guildClient.textChannel,
+    memberClient.guildClient.sendMsg(
       `${Emojis.error} ***Nothing currently playing!***`
     )
     return
   }
   logger.debug('Resuming music')
   memberClient.guildClient.connection.dispatcher.resume()
-  Functions.sendMsg(
-    memberClient.guildClient.textChannel,
+  memberClient.guildClient.sendMsg(
     `${Emojis.playing} **Resuming!**`
   )
   logger.debug('Successfully resumed music')

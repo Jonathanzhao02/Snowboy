@@ -1,5 +1,4 @@
 const { Emojis } = require('../../config')
-const Functions = require('../../bot-util/Functions')
 
 /**
  * Skips to the next song in queue by ending the current dispatcher.
@@ -12,15 +11,13 @@ function skip (memberClient, args) {
   logger.info('Received skip command')
   if (!memberClient.guildClient.playing) {
     logger.debug('Not playing anything')
-    Functions.sendMsg(
-      memberClient.guildClient.textChannel,
+    memberClient.guildClient.sendMsg(
       `${Emojis.error} ***Nothing currently playing!***`
     )
     return
   }
   logger.debug('Skipping song')
-  Functions.sendMsg(
-    memberClient.guildClient.textChannel,
+  memberClient.guildClient.sendMsg(
     `${Emojis.skip} ***Skipping the current song***`
   )
   memberClient.guildClient.connection.dispatcher.end()

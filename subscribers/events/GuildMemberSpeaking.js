@@ -27,14 +27,11 @@ module.exports = function (client) {
       const newClient = new SnowClient(memberClient, userClient.settings.sensitivity)
       newClient.on('hotword', ack)
       newClient.on('result', parse)
-      newClient.on('busy', (memberClient) => Functions.sendMsg(
-        memberClient.guildClient.textChannel,
-        `***I'm still working on your last request, <@${memberClient.id}>!***`,
-        memberClient.guildClient.settings.mentions
+      newClient.on('busy', (memberClient) => guildClient.sendMsg(
+        `***I'm still working on your last request, <@${memberClient.id}>!***`
       ))
       newClient.on('error', msg => {
-        Functions.sendMsg(
-          guildClient.textChannel,
+        guildClient.sendMsg(
           `${Emojis.error} ***Error:*** \`${msg}\``
         )
       })
@@ -61,8 +58,7 @@ module.exports = function (client) {
     if (!result || !result.intents || !result.intents[0] || result.intents[0].confidence < CONFIDENCE_THRESHOLD) {
       memberClient.logger.debug('Rejected voice command')
       memberClient.logger.debug(result)
-      Functions.sendMsg(
-        memberClient.guildClient.textChannel,
+      memberClient.guildClient.sendMsg(
         `${Emojis.unknown} ***Sorry, I didn't catch that...***`
       )
       return
@@ -83,8 +79,7 @@ module.exports = function (client) {
     } else if (Commands.easteregg.get(commandName)) {
       Commands.easteregg.get(commandName).execute(memberClient, args)
     } else {
-      Functions.sendMsg(
-        memberClient.guildClient.textChannel,
+      memberClient.guildClient.sendMsg(
         `${Emojis.confused} ***Sorry, I don't understand*** "\`${result.text}\`"`
       )
       memberClient.logger.warn('No command found for %s!', commandName)
@@ -104,13 +99,11 @@ module.exports = function (client) {
   function ack (index, hotword, memberClient) {
     if (!memberClient.guildClient.connection) return
     memberClient.logger.info('Received hotword from')
-    Functions.sendMsg(
-      memberClient.guildClient.textChannel,
+    memberClient.guildClient.sendMsg(
       `**${Impressions.getResponse('hotword',
         memberClient.userClient.impression,
         [`<@${memberClient.id}>`],
-        memberClient.userClient.settings.impressions)}**`,
-      memberClient.guildClient.settings.mentions
+        memberClient.userClient.settings.impressions)}**`
     )
 
     Guilds.startTimeout(memberClient.guildClient)

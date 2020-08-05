@@ -1,5 +1,4 @@
 const Common = require('../../bot-util/Common')
-const Functions = require('../../bot-util/Functions')
 const { Emojis } = require('../../config')
 
 const Discord = require('discord.js')
@@ -31,8 +30,7 @@ function purge (memberClient, args, msg, total, snowflake) {
     // Check that the user can manage messages
     if (!msg.member.hasPermission(Discord.Permissions.FLAGS.MANAGE_MESSAGES, { checkAdmin: true, checkOwner: true })) {
       logger.debug('Rejected user due to insufficient permissions: MANAGE_MESSAGES')
-      Functions.sendMsg(
-        guildClient.textChannel,
+      memberClient.guildClient.sendMsg(
         `${Emojis.error} ***You do not have permission to use this command!***`
       )
       return
@@ -55,8 +53,7 @@ function purge (memberClient, args, msg, total, snowflake) {
         // Check that the user is an administrator
         if (!msg.member.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR, { checkAdmin: true, checkOwner: true })) {
           logger.debug('Rejected user due to insufficient permissions: ADMINISTRATOR')
-          Functions.sendMsg(
-            guildClient.textChannel,
+          memberClient.guildClient.sendMsg(
             `${Emojis.error} ***You do not have permission to use this command!***`
           )
           return
@@ -73,8 +70,7 @@ function purge (memberClient, args, msg, total, snowflake) {
         if (msg.mentions && msg.mentions.members.length > 0) mmbr = msg.mentions.members.array()[0]
         if (!mmbr) {
           logger.debug('Rejected user due to invalid user: %s', args[0])
-          Functions.sendMsg(
-            guildClient.textChannel,
+          memberClient.guildClient.sendMsg(
             `${Emojis.error} ***Could not find user \`${args[0]}\`***`
           )
           return
@@ -104,13 +100,11 @@ function purge (memberClient, args, msg, total, snowflake) {
       } else {
         logger.debug('Finished purging: %d messages deleted', total)
         guildClient.purging = false
-        Functions.sendMsg(
-          guildClient.textChannel,
+        memberClient.guildClient.sendMsg(
           [
             `${Emojis.checkmark} **Successfully finished purging, <@${memberClient.id}>!**`,
             `${Emojis.trash} **Deleted \`${total}\` messages ${mmbr ? `from user \`${mmbr.displayName}\`` : ''}!**`
-          ],
-          guildClient.settings.mentions
+          ]
         )
       }
     })

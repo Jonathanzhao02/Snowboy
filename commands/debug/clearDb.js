@@ -1,5 +1,4 @@
 const Common = require('../../bot-util/Common')
-const Functions = require('../../bot-util/Functions')
 
 /**
  * Clears Snowboy's database completely and shuts the bot down.
@@ -13,12 +12,10 @@ function clearDb (memberClient, args, msg) {
   logger.info('Received clear database command')
   Common.gKeyv.clear()
   Common.uKeyv.clear()
-  Functions.sendMsg(
-    memberClient.guildClient.textChannel,
+  memberClient.guildClient.sendMsg(
     'Cleared Database'
   ).then(() => {
-    Functions.sendMsg(
-      memberClient.guildClient.textChannel,
+    memberClient.guildClient.sendMsg(
       'Shutting down Snowboy, restart for database changes to take effect'
     ).then(() => {
       process.emit('SIGINT')

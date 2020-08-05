@@ -1,5 +1,4 @@
 const Common = require('../../bot-util/Common')
-const Functions = require('../../bot-util/Functions')
 const { Emojis } = require('../../config')
 
 /**
@@ -12,8 +11,7 @@ const { Emojis } = require('../../config')
 function stats (memberClient, args, msg) {
   const logger = memberClient.logger
   logger.info('Received stats command')
-  Functions.sendMsg(
-    memberClient.guildClient.textChannel,
+  memberClient.guildClient.sendMsg(
     `${Emojis.stats} **I am currently in \`${Common.botClient.guilds.cache.size}\` servers!**`
   )
 }

@@ -1,4 +1,3 @@
-const Functions = require('../../bot-util/Functions')
 const Impressions = require('../../bot-util/Impressions')
 
 /**
@@ -10,15 +9,13 @@ const Impressions = require('../../bot-util/Impressions')
 function impression (memberClient, args) {
   const logger = memberClient.logger
   logger.info('Received impression command')
-  Functions.sendMsg(
-    memberClient.guildClient.textChannel,
+  memberClient.guildClient.sendMsg(
     Impressions.getResponse(
       'impression',
       memberClient.userClient.impression,
       [`<@${memberClient.id}>`],
       memberClient.userClient.settings.impressions
-    ),
-    memberClient.guildClient.settings.mentions
+    )
   )
 }
 

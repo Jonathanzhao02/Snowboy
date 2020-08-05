@@ -1,5 +1,4 @@
 const { Emojis } = require('../../config')
-const Functions = require('../../bot-util/Functions')
 const Responses = require('../../bot-util/Responses')
 
 /**
@@ -17,10 +16,8 @@ function farewell (memberClient, args) {
   if (memberClient.guildClient) {
     memberClient.snowClient.stop()
     memberClient.guildClient.memberClients.delete(memberClient.id)
-    Functions.sendMsg(
-      memberClient.guildClient.textChannel,
-      `${Emojis.farewell} **${Responses.randomFarewell()},** <@${memberClient.id}>!`,
-      memberClient.guildClient.settings.mentions
+    memberClient.guildClient.sendMsg(
+      `${Emojis.farewell} **${Responses.randomFarewell()},** <@${memberClient.id}>!`
     )
   } else {
     logger.warn('No guildClient found!')
