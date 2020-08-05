@@ -156,6 +156,12 @@ function cleanupGuildClient (guildClient) {
   }
 }
 
+/**
+ * Leaves a guildClient's voice channel.
+ *
+ * @param {GuildClient} guildClient The guildClient to disconnect.
+ * @returns {Boolean} Whether the disconnect was successful or not.
+ */
 function leaveVoiceChannel (guildClient) {
   if (!guildClient.connection) {
     Common.logger.debug('Not connected')
