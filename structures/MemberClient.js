@@ -55,4 +55,25 @@ MemberClient.prototype.init = async function () {
   this.guildClient.memberClients.set(this.id, this)
 }
 
+/**
+ * Sends the response of Snowboy to a User's command according to their impression.
+ *
+ * @param {String} func The name of the called command.
+ * @returns {Promise<import('discord.js').Message[] | import('discord.js').Message>} Returns a promise for the sent messages.
+ */
+MemberClient.prototype.sendResponse = function (func) {
+  return this.guildClient.sendMsg(this.userClient.getResponse(func))
+}
+
+/**
+ * Sends a message through this MemberClient's GuildClient's bound textChannel.
+ *
+ * @param {String[] | String | import('discord.js').MessageEmbed[] | import('discord.js').MessageEmbed} msg The message to send.
+ * @param {Object} opts The options to send the message with.
+ * @returns {Promise<import('discord.js').Message[] | import('discord.js').Message>} Returns a promise for the sent messages.
+ */
+MemberClient.prototype.sendMsg = async function (msg, opts) {
+  return await this.guildClient.sendMsg(msg, opts)
+}
+
 module.exports = MemberClient

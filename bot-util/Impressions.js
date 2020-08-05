@@ -118,7 +118,7 @@ function getResponse (func, impression, args, useImpressions) {
   const replyEmoji = replyEmojis.get(func)[relation]
   if (!replyCands) Common.logger.warn('No index for %d!', relation)
   if (!replyEmoji) Common.logger.warn('No emoji index for %d!', relation)
-  return replyEmoji + ' ' + format(replyCands[random(replyCands.length)], args)
+  return `${replyEmoji} **${format(replyCands[random(replyCands.length)], args)}**`
 }
 
 /**

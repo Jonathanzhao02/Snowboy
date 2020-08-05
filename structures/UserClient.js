@@ -1,6 +1,7 @@
 const UserSettings = require('./UserSettings')
 const Common = require('../bot-util/Common')
 const Keyv = require('../bot-util/Keyv')
+const Impressions = require('../bot-util/Impressions')
 
 /**
  * Wrapper object for a User so that the bot can easily access all necessary resources.
@@ -62,6 +63,16 @@ UserClient.prototype.init = async function () {
   this.impression = await Keyv.getImpression(this.id) || 0
   this.logger.debug('Read impression as %d', this.impression)
   Common.botClient.userClients.set(this.id, this)
+}
+
+/**
+ * Returns the response to a command according to the User's impression level with Snowboy.
+ *
+ * @param {String} func The name of the called command.
+ * @returns {String} Returns the response.
+ */
+UserClient.prototype.getResponse = function (func) {
+  return Impressions.getResponse(func, this.impression, [`<@${this.id}>`], this.settings.impressions)
 }
 
 module.exports = UserClient

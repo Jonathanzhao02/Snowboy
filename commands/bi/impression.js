@@ -1,5 +1,3 @@
-const Impressions = require('../../bot-util/Impressions')
-
 /**
  * Prints Snowboy's impression of a user.
  *
@@ -9,14 +7,7 @@ const Impressions = require('../../bot-util/Impressions')
 function impression (memberClient, args) {
   const logger = memberClient.logger
   logger.info('Received impression command')
-  memberClient.guildClient.sendMsg(
-    Impressions.getResponse(
-      'impression',
-      memberClient.userClient.impression,
-      [`<@${memberClient.id}>`],
-      memberClient.userClient.settings.impressions
-    )
-  )
+  memberClient.sendResponse('impression')
 }
 
 module.exports = {

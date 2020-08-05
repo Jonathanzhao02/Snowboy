@@ -126,8 +126,9 @@ GuildClient.prototype.init = async function () {
  *
  * Also takes into consideration the GuildSettings.
  *
- * @param {String | import('discord.js').MessageEmbed} msg The message to send.
+ * @param {String[] | String | import('discord.js').MessageEmbed[] | import('discord.js').MessageEmbed} msg The message to send.
  * @param {Object} opts The options to send the message with.
+ * @returns {Promise<import('discord.js').Message[] | import('discord.js').Message>} Returns a promise for the sent messages.
  */
 GuildClient.prototype.sendMsg = async function (msg, opts) {
   if (!this.textChannel) {

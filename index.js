@@ -13,8 +13,3 @@ if (process.argv.includes('-t') || process.argv.includes('--test')) {
 } else {
   client.login(process.env.SNOWBOY_BOT_TOKEN)
 }
-
-/**
- * TODO:
- * Inject dependencies into commands through services?
- */

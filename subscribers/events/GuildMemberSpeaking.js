@@ -1,6 +1,5 @@
 const Functions = require('../../bot-util/Functions')
 const Guilds = require('../../bot-util/Guilds')
-const Impressions = require('../../bot-util/Impressions')
 const Emojis = require('../../config').Emojis
 const CONFIDENCE_THRESHOLD = require('../../config').CONFIDENCE_THRESHOLD
 const Commands = require('../../commands')
@@ -98,14 +97,8 @@ module.exports = function (client) {
    */
   function ack (index, hotword, memberClient) {
     if (!memberClient.guildClient.connection) return
-    memberClient.logger.info('Received hotword from')
-    memberClient.guildClient.sendMsg(
-      `**${Impressions.getResponse('hotword',
-        memberClient.userClient.impression,
-        [`<@${memberClient.id}>`],
-        memberClient.userClient.settings.impressions)}**`
-    )
-
+    memberClient.logger.info('Received hotword from %s', memberClient.member.displayName)
+    memberClient.sendResponse('hotword')
     memberClient.guildClient.startTimeout()
   }
 
