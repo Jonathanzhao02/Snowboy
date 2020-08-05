@@ -1,5 +1,4 @@
-const Timeouts = require('../../config').Timeouts
-const Emojis = require('../../config').Emojis
+const { Timeouts, Emojis } = require('../../config')
 
 module.exports = function (client) {
   client.on('voiceStateUpdate', (oldPresence, newPresence) => {

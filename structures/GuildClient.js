@@ -2,6 +2,7 @@ const GuildSettings = require('./GuildSettings')
 const Common = require('../bot-util/Common')
 const Functions = require('../bot-util/Functions')
 const { Timeouts, Emojis } = require('../config')
+const Guilds = require('../bot-util/Guilds')
 
 /**
  * Wrapper object for a Guild so the bot is more easily able to access related resources.
@@ -206,6 +207,13 @@ GuildClient.prototype.leaveVoiceChannel = function () {
   this.loopState = 0
   this.logger.debug('Successfully left')
   return true
+}
+
+GuildClient.prototype.checkPermissions = function () {
+  return {
+    textPermissions: Guilds.checkTextPermissions(this.textChannel),
+    voicePermissions: Guilds.checkVoicePermissions(this.voiceChannel)
+  }
 }
 
 module.exports = GuildClient

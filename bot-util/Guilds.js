@@ -11,18 +11,20 @@ const Common = require('./Common')
  * @returns {String[]?} The array of missing text permissions or null if all permissions are granted.
  */
 function checkTextPermissions (channel) {
-  if (channel.guild.me.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR)) return
-  const textPermissions = channel.permissionsFor(channel.guild.me)
-  const textMissingPermissions = new Discord.Permissions(textPermissions.missing([
-    Discord.Permissions.FLAGS.VIEW_CHANNEL,
-    Discord.Permissions.FLAGS.SEND_MESSAGES,
-    Discord.Permissions.FLAGS.MANAGE_MESSAGES,
-    Discord.Permissions.FLAGS.EMBED_LINKS,
-    Discord.Permissions.FLAGS.ATTACH_FILES,
-    Discord.Permissions.FLAGS.READ_MESSAGE_HISTORY
-  ])).toArray()
+  if (channel) {
+    if (channel.guild.me.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR)) return
+    const textPermissions = channel.permissionsFor(channel.guild.me)
+    const textMissingPermissions = new Discord.Permissions(textPermissions.missing([
+      Discord.Permissions.FLAGS.VIEW_CHANNEL,
+      Discord.Permissions.FLAGS.SEND_MESSAGES,
+      Discord.Permissions.FLAGS.MANAGE_MESSAGES,
+      Discord.Permissions.FLAGS.EMBED_LINKS,
+      Discord.Permissions.FLAGS.ATTACH_FILES,
+      Discord.Permissions.FLAGS.READ_MESSAGE_HISTORY
+    ])).toArray()
 
-  if (textMissingPermissions.length > 0) return textMissingPermissions
+    if (textMissingPermissions.length > 0) return textMissingPermissions
+  }
 }
 
 /**

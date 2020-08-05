@@ -4,6 +4,7 @@ const Commands = require('../../commands')
 const Emojis = require('../../config').Emojis
 const DEBUG_IDS = require('../../config').DEBUG_IDS
 const Fs = require('fs')
+const Path = require('path')
 
 module.exports = function (client) {
   /**
@@ -22,7 +23,7 @@ module.exports = function (client) {
       logger.info('Accepting bug report from %s', msg.author.username)
       userClient.lastReport = Date.now()
       logger.info('Read bug report from %s', msg.author.username)
-      const file = Fs.createWriteStream(`./logs/${msg.createdAt.toISOString()}_${msg.createdAt.getTime()}_REPORT.txt`)
+      const file = Fs.createWriteStream(Path.resolve(__dirname, `../../logs/${msg.createdAt.toISOString()}_${msg.createdAt.getTime()}_REPORT.txt`))
       file.write(msg.content)
       file.write('\n')
       file.write(`${msg.author.username}#${msg.author.discriminator}`)
@@ -57,14 +58,14 @@ module.exports = function (client) {
     if (!guildClient.textChannel || !guildClient.connection) guildClient.textChannel = msg.channel
 
     // Check that Snowboy has all necessary permissions in text channel
-    const missingPermissions = Guilds.checkTextPermissions(guildClient.textChannel)
-    if (missingPermissions) {
-      if (missingPermissions.includes('SEND_MESSAGES')) return
+    const { textPermissions } = guildClient.checkPermissions()
+    if (textPermissions) {
+      if (textPermissions.includes('SEND_MESSAGES')) return
       guildClient.sendMsg(
         `${Emojis.error} ***Please ensure I have all the following permissions in your text channel! I won't completely work otherwise!***`
       )
       guildClient.sendMsg(
-        Functions.formatList(missingPermissions)
+        Functions.formatList(textPermissions)
       )
       return
     }
