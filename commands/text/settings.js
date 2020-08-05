@@ -1,4 +1,3 @@
-const Common = require('../../bot-util/Common')
 const Embeds = require('../../bot-util/Embeds')
 const { Emojis } = require('../../config')
 

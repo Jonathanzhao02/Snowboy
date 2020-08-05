@@ -1,4 +1,3 @@
-const Common = require('../../bot-util/Common')
 const Responses = require('../../bot-util/Responses')
 const { Emojis } = require('../../config')
 
@@ -9,10 +8,6 @@ const { Emojis } = require('../../config')
  * @param {String[]} args Unused parameter.
  */
 function leave (memberClient, args) {
-  if (!memberClient) {
-    Common.logger.warn('Attempted to leave, but no client found!')
-    return
-  }
   const logger = memberClient.logger
   logger.info('Received leave command')
 
