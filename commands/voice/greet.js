@@ -1,5 +1,4 @@
 const Responses = require('../../bot-util/Responses')
-const Impressions = require('../../bot-util/Impressions')
 const { ImpressionValues, Emojis } = require('../../config')
 
 /**
@@ -14,12 +13,7 @@ function greet (memberClient, args) {
   memberClient.guildClient.sendMsg(
     `${Emojis.greeting} **${Responses.randomGreeting()},** <@${memberClient.id}>!`
   )
-  Impressions.updateImpression(
-    memberClient.id,
-    memberClient.userClient,
-    ImpressionValues.GREET_VALUE,
-    memberClient.userClient.settings.impressions
-  )
+  memberClient.userClient.updateImpression(ImpressionValues.GREET_VALUE)
 }
 
 module.exports = {

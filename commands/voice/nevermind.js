@@ -1,4 +1,3 @@
-const Impressions = require('../../bot-util/Impressions')
 const { ImpressionValues, Emojis } = require('../../config')
 
 /**
@@ -13,12 +12,7 @@ function nevermind (memberClient, args) {
   memberClient.guildClient.sendMsg(
     `${Emojis.angry} **Call me only when you need me, <@${memberClient.id}>!**`
   )
-  Impressions.updateImpression(
-    memberClient.id,
-    memberClient.userClient,
-    ImpressionValues.NEVERMIND_VALUE,
-    memberClient.userClient.settings.impressions
-  )
+  memberClient.userClient.updateImpression(ImpressionValues.NEVERMIND_VALUE)
 }
 
 module.exports = {

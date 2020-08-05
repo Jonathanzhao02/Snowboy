@@ -1,4 +1,3 @@
-const Impressions = require('../../bot-util/Impressions')
 const { ImpressionValues, Emojis } = require('../../config')
 
 /**
@@ -13,12 +12,7 @@ function gross (memberClient, args) {
   memberClient.guildClient.sendMsg(
     `${Emojis.weird} **Not much I can do for you, <@${memberClient.id}>**`
   )
-  Impressions.updateImpression(
-    memberClient.id,
-    memberClient.userClient,
-    ImpressionValues.GROSS_VALUE,
-    memberClient.userClient.settings.impressions
-  )
+  memberClient.userClient.updateImpression(ImpressionValues.GROSS_VALUE)
 }
 
 module.exports = {

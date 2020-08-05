@@ -75,4 +75,13 @@ UserClient.prototype.getResponse = function (func) {
   return Impressions.getResponse(func, this.impression, [`<@${this.id}>`], this.settings.impressions)
 }
 
+/**
+ * Updates the impression of the UserClient by the sent value.
+ *
+ * @param {Number} value The amount to update the impression by.
+ */
+UserClient.prototype.updateImpression = function (value) {
+  Impressions.updateImpression(this.id, this, value, this.settings.impressions)
+}
+
 module.exports = UserClient
