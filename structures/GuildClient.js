@@ -1,6 +1,7 @@
 const GuildSettings = require('./GuildSettings')
 const Common = require('../bot-util/Common')
 const Functions = require('../bot-util/Functions')
+const { Timeouts, Emojis } = require('../config')
 const Discord = require('discord.js')
 
 /**
@@ -137,6 +138,74 @@ GuildClient.prototype.sendMsg = async function (msg, opts) {
   this.logger.debug('Attempting to send %o to %s', msg, this.textChannel.name)
   if (this.settings.mentions === false && !(msg instanceof Discord.MessageEmbed)) msg = await Functions.replaceMentions(msg, this.guild)
   return this.textChannel.send(msg, opts)
+}
+
+/**
+ * Starts the timeout for cleanup.
+ */
+GuildClient.prototype.startTimeout = function () {
+  this.logger.info('Starting expiration timer')
+  this.lastCalled = Date.now()
+  if (this.timeoutId) clearTimeout(this.timeoutId)
+  this.timeoutId = setTimeout(() => { this.cleanupGuildClient() }, Timeouts.TIMEOUT + 500)
+}
+
+/**
+ * Deletes the GuildClient if it has been inactive for a certain amount of time.
+ *
+ * If the GuildClient has an active voice connection, notify through the TextChannel and mark the GuildClient
+ * for deletion to be handled by the voiceStateUpdate event before leaving the voice channel.
+ */
+GuildClient.prototype.cleanupGuildClient = function () {
+  if (Date.now() - this.lastCalled >= Timeouts.GUILD_TIMEOUT) {
+    this.logger.debug('Attempting to clean up guildClient')
+    // If the guild is currently connected, is not playing music, and has an active TextChannel,
+    // notify, mark the guildClient for deletion, and leave
+    if (this.textChannel && this.connection && !this.playing) {
+      this.logger.debug('Leaving voice channel')
+      this.sendMsg(
+        `${Emojis.happy} **It seems nobody needs me right now, so I'll be headed out. Call me when you do!**`
+      )
+      this.delete = true
+      this.voiceChannel.leave()
+    } else {
+      this.logger.debug('Deleting guildClient')
+      Common.botClient.guildClients.delete(this.guild.id)
+    }
+  }
+}
+
+/**
+ * Leaves a guildClient's voice channel.
+ *
+ * @returns {Boolean} Whether the disconnect was successful or not.
+ */
+GuildClient.prototype.leaveVoiceChannel = function () {
+  if (!this.connection) {
+    this.logger.debug('Not connected')
+    return false
+  }
+
+  this.logger.debug('Leaving')
+  this.logger.trace('Disconnecting')
+  this.songQueue = []
+  if (this.connection.dispatcher) {
+    this.logger.trace('Ending dispatcher')
+    this.connection.dispatcher.end()
+  }
+  this.logger.trace('Cleaning up members')
+  this.memberClients.forEach(member => { if (member.snowClient) member.snowClient.stop() })
+  this.memberClients.clear()
+  this.logger.trace('Leaving channel')
+  this.connection.disconnect()
+  this.connection.removeAllListeners()
+  this.voiceChannel.leave()
+  this.voiceChannel = null
+  this.textChannel = null
+  this.connection = null
+  this.loopState = 0
+  this.logger.debug('Successfully left')
+  return true
 }
 
 module.exports = GuildClient

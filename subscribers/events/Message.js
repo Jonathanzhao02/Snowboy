@@ -59,6 +59,7 @@ module.exports = function (client) {
     // Check that Snowboy has all necessary permissions in text channel
     const missingPermissions = Guilds.checkTextPermissions(guildClient.textChannel)
     if (missingPermissions) {
+      if (missingPermissions.includes('SEND_MESSAGES')) return
       guildClient.sendMsg(
         `${Emojis.error} ***Please ensure I have all the following permissions in your text channel! I won't completely work otherwise!***`
       )
@@ -115,7 +116,7 @@ module.exports = function (client) {
       )
     }
 
-    Guilds.startTimeout(guildClient)
+    guildClient.startTimeout()
   }
 
   client.on('message', onMessage)

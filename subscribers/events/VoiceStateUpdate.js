@@ -1,4 +1,3 @@
-const Guilds = require('../../bot-util/Guilds')
 const Timeouts = require('../../config').Timeouts
 const Emojis = require('../../config').Emojis
 
@@ -25,7 +24,7 @@ module.exports = function (client) {
       // If the bot has been disconnected, clean up the guildClient
       if (userId === client.user.id && !newPresence.channelID) {
         guildClient.logger.info('Bot disconnected, cleaning up...')
-        Guilds.leaveVoiceChannel(guildClient)
+        guildClient.leaveVoiceChannel()
       }
 
       // If the bot has been left alone in a channel, wait a few seconds before leaving
@@ -38,7 +37,7 @@ module.exports = function (client) {
             guildClient.sendMsg(
               `${Emojis.sad} I'm leaving, I'm all by myself!`
             )
-            Guilds.leaveVoiceChannel(guildClient)
+            guildClient.leadVoiceChannel()
           }
         }, Timeouts.ALONE_TIMEOUT + 500)
       }

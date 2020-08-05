@@ -1,5 +1,4 @@
 const Common = require('../../bot-util/Common')
-const Guilds = require('../../bot-util/Guilds')
 const Responses = require('../../bot-util/Responses')
 const { Emojis } = require('../../config')
 
@@ -18,7 +17,7 @@ function leave (memberClient, args) {
   logger.info('Received leave command')
 
   // If successfully left
-  if (Guilds.leaveVoiceChannel(memberClient.guildClient)) {
+  if (memberClient.guildClient.leaveVoiceChannel()) {
     logger.info('Successfully left')
     memberClient.guildClient.sendMsg(
       `${Emojis.farewell} **${Responses.randomFarewell()},** <@${memberClient.id}>!`

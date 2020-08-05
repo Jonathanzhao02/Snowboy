@@ -106,7 +106,7 @@ module.exports = function (client) {
         memberClient.userClient.settings.impressions)}**`
     )
 
-    Guilds.startTimeout(memberClient.guildClient)
+    memberClient.guildClient.startTimeout()
   }
 
   client.on('guildMemberSpeaking', onSpeaking)
