@@ -1,57 +1,12 @@
-const Discord = require('discord.js')
 const UserClient = require('../structures/UserClient')
 const GuildClient = require('../structures/GuildClient')
 const MemberClient = require('../structures/MemberClient')
 const Common = require('./Common')
 
 /**
- * Checks permissions in a TextChannel and returns any missing.
- *
- * @param {Discord.TextChannel} channel The TextChannel where permissions are required.
- * @returns {String[]?} The array of missing text permissions or null if all permissions are granted.
- */
-function checkTextPermissions (channel) {
-  if (channel) {
-    if (channel.guild.me.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR)) return
-    const textPermissions = channel.permissionsFor(channel.guild.me)
-    const textMissingPermissions = new Discord.Permissions(textPermissions.missing([
-      Discord.Permissions.FLAGS.VIEW_CHANNEL,
-      Discord.Permissions.FLAGS.SEND_MESSAGES,
-      Discord.Permissions.FLAGS.MANAGE_MESSAGES,
-      Discord.Permissions.FLAGS.EMBED_LINKS,
-      Discord.Permissions.FLAGS.ATTACH_FILES,
-      Discord.Permissions.FLAGS.READ_MESSAGE_HISTORY
-    ])).toArray()
-
-    if (textMissingPermissions.length > 0) return textMissingPermissions
-  }
-}
-
-/**
- * Checks permissions in a VoiceChannel and returns any missing.
- *
- * @param {*} channel The VoiceChannel where permissions are required.
- * @returns {String[]?} The array of missing voice permissions or null if all permissions are granted.
- */
-function checkVoicePermissions (channel) {
-  if (channel) {
-    if (channel.guild.me.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR)) return
-    const voicePermissions = channel.permissionsFor(channel.guild.me)
-    const voiceMissingPermissions = new Discord.Permissions(voicePermissions.missing([
-      Discord.Permissions.FLAGS.VIEW_CHANNEL,
-      Discord.Permissions.FLAGS.CONNECT,
-      Discord.Permissions.FLAGS.SPEAK,
-      Discord.Permissions.FLAGS.DEAFEN_MEMBERS
-    ])).toArray()
-
-    if (voiceMissingPermissions.length > 0) return voiceMissingPermissions
-  }
-}
-
-/**
  * Gets userClient, guildClient, and memberClient from a GuildMember, if they exist.
  *
- * @param {Discord.GuildMember} member The GuildMember to fetch the clients for.
+ * @param {import('discord.js').GuildMember} member The GuildMember to fetch the clients for.
  * @returns {Object} Returns an object containing all existing clients.
  */
 function getClientsFromMember (member) {
@@ -81,7 +36,7 @@ function getClientsFromMember (member) {
  * Only returns the UserClient if object is a User.
  * Otherwise, returns the userClient, guildClient, and memberClient.
  *
- * @param {Discord.GuildMember | Discord.User} member The member to fetch all information from.
+ * @param {import('discord.js').GuildMember | import('discord.js').User} member The member to fetch all information from.
  * @returns {Object} Returns an Object containing all three clients.
  */
 async function createClientsFromMember (member) {
@@ -118,8 +73,6 @@ async function createClientsFromMember (member) {
 }
 
 module.exports = {
-  checkTextPermissions: checkTextPermissions,
-  checkVoicePermissions: checkVoicePermissions,
   getClientsFromMember: getClientsFromMember,
   createClientsFromMember: createClientsFromMember
 }

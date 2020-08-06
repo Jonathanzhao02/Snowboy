@@ -115,6 +115,12 @@ function playSilence (guildClient) {
   })
 }
 
+/**
+ * Checks that a URL returns a 200 status code.
+ *
+ * @param {String} url The https URL to access.
+ * @returns {Promise} Returns a Promise that resolves if successful connection.
+ */
 function validateURL (url) {
   return new Promise((resolve, reject) => {
     Https.request(url, resp => {
@@ -162,6 +168,50 @@ function createAudioStream (member, receiver) {
   return audioStream.pipe(transformStream).pipe(resample)
 }
 
+/**
+ * Checks permissions in a TextChannel and returns any missing.
+ *
+ * @param {Discord.TextChannel} channel The TextChannel where permissions are required.
+ * @returns {String[]?} The array of missing text permissions or null if all permissions are granted.
+ */
+function checkTextPermissions (channel) {
+  if (channel) {
+    if (channel.guild.me.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR)) return
+    const textPermissions = channel.permissionsFor(channel.guild.me)
+    const textMissingPermissions = new Discord.Permissions(textPermissions.missing([
+      Discord.Permissions.FLAGS.VIEW_CHANNEL,
+      Discord.Permissions.FLAGS.SEND_MESSAGES,
+      Discord.Permissions.FLAGS.MANAGE_MESSAGES,
+      Discord.Permissions.FLAGS.EMBED_LINKS,
+      Discord.Permissions.FLAGS.ATTACH_FILES,
+      Discord.Permissions.FLAGS.READ_MESSAGE_HISTORY
+    ])).toArray()
+
+    if (textMissingPermissions.length > 0) return textMissingPermissions
+  }
+}
+
+/**
+ * Checks permissions in a VoiceChannel and returns any missing.
+ *
+ * @param {*} channel The VoiceChannel where permissions are required.
+ * @returns {String[]?} The array of missing voice permissions or null if all permissions are granted.
+ */
+function checkVoicePermissions (channel) {
+  if (channel) {
+    if (channel.guild.me.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR)) return
+    const voicePermissions = channel.permissionsFor(channel.guild.me)
+    const voiceMissingPermissions = new Discord.Permissions(voicePermissions.missing([
+      Discord.Permissions.FLAGS.VIEW_CHANNEL,
+      Discord.Permissions.FLAGS.CONNECT,
+      Discord.Permissions.FLAGS.SPEAK,
+      Discord.Permissions.FLAGS.DEAFEN_MEMBERS
+    ])).toArray()
+
+    if (voiceMissingPermissions.length > 0) return voiceMissingPermissions
+  }
+}
+
 module.exports = {
   random: random,
   forEachAsync: forEachAsync,
@@ -169,5 +219,7 @@ module.exports = {
   replaceMentions: replaceMentions,
   playSilence: playSilence,
   validateURL: validateURL,
-  createAudioStream: createAudioStream
+  createAudioStream: createAudioStream,
+  checkTextPermissions: checkTextPermissions,
+  checkVoicePermissions: checkVoicePermissions
 }

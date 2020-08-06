@@ -2,7 +2,6 @@ const GuildSettings = require('./GuildSettings')
 const Common = require('../bot-util/Common')
 const Functions = require('../bot-util/Functions')
 const { Timeouts, Emojis } = require('../config')
-const Guilds = require('../bot-util/Guilds')
 
 /**
  * Wrapper object for a Guild so the bot is more easily able to access related resources.
@@ -215,7 +214,7 @@ GuildClient.prototype.leaveVoiceChannel = function () {
  */
 GuildClient.prototype.checkTextPermissions = function () {
   // Check that Snowboy has all necessary permissions in text channel
-  const missingPerms = Guilds.checkTextPermissions(this.textChannel)
+  const missingPerms = Functions.checkTextPermissions(this.textChannel)
   if (missingPerms) {
     this.logger.debug('Missing permissions: %o', missingPerms)
     if (missingPerms.includes('SEND_MESSAGES')) return
@@ -233,7 +232,7 @@ GuildClient.prototype.checkTextPermissions = function () {
  */
 GuildClient.prototype.checkVoicePermissions = function () {
   // Check that Snowboy has all necessary permissions in text channel and voice channel
-  const missingPerms = Guilds.checkVoicePermissions(this.voiceChannel)
+  const missingPerms = Functions.checkVoicePermissions(this.voiceChannel)
   if (missingPerms) {
     this.logger.debug('Missing permissions: %o', missingPerms)
     this.sendMsg(
