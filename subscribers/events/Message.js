@@ -1,9 +1,9 @@
+const Common = require('../../bot-util/Common')
 const Guilds = require('../../bot-util/Guilds')
 const Commands = require('../../commands')
 const Emojis = require('../../config').Emojis
 const DEBUG_IDS = require('../../config').DEBUG_IDS
 const Fs = require('fs')
-const Path = require('path')
 
 module.exports = function (client) {
   /**
@@ -22,7 +22,7 @@ module.exports = function (client) {
       logger.info('Accepting bug report from %s', msg.author.username)
       userClient.lastReport = Date.now()
       logger.info('Read bug report from %s', msg.author.username)
-      const file = Fs.createWriteStream(Path.resolve(__dirname, `../../logs/${msg.createdAt.toISOString()}_${msg.createdAt.getTime()}_REPORT.txt`))
+      const file = Fs.createWriteStream(Common.defaultLogdir + `/${msg.createdAt.toISOString()}_${msg.createdAt.getTime()}_REPORT.txt`)
       file.write(msg.content)
       file.write('\n')
       file.write(`${msg.author.username}#${msg.author.discriminator}`)

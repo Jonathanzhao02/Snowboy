@@ -7,7 +7,7 @@ module.exports = function (Common) {
   process.on('uncaughtException', error => {
     console.log('UNCAUGHT EXCEPTION: Exiting')
     console.log(error)
-    heapdump.writeSnapshot(`./logs/${new Date().toISOString()}_ERR.heapdump`, (err, filename) => {
+    heapdump.writeSnapshot(Common.defaultLogdir + `/${new Date().toISOString()}_ERR.heapdump`, (err, filename) => {
       Common.logger.error('Uncaught exception')
       Common.logger.error(error)
       Common.botClient.destroy()
@@ -22,7 +22,7 @@ module.exports = function (Common) {
     console.log('UNHANDLED REJECTION: Exiting')
     console.log(error)
     console.log(promise)
-    heapdump.writeSnapshot(`./logs/${new Date().toISOString()}_REJ.heapdump`, (err, filename) => {
+    heapdump.writeSnapshot(Common.defaultLogdir + `/${new Date().toISOString()}_REJ.heapdump`, (err, filename) => {
       Common.logger.error('Unhandled promise rejection')
       Common.logger.error(promise)
       Common.logger.error(error)

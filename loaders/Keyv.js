@@ -1,11 +1,10 @@
 const Keyv = require('keyv')
 const Fs = require('fs')
-const Path = require('path')
 
 module.exports = function (Common) {
-  const defaultDbdir = Path.resolve(__dirname, '../db')
-  const defaultDbtest = Path.resolve(__dirname, '../db/testing.db')
-  const defaultDbprod = Path.resolve(__dirname, '../db/snowboy.db')
+  const defaultDbdir = Common.defaultDbdir
+  const defaultDbtest = defaultDbdir + '/testing.db'
+  const defaultDbprod = defaultDbdir + '/snowboy.db'
 
   if (!Fs.existsSync(defaultDbdir)) {
     Fs.mkdirSync(defaultDbdir)
