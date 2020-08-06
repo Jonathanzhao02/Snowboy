@@ -267,7 +267,8 @@ GuildClient.prototype.joinVoiceChannel = function (voiceChannel) {
   }).catch(e => {
     this.sendMsg(
       `${Emojis.error} ***Could not connect! \\;(***`
-    ).then(() => { throw e })})
+    ).then(() => { throw e })
+  })
 }
 
 module.exports = GuildClient
