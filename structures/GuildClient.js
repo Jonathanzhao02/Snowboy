@@ -3,7 +3,6 @@ const Common = require('../bot-util/Common')
 const Functions = require('../bot-util/Functions')
 const { Timeouts, Emojis } = require('../config')
 const Guilds = require('../bot-util/Guilds')
-const { Guild } = require('discord.js')
 
 /**
  * Wrapper object for a Guild so the bot is more easily able to access related resources.
