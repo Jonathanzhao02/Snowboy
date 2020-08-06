@@ -112,27 +112,8 @@ function createAudioStream (memberClient) {
   return audioStream.pipe(transformStream).pipe(resample)
 }
 
-/**
- * Plays silence frames in a voice channel.
- *
- * Necessary for 'speaking' event to continue functioning.
- *
- * @param {import('../structures/GuildClient')} guildClient The guildClient associated with the voice channel's server.
- */
-function playSilence (guildClient) {
-  guildClient.logger.debug('Playing silence')
-  const silence = new Streams.Silence()
-  const dispatcher = guildClient.connection.play(silence, { type: 'opus' })
-  dispatcher.on('finish', () => {
-    silence.destroy()
-    dispatcher.destroy()
-    guildClient.logger.debug('Destroyed silence stream')
-  })
-}
-
 module.exports = {
   getClientsFromMember: getClientsFromMember,
   createClientsFromMember: createClientsFromMember,
   createAudioStream: createAudioStream,
-  playSilence: playSilence
 }

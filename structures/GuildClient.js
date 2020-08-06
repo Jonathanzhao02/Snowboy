@@ -211,6 +211,8 @@ GuildClient.prototype.leaveVoiceChannel = function () {
 
 /**
  * Checks the GuildClient has necessary permissions in the bound TextChannel.
+ *
+ * @returns {Boolean} Returns whether any permissions are missing.
  */
 GuildClient.prototype.checkTextPermissions = function () {
   // Check that Snowboy has all necessary permissions in text channel
@@ -224,11 +226,17 @@ GuildClient.prototype.checkTextPermissions = function () {
         Functions.formatList(missingPerms)
       ]
     )
+
+    return false
   }
+
+  return true
 }
 
 /**
  * Checks the GuildClient has necessary permissions in the bound VoiceChannel.
+ *
+ * @returns {Boolean} Returns whether any permissions are missing.
  */
 GuildClient.prototype.checkVoicePermissions = function () {
   // Check that Snowboy has all necessary permissions in text channel and voice channel
@@ -241,7 +249,25 @@ GuildClient.prototype.checkVoicePermissions = function () {
         Functions.formatList(missingPerms)
       ]
     )
+
+    return false
   }
+
+  return true
+}
+
+GuildClient.prototype.joinVoiceChannel = function (voiceChannel) {
+  this.voiceChannel = voiceChannel
+  if (!this.checkVoicePermissions()) return
+  voiceChannel.join().then(connection => {
+    this.logger.info('Successfully connected!')
+    this.connection = connection
+    this.logger.info('Playing silence over connection')
+    Functions.playSilence(connection)
+  }).catch(e => {
+    this.sendMsg(
+      `${Emojis.error} ***Could not connect! \\;(***`
+    ).then(() => { throw e })})
 }
 
 module.exports = GuildClient

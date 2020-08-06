@@ -1,18 +1,5 @@
 const { Emojis } = require('../../config')
-const Guilds = require('../../bot-util/Guilds')
 const Responses = require('../../bot-util/Responses')
-
-/**
- * Handles all setup associated with the connection.
- *
- * @param {import('discord.js').VoiceConnection} connection The VoiceConnection from the VoiceChannel.
- * @param {import('../../structures/GuildClient')} guildClient The guildClient associated with the server of the connection.
- */
-function connectionHandler (connection, guildClient) {
-  guildClient.logger.info('Successfully connected')
-  guildClient.connection = connection
-  Guilds.playSilence(guildClient)
-}
 
 /**
  * Makes Snowboy join a VoiceChannel.
@@ -31,12 +18,7 @@ function join (memberClient, args, msg) {
       `${Emojis.error} ***You are not connected to a voice channel!***`
     )
     return
-  // Otherwise, set the guildClient's VoiceChannel to the member's
-  } else {
-    memberClient.guildClient.voiceChannel = msg.member.voice.channel
   }
-
-  memberClient.guildClient.checkVoicePermissions()
 
   // If already connected, notify and return
   if (memberClient.guildClient.connection) {
@@ -54,11 +36,7 @@ function join (memberClient, args, msg) {
 
   // Attempt to join and handle the connection, or error
   logger.trace('Attempting to join')
-  memberClient.guildClient.voiceChannel.join().then(connection => connectionHandler(connection, memberClient.guildClient)).catch(e => {
-    memberClient.guildClient.sendMsg(
-      `${Emojis.error} ***Could not connect! \\;(***`
-    ).then(() => { throw e })
-  })
+  memberClient.guildClient.joinVoiceChannel(msg.member.voice.channel)
 }
 
 module.exports = {

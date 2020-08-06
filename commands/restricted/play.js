@@ -1,5 +1,5 @@
 const { Emojis } = require('../../config')
-const Guilds = require('../../bot-util/Guilds')
+const Functions = require('../../bot-util/Functions')
 const Embeds = require('../../bot-util/Embeds')
 const YtdlDiscord = require('ytdl-core-discord')
 const Ytpl = require('ytpl')
@@ -18,7 +18,7 @@ function queuedPlay (video, guildClient) {
     logger.info('Reached end of current song queue')
     // End current dispatcher
     if (guildClient.playing) guildClient.connection.dispatcher.end()
-    Guilds.playSilence(guildClient)
+    Functions.playSilence(guildClient)
     guildClient.playing = false
     guildClient.startTimeout()
     return
@@ -28,7 +28,14 @@ function queuedPlay (video, guildClient) {
   logger.info('Attempting to download from %s', video.url)
   guildClient.downloading = true
   YtdlDiscord(video.url).then(stream => {
-    logger.debug('Successfully downloaded video, playing audio')
+    logger.debug('Successfully downloaded video, attempting to play audio')
+    if (!guildClient.connection) {
+      logger.debug('GuildClient no longer connected, returning')
+      guildClient.downloading = false
+      guildClient.playing = false
+      stream.destroy()
+      return
+    }
     guildClient.downloading = false
     guildClient.playing = true
     const dispatcher = guildClient.connection.play(stream, {
