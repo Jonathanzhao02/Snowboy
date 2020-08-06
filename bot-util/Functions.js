@@ -1,8 +1,5 @@
 const Discord = require('discord.js')
-const Common = require('./Common')
-const Streams = require('../structures/Streams')
 const Https = require('https')
-const Resampler = require('node-libsamplerate')
 
 // NOT EXPORTED
 
@@ -98,24 +95,6 @@ async function replaceMentions (msg, guild) {
 }
 
 /**
- * Plays silence frames in a voice channel.
- *
- * Necessary for 'speaking' event to continue functioning.
- *
- * @param {import('../structures/GuildClient')} guildClient The guildClient associated with the voice channel's server.
- */
-function playSilence (guildClient) {
-  guildClient.logger.debug('Playing silence')
-  const silence = new Streams.Silence()
-  const dispatcher = guildClient.connection.play(silence, { type: 'opus' })
-  dispatcher.on('finish', () => {
-    silence.destroy()
-    dispatcher.destroy()
-    guildClient.logger.debug('Destroyed silence stream')
-  })
-}
-
-/**
  * Checks that a URL returns a 200 status code.
  *
  * @param {String} url The https URL to access.
@@ -128,44 +107,6 @@ function validateURL (url) {
       else reject(new Error('Invalid status code'))
     }).end()
   })
-}
-
-/**
- * Creates a processed audio stream listening to a GuildMember.
- *
- * Returned stream is formatted 16kHz, mono, 16-bit, little-endian, signed integers.
- * @param {Discord.GuildMember} member The GuildMember to listen to.
- * @param {Discord.VoiceReceiver} receiver The receiver to create the connection from.
- * @returns {ReadableStream} Returns a stream to read audio data from.
- */
-function createAudioStream (member, receiver) {
-  Common.logger.debug('Attempting to create audio stream for %s in %s', member.displayName, member.guild.name)
-  const audioStream = receiver.createStream(member, {
-    mode: 'pcm',
-    end: 'manual'
-  })
-  // Turns from stereo to mono
-  const transformStream = new Streams.TransformStream()
-  // Turns from 48k to 16k
-  const resample = new Resampler({
-    type: 3,
-    channels: 1,
-    fromRate: 48000,
-    fromDepth: 16,
-    toRate: 16000,
-    toDepth: 16
-  })
-
-  // Ensures proper stream cleanup
-  resample.on('close', () => {
-    transformStream.removeAllListeners()
-    audioStream.removeAllListeners()
-    resample.removeAllListeners()
-    transformStream.destroy()
-    audioStream.destroy()
-    resample.destroy()
-  })
-  return audioStream.pipe(transformStream).pipe(resample)
 }
 
 /**
@@ -217,9 +158,7 @@ module.exports = {
   forEachAsync: forEachAsync,
   formatList: formatList,
   replaceMentions: replaceMentions,
-  playSilence: playSilence,
   validateURL: validateURL,
-  createAudioStream: createAudioStream,
   checkTextPermissions: checkTextPermissions,
   checkVoicePermissions: checkVoicePermissions
 }

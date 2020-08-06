@@ -1,5 +1,5 @@
 const { Emojis } = require('../../config')
-const Functions = require('../../bot-util/Functions')
+const Guilds = require('../../bot-util/Guilds')
 const Embeds = require('../../bot-util/Embeds')
 const YtdlDiscord = require('ytdl-core-discord')
 const Ytpl = require('ytpl')
@@ -18,7 +18,7 @@ function queuedPlay (video, guildClient) {
     logger.info('Reached end of current song queue')
     // End current dispatcher
     if (guildClient.playing) guildClient.connection.dispatcher.end()
-    Functions.playSilence(guildClient)
+    Guilds.playSilence(guildClient)
     guildClient.playing = false
     guildClient.startTimeout()
     return

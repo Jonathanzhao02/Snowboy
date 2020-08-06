@@ -1,5 +1,5 @@
 const { Emojis } = require('../../config')
-const Functions = require('../../bot-util/Functions')
+const Guilds = require('../../bot-util/Guilds')
 const Responses = require('../../bot-util/Responses')
 
 /**
@@ -11,7 +11,7 @@ const Responses = require('../../bot-util/Responses')
 function connectionHandler (connection, guildClient) {
   guildClient.logger.info('Successfully connected')
   guildClient.connection = connection
-  Functions.playSilence(guildClient)
+  Guilds.playSilence(guildClient)
 }
 
 /**

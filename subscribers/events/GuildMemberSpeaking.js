@@ -1,4 +1,3 @@
-const Functions = require('../../bot-util/Functions')
 const Guilds = require('../../bot-util/Guilds')
 const Emojis = require('../../config').Emojis
 const CONFIDENCE_THRESHOLD = require('../../config').CONFIDENCE_THRESHOLD
@@ -34,7 +33,7 @@ module.exports = function (client) {
           `${Emojis.error} ***Error:*** \`${msg}\``
         )
       })
-      newClient.start(Functions.createAudioStream(member, guildClient.connection.receiver))
+      newClient.start(Guilds.createAudioStream(memberClient))
       memberClient.snowClient = newClient
       childLogger.info('Successfully created SnowClient for %s', member.displayName)
     }
