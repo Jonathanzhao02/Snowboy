@@ -4,6 +4,19 @@ const Https = require('https')
 // NOT EXPORTED
 
 /**
+ * Finds the GuildMember object associated with a mention string.
+ *
+ * @param {String} str The mention string.
+ * @param {Discord.Guild} guild The Guild whose members cache is to be searched.
+ * @returns {Discord.GuildMember} Returns the first GuildMember associated with that identifier.
+ */
+async function findMember (str, guild) {
+  const mentionId = str.match(/^<@!?(\d+)>$/)
+  if (!mentionId) return
+  return await guild.members.fetch(mentionId[1])
+}
+
+/**
  * Function to asynchronously replace mentions in a message.
  *
  * Ripped from StackOverflow.
@@ -64,20 +77,20 @@ function formatList (list) {
  * Replaces the mentions in a message with their display name.
  *
  * @param {String[] | String} msg The message(s) to be formatted.
- * @param {import('../structures/GuildClient')} guildClient The GuildClient whose members are to be searched for display names.
+ * @param {Discord.Guild} guild The Guild whose members cache is to be searched for display names.
  * @returns {String[] | String} Returns the formatted message(s).
  */
-async function replaceMentions (msg, guildClient) {
+async function replaceMentions (msg, guild) {
   if (msg instanceof Array) {
     await forEachAsync(msg, async (val, index) => {
-      msg[index] = await replaceMentions(val, guildClient)
+      msg[index] = await replaceMentions(val, guild)
     })
     return msg
   } else if (msg instanceof Discord.MessageEmbed) {
     return msg
   } else {
     const regex = /<@!?(\d+)>/gi
-    return replaceAsync(msg, regex, async match => { return (await guildClient.findMember(match)).displayName })
+    return replaceAsync(msg, regex, async match => { return (await findMember(match, guild)).displayName })
   }
 }
 

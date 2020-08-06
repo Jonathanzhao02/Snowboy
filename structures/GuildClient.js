@@ -244,16 +244,4 @@ GuildClient.prototype.checkVoicePermissions = function () {
   }
 }
 
-/**
- * Parses a mention to fetch a GuildMember by ID.
- *
- * @param {String} mention The mention string containing the ID.
- * @returns {import('discord.js').GuildMember?} Returns the fetched GuildMember, if any.
- */
-GuildClient.prototype.findMemberByMention = async function (mention) {
-  const mentionId = mention.match(/^<@!?(\d+)>$/)
-  if (!mentionId) return
-  return await this.guild.members.fetch(mentionId[1])
-}
-
 module.exports = GuildClient
