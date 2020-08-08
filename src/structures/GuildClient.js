@@ -2,6 +2,7 @@ const GuildSettings = require('./GuildSettings')
 const Common = require('../bot-util/Common')
 const Functions = require('../bot-util/Functions')
 const { Timeouts, Emojis } = require('../config')
+const { EventEmitter } = require('events')
 
 /**
  * Wrapper object for a Guild so the bot is more easily able to access related resources.
@@ -110,6 +111,9 @@ function GuildClient (guild) {
   this.logger.debug(this)
 }
 
+// Extend the EventEmitter
+GuildClient.prototype = Object.create(EventEmitter.prototype)
+
 /**
  * Initializes all database-related values and adds the GuildClient to the guildClients Map.
  */
@@ -201,11 +205,11 @@ GuildClient.prototype.leaveVoiceChannel = function () {
   this.connection.disconnect()
   this.connection.removeAllListeners()
   this.voiceChannel.leave()
+  this.logger.debug('Successfully left')
+  this.emit('disconnected', this.voiceChannel, this.connection)
   this.voiceChannel = null
-  this.textChannel = null
   this.connection = null
   this.loopState = 0
-  this.logger.debug('Successfully left')
   return true
 }
 
@@ -264,6 +268,7 @@ GuildClient.prototype.joinVoiceChannel = function (voiceChannel) {
     this.connection = connection
     this.logger.info('Playing silence over connection')
     Functions.playSilence(connection)
+    this.emit('connected', connection)
   }).catch(e => {
     this.sendMsg(
       `${Emojis.error} ***Could not connect! \\;(***`
