@@ -6,4 +6,7 @@ module.exports = function (Common) {
 
   const defaultDbdir = Path.resolve(__dirname, '../db')
   Common.set('defaultDbdir', defaultDbdir)
+
+  const defaultResdir = Path.resolve(__dirname, '../resources')
+  Common.set('defaultResdir', defaultResdir)
 }

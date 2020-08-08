@@ -1,5 +1,6 @@
 const { Emojis } = require('../../config')
 const Functions = require('../../bot-util/Functions')
+const Common = require('../../bot-util/Common')
 
 /**
  * No description needed.
@@ -12,7 +13,7 @@ function chungus (memberClient, args) {
   logger.info('Received chungus command')
   memberClient.guildClient.sendMsg(
     `${Emojis.rabbit} ***B I G   C H U N G U S*** ${Emojis.rabbit}`,
-    { files: [`../../resources/chungus/chungus${Functions.random(6)}.jpg`] }
+    { files: [`${Common.defaultResdir}/chungus/chungus${Functions.random(6)}.jpg`] }
   )
 }
 

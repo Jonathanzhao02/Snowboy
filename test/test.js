@@ -1,5 +1,4 @@
 const { assert } = require('chai')
-const commands = require('../commands')
 
 describe('Array', function () {
   describe('functions', function () {

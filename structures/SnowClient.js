@@ -2,6 +2,7 @@ const { Models, Detector } = require('snowboy')
 const { EventEmitter } = require('events')
 const Wit = require('../web-apis/Wit')
 const { Timeouts } = require('../config')
+const Common = require('../bot-util/Common')
 
 /**
  * Uses Snowboy and Wit.ai for hotword speech detection, triggering a callback whenever it finishes.
@@ -42,7 +43,7 @@ function SnowClient (memberClient, sensitivity) {
 
   const models = new Models()
   models.add({
-    file: './resources/snowboy.umdl',
+    file: Common.defaultResdir + '/snowboy.umdl',
     sensitivity: sensitivity ? '0.45' : sensitivity,
     hotwords: 'snowboy'
   })
@@ -52,7 +53,7 @@ function SnowClient (memberClient, sensitivity) {
    * @type {Detector}
    */
   this.detector = new Detector({
-    resource: './resources/common.res',
+    resource: Common.defaultResdir + '/common.res',
     models: models,
     audioGain: 2.0,
     language: 'en-US'
