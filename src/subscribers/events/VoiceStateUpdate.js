@@ -34,7 +34,7 @@ module.exports = function (client) {
             guildClient.sendMsg(
               `${Emojis.sad} I'm leaving, I'm all by myself!`
             )
-            guildClient.leadVoiceChannel()
+            guildClient.leaveVoiceChannel()
           }
         }, Timeouts.ALONE_TIMEOUT + 500)
       }

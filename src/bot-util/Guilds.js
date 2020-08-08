@@ -115,5 +115,5 @@ function createAudioStream (memberClient) {
 module.exports = {
   getClientsFromMember: getClientsFromMember,
   createClientsFromMember: createClientsFromMember,
-  createAudioStream: createAudioStream,
+  createAudioStream: createAudioStream
 }
