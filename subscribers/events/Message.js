@@ -96,7 +96,7 @@ module.exports = function (client) {
     } else if (DEBUG_IDS.includes(memberClient.id) && Commands.debug.get(commandName)) {
       Commands.debug.get(commandName).execute(memberClient, args, msg)
     } else if (Commands.easteregg.get(commandName)) {
-      Commands.eastergg.get(commandName).execute(memberClient, args)
+      Commands.easteregg.get(commandName).execute(memberClient, args)
     } else {
       guildClient.sendMsg(
         `${Emojis.confused} ***Sorry, I don't understand.***`
