@@ -3,6 +3,7 @@ const Common = require('../bot-util/Common')
 const Functions = require('../bot-util/Functions')
 const { Timeouts, Emojis } = require('../config')
 const { EventEmitter } = require('events')
+const GuildPlayer = require('./GuildPlayer')
 
 /**
  * Wrapper object for a Guild so the bot is more easily able to access related resources.
@@ -181,39 +182,6 @@ GuildClient.prototype.cleanupGuildClient = function () {
 }
 
 /**
- * Leaves a guildClient's voice channel.
- *
- * @returns {Boolean} Whether the disconnect was successful or not.
- */
-GuildClient.prototype.leaveVoiceChannel = function () {
-  if (!this.connection) {
-    this.logger.debug('Not connected')
-    return false
-  }
-
-  this.logger.debug('Leaving')
-  this.logger.trace('Disconnecting')
-  this.songQueue = []
-  if (this.connection.dispatcher) {
-    this.logger.trace('Ending dispatcher')
-    this.connection.dispatcher.end()
-  }
-  this.logger.trace('Cleaning up members')
-  this.memberClients.forEach(member => { if (member.snowClient) member.snowClient.stop() })
-  this.memberClients.clear()
-  this.logger.trace('Leaving channel')
-  this.connection.disconnect()
-  this.connection.removeAllListeners()
-  this.voiceChannel.leave()
-  this.logger.debug('Successfully left')
-  this.emit('disconnected', this.voiceChannel, this.connection)
-  this.voiceChannel = null
-  this.connection = null
-  this.loopState = 0
-  return true
-}
-
-/**
  * Checks the GuildClient has necessary permissions in the bound TextChannel.
  *
  * @returns {Boolean} Returns whether any permissions are missing.
@@ -260,6 +228,12 @@ GuildClient.prototype.checkVoicePermissions = function () {
   return true
 }
 
+/**
+ * Joins a voice channel.
+ *
+ * @param {import('discord.js').VoiceChannel} voiceChannel The VoiceChannel to join.
+ * @fires GuildClient#connected
+ */
 GuildClient.prototype.joinVoiceChannel = function (voiceChannel) {
   this.voiceChannel = voiceChannel
   if (!this.checkVoicePermissions()) return
@@ -268,12 +242,63 @@ GuildClient.prototype.joinVoiceChannel = function (voiceChannel) {
     this.connection = connection
     this.logger.info('Playing silence over connection')
     Functions.playSilence(connection)
-    this.emit('connected', connection)
+    /**
+     * Connected event.
+     *
+     * @event GuildClient#connected
+     * @type {Object}
+     * @property {import('discord.js').VoiceConnection} connection The created VoiceConnection.
+     */
+    this.emit('connected', {
+      connection: connection
+    })
   }).catch(e => {
     this.sendMsg(
       `${Emojis.error} ***Could not connect! \\;(***`
     ).then(() => { throw e })
   })
+}
+
+/**
+ * Leaves a guildClient's voice channel.
+ *
+ * @returns {Boolean} Whether the disconnect was successful or not.
+ * @fires GuildClient#disconnected
+ */
+GuildClient.prototype.leaveVoiceChannel = function () {
+  if (!this.connection) {
+    this.logger.debug('Not connected')
+    return false
+  }
+
+  this.logger.debug('Leaving')
+  this.logger.trace('Disconnecting')
+  this.songQueue = []
+  if (this.connection.dispatcher) {
+    this.logger.trace('Ending dispatcher')
+    this.connection.dispatcher.end()
+  }
+  this.logger.trace('Cleaning up members')
+  this.memberClients.forEach(member => { if (member.snowClient) member.snowClient.stop() })
+  this.memberClients.clear()
+  this.logger.trace('Leaving channel')
+  this.connection.disconnect()
+  this.voiceChannel.leave()
+  this.logger.debug('Successfully left')
+  /**
+   * Disconnected event.
+   *
+   * @event GuildClient#disconnected
+   * @type {Object}
+   * @property {import('discord.js').VoiceConnection} connection The VoiceConnection previously made.
+   */
+  this.emit('disconnected', {
+    connection: this.connection
+  })
+  this.voiceChannel = null
+  this.connection = null
+  this.loopState = 0
+  return true
 }
 
 module.exports = GuildClient
