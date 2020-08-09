@@ -1,5 +1,3 @@
-const Resampler = require('node-libsamplerate')
-const Streams = require('../structures/Streams')
 const UserClient = require('../structures/UserClient')
 const GuildClient = require('../structures/GuildClient')
 const MemberClient = require('../structures/MemberClient')
@@ -12,7 +10,7 @@ const Common = require('./Common')
  * @returns {Object} Returns an object containing all existing clients.
  */
 function getClientsFromMember (member) {
-  Common.logger.info('Fetching clients for %s', member.displayName)
+  Common.logger.debug('Fetching clients for %s', member.displayName)
   // Get the userClient
   const userClient = Common.botClient.userClients.get(member.id)
   if (!userClient) Common.logger.warn('No userClient found for %s!', member.displayName)
@@ -42,7 +40,7 @@ function getClientsFromMember (member) {
  * @returns {Object} Returns an Object containing all three clients.
  */
 async function createClientsFromMember (member) {
-  Common.logger.info('Fetching clients for user %s', member.id)
+  Common.logger.debug('Fetching clients for %s', member.displayName || member.username)
   // Create a new userConstruct if the User is not currently tracked, loading settings from database
   let userClient = Common.botClient.userClients.get(member.id)
   if (!userClient) {

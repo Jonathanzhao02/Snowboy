@@ -1,8 +1,4 @@
 const { Emojis } = require('../../config')
-const Embeds = require('../../bot-util/Embeds')
-const YtdlDiscord = require('ytdl-core-discord')
-const Ytpl = require('ytpl')
-const Ytsearch = require('yt-search')
 
 /**
  * Plays or queues a song or playlist.
