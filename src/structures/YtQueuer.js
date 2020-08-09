@@ -61,6 +61,7 @@ YtQueuer.prototype.play = function (video) {
   if (!video || !this.connection) {
     this.logger.info('Reached end of current song queue')
     this.cleanUp()
+    if (this.connection) this.player.idle()
     return
   }
 
