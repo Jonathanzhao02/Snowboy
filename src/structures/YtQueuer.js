@@ -10,10 +10,28 @@ const Ytsearch = require('yt-search')
  * @param {import('./GuildPlayer')} player The GuildPlayer the queue is for.
  */
 function YtQueuer (player) {
+  /**
+   * The backing GuildPlayer.
+   * @type {import('./GuildPlayer')}
+   */
   this.player = player
+
+  /**
+   * The backing GuildClient.
+   * @type {import('./GuildClient')}
+   */
   this.guildClient = player.guildClient
+
+  /**
+   * The logger to use for logging.
+   * @type {import('pino')}
+   */
   this.logger = player.logger
 
+  /**
+   * The active VoiceConnection.
+   * @type {import('discord.js').VoiceConnection}
+   */
   Object.defineProperty(this, 'connection', {
     get: () => this.player.connection
   })
@@ -190,6 +208,12 @@ YtQueuer.prototype.urlSearch = async function (url) {
   return videoConstruct
 }
 
+/**
+ * Searches a YouTube playlist and queues songs from it.
+ *
+ * @param {String} url The playlist URL.
+ * @returns {Array} Returns the Array of created video constructs.
+ */
 YtQueuer.prototype.playlistSearch = async function (url) {
   const result = await Ytpl(url, { limit: MAX_SONGS })
   const name = result.title
