@@ -44,18 +44,6 @@ function GuildClient (guild) {
   this.memberClients = new Map()
 
   /**
-   * Whether a song is currently playing.
-   * @type {Boolean}
-   */
-  this.playing = false
-
-  /**
-   * Whether a song is currently being downloaded.
-   * @type {Boolean}
-   */
-  this.downloading = false
-
-  /**
    * The associated Guild.
    * @type {import('discord.js').Guild}
    */
@@ -109,6 +97,10 @@ function GuildClient (guild) {
    */
   Object.defineProperty(this, 'connection', {
     get: () => this.guildPlayer.connection
+  })
+
+  Object.defineProperty(this, 'playing', {
+    get: () => this.guildPlayer.queuer.playing
   })
 
   this.logger.debug(this)
@@ -290,8 +282,6 @@ GuildClient.prototype.leaveVoiceChannel = function () {
     channel: this.voiceChannel
   })
   this.voiceChannel = null
-  this.playing = false
-  this.downloading = false
   this.loopState = 0
   return true
 }

@@ -40,7 +40,7 @@ function GuildPlayer (guildClient) {
 
   guildClient.on('disconnected', () => {
     this.logger.debug('Received GuildClient#disconnected event')
-    this.queuer.clear()
+    this.queuer.cleanUp()
     if (this.connection.dispatcher) {
       this.end()
     }
@@ -126,11 +126,24 @@ GuildPlayer.prototype.listenTo = function (member) {
  * Plays silence over the VoiceConnection to await new commands.
  */
 GuildPlayer.prototype.idle = function () {
-  const silence = new Streams.Silence()
-  const dispatcher = this.connection.play(silence, { type: 'opus' })
+  this.play(new Streams.Silence(), null, { type: 'opus' })
+}
+
+/**
+ * Plays a stream over the connection.
+ *
+ * @param {ReadableStream} stream The stream to read from.
+ * @param {Function} callback The callback upon dispatcher finish.
+ * @param {Object} opts The options to play the stream with.
+ */
+GuildPlayer.prototype.play = function (stream, callback, opts) {
+  this.logger.trace('Playing stream over connection')
+  const dispatcher = this.connection.play(stream, opts)
   dispatcher.on('finish', () => {
-    silence.destroy()
+    this.logger.trace('Finished dispatcher')
+    stream.destroy()
     dispatcher.destroy()
+    if (callback) callback()
   })
 }
 

@@ -23,6 +23,18 @@ function YtQueuer (player) {
   this.guildClient = player.guildClient
 
   /**
+   * Whether a video is being downloaded or not.
+   * @type {Boolean}
+   */
+  this.downloading = false
+
+  /**
+   * Whether a song is currently playing or not.
+   * @type {Boolean}
+   */
+  this.playing = false
+
+  /**
    * The logger to use for logging.
    * @type {import('pino')}
    */
@@ -49,45 +61,34 @@ YtQueuer.prototype.queuedPlay = function (video) {
   if (!video) {
     this.logger.info('Reached end of current song queue')
     // End current dispatcher
-    if (this.guildClient.playing) this.player.end()
-    this.guildClient.playing = false
+    if (this.playing) this.player.end()
+    this.playing = false
     this.guildClient.startTimeout()
     return
   }
 
   // Uses ytdl-core-discord
   this.logger.info('Attempting to download from %s', video.url)
-  this.guildClient.downloading = true
+  this.downloading = true
   YtdlDiscord(video.url).then(stream => {
     this.logger.debug('Successfully downloaded video, attempting to play audio')
-    this.guildClient.downloading = false
-    this.guildClient.playing = true
-    const dispatcher = this.connection.play(stream, {
-      type: 'opus',
-      highWaterMark: 50
-    })
-      .on('finish', () => {
-        // Cleans up stream and dispatcher
-        this.logger.info('Finished song')
-        this.guildClient.playing = false
-        this.guildClient.downloading = false
-        dispatcher.destroy()
-        stream.destroy()
-        this.queuedPlay(this.next())
-      })
-  }).catch('error', error => {
-    // Uh oh
-    this.logger.error('Youtube error')
-    this.guildClient.sendMsg(`${Emojis.error} ***Sorry, an error occurred on playback!***`)
-    throw error
-  })
+    this.downloading = false
+    this.playing = true
 
-  // Sends a message detailing the currently playing video
-  video.channel = `${Emojis.playing} Now Playing! - ${video.channel}`
-  video.position = 0
-  this.guildClient.sendMsg(
-    Embeds.createVideoEmbed(video)
-  )
+    this.player.play(stream, () => {
+      this.logger.info('Finished song')
+      this.playing = false
+      this.downloading = false
+      this.queuedPlay(this.next())
+    }, { type: 'opus', highWaterMark: 50 })
+
+    // Sends a message detailing the currently playing video
+    video.channel = `${Emojis.playing} Now Playing! - ${video.channel}`
+    video.position = 0
+    this.guildClient.sendMsg(
+      Embeds.createVideoEmbed(video)
+    )
+  })
 }
 
 /**
@@ -109,7 +110,7 @@ YtQueuer.prototype.queue = async function (requester, video, query) {
   this.push(video)
 
   // If not playing anything, play this song
-  if (!this.guildClient.playing && !this.guildClient.downloading) {
+  if (!this.guildClient.playing && !this.downloading) {
     this.logger.info('Playing %s', video.url)
     this.queuedPlay(video)
   // If playing something, just say it's queued
@@ -309,6 +310,12 @@ YtQueuer.prototype.clear = function () {
 YtQueuer.prototype.push = function (item) {
   item.position = this.length
   Array.prototype.push.call(this, item)
+}
+
+YtQueuer.prototype.cleanUp = function () {
+  this.clear()
+  this.downloading = false
+  this.playing = false
 }
 
 module.exports = YtQueuer
