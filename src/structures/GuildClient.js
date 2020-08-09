@@ -32,12 +32,6 @@ function GuildClient (guild) {
   this.voiceChannel = null
 
   /**
-   * Whether this GuildClient is connected or not.
-   * @type {Boolean}
-   */
-  this.connected = false
-
-  /**
    * The current looping state.
    * @type {Number}
    */
@@ -109,6 +103,14 @@ function GuildClient (guild) {
    */
   this.guildPlayer = new GuildPlayer(this)
 
+  /**
+   * The active VoiceConnection to the VoiceChannel.
+   * @type {import('discord.js').VoiceConnection}
+   */
+  Object.defineProperty(this, 'connection', {
+    get: () => this.guildPlayer.connection
+  })
+
   this.logger.debug(this)
 }
 
@@ -167,7 +169,7 @@ GuildClient.prototype.cleanupGuildClient = function () {
     this.logger.debug('Attempting to clean up guildClient')
     // If the guild is currently connected, is not playing music, and has an active TextChannel,
     // notify, mark the guildClient for deletion, and leave
-    if (this.textChannel && this.connected && !this.playing) {
+    if (this.textChannel && this.connection && !this.playing) {
       this.logger.debug('Leaving voice channel')
       this.sendMsg(
         `${Emojis.happy} **It seems nobody needs me right now, so I'll be headed out. Call me when you do!**`
@@ -239,8 +241,7 @@ GuildClient.prototype.joinVoiceChannel = function (voiceChannel) {
   if (!this.checkVoicePermissions()) return
   voiceChannel.join().then(connection => {
     this.logger.info('Successfully connected!')
-    this.connected = true
-    this.logger.info('Playing silence over connection')
+    this.logger.trace('Emitting connected event')
     /**
      * Connected event.
      *
@@ -265,7 +266,7 @@ GuildClient.prototype.joinVoiceChannel = function (voiceChannel) {
  * @fires GuildClient#disconnected
  */
 GuildClient.prototype.leaveVoiceChannel = function () {
-  if (!this.connected) {
+  if (!this.connection) {
     this.logger.debug('Not connected')
     return false
   }
@@ -289,7 +290,6 @@ GuildClient.prototype.leaveVoiceChannel = function () {
     channel: this.voiceChannel
   })
   this.voiceChannel = null
-  this.connected = false
   this.playing = false
   this.downloading = false
   this.loopState = 0

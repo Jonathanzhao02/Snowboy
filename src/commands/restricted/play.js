@@ -27,7 +27,7 @@ function queuedPlay (video, guildClient) {
   guildClient.downloading = true
   YtdlDiscord(video.url).then(stream => {
     logger.debug('Successfully downloaded video, attempting to play audio')
-    if (!guildClient.connected) {
+    if (!guildClient.connection) {
       logger.debug('GuildClient no longer connected, returning')
       guildClient.downloading = false
       guildClient.playing = false
@@ -194,7 +194,7 @@ function play (memberClient, args) {
   const logger = memberClient.logger
   logger.info('Received play command')
   // If not connected, notify and return
-  if (!memberClient.guildClient.connected) {
+  if (!memberClient.guildClient.connection) {
     logger.debug('Not connected to a voice channel')
     memberClient.guildClient.sendMsg(
       `${Emojis.error} ***I am not in a voice channel!***`

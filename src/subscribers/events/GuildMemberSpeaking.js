@@ -95,7 +95,7 @@ module.exports = function (client) {
    * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who triggered the hotword.
    */
   function ack (index, hotword, memberClient) {
-    if (!memberClient.guildClient.connected) return
+    if (!memberClient.guildClient.connection) return
     memberClient.logger.info('Received hotword from %s', memberClient.member.displayName)
     memberClient.sendResponse('hotword')
     memberClient.guildClient.startTimeout()
