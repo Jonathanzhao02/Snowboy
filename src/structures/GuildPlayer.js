@@ -40,8 +40,8 @@ function GuildPlayer (guildClient) {
 
   guildClient.on('disconnected', () => {
     this.logger.debug('Received GuildClient#disconnected event')
+    this.queuer.clear()
     if (this.connection.dispatcher) {
-      this.clearQueue()
       this.end()
     }
     this.logger.trace('Disconnecting')
@@ -54,8 +54,8 @@ function GuildPlayer (guildClient) {
  * Ends the current playback and clears the queue.
  */
 GuildPlayer.prototype.stop = function () {
-  this.logger.debug('Ending dispatcher')
-  this.clearQueue()
+  this.logger.debug('Stopping dispatcher')
+  this.queuer.clear()
   this.end()
   this.idle()
 }
@@ -82,52 +82,6 @@ GuildPlayer.prototype.pause = function () {
 GuildPlayer.prototype.resume = function () {
   this.logger.debug('Resuming dispatcher')
   this.connection.dispatcher.resume()
-}
-
-/**
- * Clears the song queue.
- */
-GuildPlayer.prototype.clearQueue = function () {
-  this.logger.debug('Clearing song queue')
-  this.queuer = new YtQueuer(this)
-}
-
-/**
- * Adds an object to the queue.
- *
- * @param {Object} item The object to push.
- */
-GuildPlayer.prototype.queue = function (item) {
-  this.logger.debug('Pushing item %o into queue', item)
-  item.position = this.queuer.length
-  this.queuer.push(item)
-}
-
-/**
- * Returns the next song in the queue
- *
- * Also handles all looping operations.
- *
- * @returns {Object} Returns the next object in the queue.
- */
-GuildPlayer.prototype.next = function () {
-  switch (this.guildClient.loopState) {
-    case 0:
-      this.logger.info('Moving to next song in queue')
-      this.queuer.shift()
-      break
-    case 1:
-      this.logger.info('Looping song')
-      break
-    case 2:
-      this.logger.info('Moving to next song in looped queue')
-      this.queue(this.queuer.shift())
-      break
-    default:
-      throw new Error(`Unhandled loopstate ${this.guildClient.loopState}!`)
-  }
-
-  return this.queuer[0]
 }
 
 /**

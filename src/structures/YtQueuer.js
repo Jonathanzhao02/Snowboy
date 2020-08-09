@@ -13,6 +13,10 @@ function YtQueuer (player) {
   this.player = player
   this.guildClient = player.guildClient
   this.logger = player.logger
+
+  Object.defineProperty(this, 'connection', {
+    get: () => this.player.connection
+  })
 }
 
 YtQueuer.prototype = Object.create(Array.prototype)
@@ -38,7 +42,7 @@ YtQueuer.prototype.queuedPlay = function (video) {
   this.guildClient.downloading = true
   YtdlDiscord(video.url).then(stream => {
     this.logger.debug('Successfully downloaded video, attempting to play audio')
-    if (!this.guildClient.connection) {
+    if (!this.connection) {
       this.logger.debug('GuildClient no longer connected, returning')
       this.guildClient.downloading = false
       this.guildClient.playing = false
@@ -47,7 +51,7 @@ YtQueuer.prototype.queuedPlay = function (video) {
     }
     this.guildClient.downloading = false
     this.guildClient.playing = true
-    const dispatcher = this.guildClient.connection.play(stream, {
+    const dispatcher = this.connection.play(stream, {
       type: 'opus',
       highWaterMark: 50
     })
@@ -58,7 +62,7 @@ YtQueuer.prototype.queuedPlay = function (video) {
         this.guildClient.downloading = false
         dispatcher.destroy()
         stream.destroy()
-        this.queuedPlay(this.player.next())
+        this.queuedPlay(this.next())
       })
   }).catch('error', error => {
     // Uh oh
@@ -69,6 +73,7 @@ YtQueuer.prototype.queuedPlay = function (video) {
 
   // Sends a message detailing the currently playing video
   video.channel = `${Emojis.playing} Now Playing! - ${video.channel}`
+  video.position = 0
   this.guildClient.sendMsg(
     Embeds.createVideoEmbed(video)
   )
@@ -90,7 +95,7 @@ YtQueuer.prototype.queue = async function (requester, video, query) {
     return
   }
   video.requester = requester
-  this.player.queue(video)
+  this.push(video)
 
   // If not playing anything, play this song
   if (!this.guildClient.playing && !this.guildClient.downloading) {
@@ -185,6 +190,27 @@ YtQueuer.prototype.urlSearch = async function (url) {
   return videoConstruct
 }
 
+YtQueuer.prototype.playlistSearch = async function (url) {
+  const result = await Ytpl(url, { limit: 0 })
+  const name = result.title
+  const vids = result.items
+  this.guildClient.sendMsg(
+    `${Emojis.checkmark} **Adding \`${vids.length}\` videos from \`${name}\`**`
+  )
+
+  vids.forEach((vid, index) => {
+    vids[index] = {
+      url: vid.url_simple,
+      title: vid.title,
+      channel: vid.author.name,
+      thumbnail: vid.thumbnail,
+      duration: vid.duration
+    }
+  })
+
+  return vids
+}
+
 /**
  * Searches and queues up a query.
  *
@@ -197,25 +223,10 @@ YtQueuer.prototype.search = function (query, requester) {
     this.guildClient.sendMsg(
       `${Emojis.search} ***Searching for*** \`${query}\``
     )
-    Ytpl(query, { limit: 0 }).then(result => {
-      const name = result.title
-      const vids = result.items
-      this.guildClient.sendMsg(
-        `${Emojis.checkmark} **Adding \`${vids.length}\` videos from \`${name}\`**`
-      )
-
-      vids.forEach(vid => {
-        this.logger.info('Adding %s to queue as playlist item', vid.url_simple)
-        this.queue(requester,
-          {
-            url: vid.url_simple,
-            title: vid.title,
-            channel: vid.author.name,
-            thumbnail: vid.thumbnail,
-            duration: vid.duration
-          },
-          query
-        )
+    this.playlistSearch(query).then(vids => {
+      vids.forEach(video => {
+        this.logger.info('Adding %s to queue as playlist item', video.url)
+        this.queue(requester, video, query)
       })
     })
   // Directly get info from URL
@@ -224,6 +235,7 @@ YtQueuer.prototype.search = function (query, requester) {
       `${Emojis.search} ***Searching for*** \`${query}\``
     )
     this.urlSearch(query).then(video => {
+      this.logger.info('Adding %s to queue', video.url)
       this.queue(requester, video, query)
     })
   // Search query from Youtube
@@ -232,9 +244,54 @@ YtQueuer.prototype.search = function (query, requester) {
       `${Emojis.search} ***Searching for*** \`${query}\``
     )
     this.querySearch(query).then(video => {
+      this.logger.info('Adding %s to queue', video.url)
       this.queue(requester, video, query)
     })
   }
+}
+
+/**
+ * Returns the next song in the queue
+ *
+ * Also handles all looping operations.
+ *
+ * @returns {Object} Returns the next object in the queue.
+ */
+YtQueuer.prototype.next = function () {
+  switch (this.guildClient.loopState) {
+    case 0:
+      this.logger.info('Moving to next song in queue')
+      this.shift()
+      break
+    case 1:
+      this.logger.info('Looping song')
+      break
+    case 2:
+      this.logger.info('Moving to next song in looped queue')
+      this.push(this.shift())
+      break
+    default:
+      throw new Error(`Unhandled loopstate ${this.guildClient.loopState}!`)
+  }
+
+  return this[0]
+}
+
+/**
+ * Clears the backing array data.
+ */
+YtQueuer.prototype.clear = function () {
+  this.splice(0, this.length)
+}
+
+/**
+ * Pushes an item into the queue while also settings its position.
+ *
+ * @param {Object} item The item to push into the queue.
+ */
+YtQueuer.prototype.push = function (item) {
+  item.position = this.length
+  Array.prototype.push.call(this, item)
 }
 
 module.exports = YtQueuer
