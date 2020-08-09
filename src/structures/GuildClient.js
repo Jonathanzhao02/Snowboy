@@ -264,12 +264,6 @@ GuildClient.prototype.leaveVoiceChannel = function () {
   }
 
   this.logger.debug('Leaving')
-  this.logger.trace('Cleaning up members')
-  this.memberClients.forEach(member => { if (member.snowClient) member.snowClient.stop() })
-  this.memberClients.clear()
-  this.logger.trace('Leaving channel')
-  this.voiceChannel.leave()
-  this.logger.debug('Successfully left')
   this.logger.trace('Emitting disconnected event')
   /**
    * Disconnected event.
@@ -281,6 +275,12 @@ GuildClient.prototype.leaveVoiceChannel = function () {
   this.emit('disconnected', {
     channel: this.voiceChannel
   })
+  this.logger.trace('Cleaning up members')
+  this.memberClients.forEach(member => { if (member.snowClient) member.snowClient.stop() })
+  this.memberClients.clear()
+  this.logger.trace('Leaving channel')
+  this.voiceChannel.leave()
+  this.logger.debug('Successfully left')
   this.voiceChannel = null
   this.loopState = 0
   return true

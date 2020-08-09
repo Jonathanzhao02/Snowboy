@@ -15,7 +15,7 @@ module.exports = function (client) {
   async function onSpeaking (member, speaking) {
     if (!member || speaking.equals(0) || member.id === client.user.id) return
     const { userClient, guildClient, memberClient } = await Guilds.createClientsFromMember(member)
-    if (!guildClient || member.voice.channelID !== guildClient.voiceChannel.id || !guildClient.settings.voice) return
+    if (!guildClient.connection || member.voice.channelID !== guildClient.voiceChannel.id || !guildClient.settings.voice) return
     const childLogger = guildClient.logger
 
     // If the member is not being listened to, create a new SnowClient and process the audio

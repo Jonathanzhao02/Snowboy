@@ -40,7 +40,6 @@ function GuildPlayer (guildClient) {
 
   guildClient.on('disconnected', () => {
     this.logger.debug('Received GuildClient#disconnected event')
-    this.queuer.cleanUp()
     if (this.connection.dispatcher) {
       this.end()
     }

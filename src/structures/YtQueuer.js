@@ -56,14 +56,11 @@ YtQueuer.prototype = Object.create(Array.prototype)
  *
  * @param {Object} video The videoConstruct object representing the video.
  */
-YtQueuer.prototype.queuedPlay = function (video) {
-  // If no video, clean up connection and begin expiration timeout
-  if (!video) {
+YtQueuer.prototype.play = function (video) {
+  // If no video or no connection, clean up connection and begin expiration timeout
+  if (!video || !this.connection) {
     this.logger.info('Reached end of current song queue')
-    // End current dispatcher
-    if (this.playing) this.player.end()
-    this.playing = false
-    this.guildClient.startTimeout()
+    this.cleanUp()
     return
   }
 
@@ -73,21 +70,24 @@ YtQueuer.prototype.queuedPlay = function (video) {
   YtdlDiscord(video.url).then(stream => {
     this.logger.debug('Successfully downloaded video, attempting to play audio')
     this.downloading = false
-    this.playing = true
 
-    this.player.play(stream, () => {
-      this.logger.info('Finished song')
-      this.playing = false
-      this.downloading = false
-      this.queuedPlay(this.next())
-    }, { type: 'opus', highWaterMark: 50 })
+    if (this.connection) {
+      this.logger.trace('Playing audio')
+      this.playing = true
+      this.player.play(stream, () => {
+        this.logger.info('Finished song')
+        this.playing = false
+        this.downloading = false
+        this.play(this.next())
+      }, { type: 'opus', highWaterMark: 50 })
 
-    // Sends a message detailing the currently playing video
-    video.channel = `${Emojis.playing} Now Playing! - ${video.channel}`
-    video.position = 0
-    this.guildClient.sendMsg(
-      Embeds.createVideoEmbed(video)
-    )
+      // Sends a message detailing the currently playing video
+      video.channel = `${Emojis.playing} Now Playing! - ${video.channel}`
+      video.position = 0
+      this.guildClient.sendMsg(
+        Embeds.createVideoEmbed(video)
+      )
+    }
   })
 }
 
@@ -112,7 +112,7 @@ YtQueuer.prototype.queue = async function (requester, video, query) {
   // If not playing anything, play this song
   if (!this.guildClient.playing && !this.downloading) {
     this.logger.info('Playing %s', video.url)
-    this.queuedPlay(video)
+    this.play(video)
   // If playing something, just say it's queued
   } else {
     this.logger.info('Queued %s', video.url)
@@ -133,14 +133,8 @@ YtQueuer.prototype.queue = async function (requester, video, query) {
  */
 YtQueuer.prototype.querySearch = async function (query) {
   this.logger.info('Searching query %s', query)
-  let result
   // Attempt to get result from Youtube
-  try {
-    result = await Ytsearch(query)
-  } catch (error) {
-    this.logger.error('Error while searching YouTube')
-    throw error
-  }
+  const result = await Ytsearch(query)
 
   if (!result.videos || !result.videos[0]) {
     this.logger.debug('No results found for %s', query)
@@ -170,13 +164,8 @@ YtQueuer.prototype.querySearch = async function (query) {
  */
 YtQueuer.prototype.urlSearch = async function (url) {
   this.logger.info('Searching URL %s', url)
-  let result
   // Attempt to get info from url
-  try {
-    result = await YtdlDiscord.getBasicInfo(url)
-  } catch (error) {
-    return
-  }
+  const result = await YtdlDiscord.getBasicInfo(url)
 
   if (!result || result.player_response.videoDetails.isPrivate) {
     this.logger.debug('No info found for %s', url)
@@ -316,6 +305,7 @@ YtQueuer.prototype.cleanUp = function () {
   this.clear()
   this.downloading = false
   this.playing = false
+  this.guildClient.startTimeout()
 }
 
 module.exports = YtQueuer
