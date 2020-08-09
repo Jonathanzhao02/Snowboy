@@ -60,13 +60,6 @@ YtQueuer.prototype.queuedPlay = function (video) {
   this.guildClient.downloading = true
   YtdlDiscord(video.url).then(stream => {
     this.logger.debug('Successfully downloaded video, attempting to play audio')
-    if (!this.connection) {
-      this.logger.debug('GuildClient no longer connected, returning')
-      this.guildClient.downloading = false
-      this.guildClient.playing = false
-      stream.destroy()
-      return
-    }
     this.guildClient.downloading = false
     this.guildClient.playing = true
     const dispatcher = this.connection.play(stream, {

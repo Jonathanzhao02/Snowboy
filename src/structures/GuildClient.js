@@ -175,7 +175,7 @@ GuildClient.prototype.cleanupGuildClient = function () {
         `${Emojis.happy} **It seems nobody needs me right now, so I'll be headed out. Call me when you do!**`
       )
       this.delete = true
-      this.voiceChannel.leave()
+      this.leaveVoiceChannel()
     } else {
       this.logger.debug('Deleting guildClient')
       Common.botClient.guildClients.delete(this.guild.id)

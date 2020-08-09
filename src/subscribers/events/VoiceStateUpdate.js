@@ -6,7 +6,7 @@ module.exports = function (client) {
     const userId = newPresence.id
 
     // If bot is currently connected, the channel in question is the bot's channel, and a user has left or moved channels
-    if (guildClient && guildClient.voiceChannel && oldPresence.channelID === guildClient.voiceChannel.id &&
+    if (guildClient && guildClient.connection && oldPresence.channelID === guildClient.voiceChannel.id &&
       (!newPresence.channelID || newPresence.channelID !== guildClient.voiceChannel.id)) {
       guildClient.logger.info('User has left the voice channel')
 
