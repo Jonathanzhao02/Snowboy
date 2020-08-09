@@ -33,7 +33,7 @@ module.exports = function (client) {
           `${Emojis.error} ***Error:*** \`${msg}\``
         )
       })
-      newClient.start(Guilds.createAudioStream(memberClient))
+      newClient.start(guildClient.guildPlayer.listenTo(memberClient.member))
       memberClient.snowClient = newClient
       childLogger.info('Successfully created SnowClient for %s', member.displayName)
     }
@@ -95,7 +95,7 @@ module.exports = function (client) {
    * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who triggered the hotword.
    */
   function ack (index, hotword, memberClient) {
-    if (!memberClient.guildClient.connection) return
+    if (!memberClient.guildClient.connected) return
     memberClient.logger.info('Received hotword from %s', memberClient.member.displayName)
     memberClient.sendResponse('hotword')
     memberClient.guildClient.startTimeout()

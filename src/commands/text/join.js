@@ -21,7 +21,7 @@ function join (memberClient, args, msg) {
   }
 
   // If already connected, notify and return
-  if (memberClient.guildClient.connection) {
+  if (memberClient.guildClient.connected) {
     logger.trace('Already connected')
     memberClient.guildClient.sendMsg(
       `${Emojis.error} ***I'm already connected to a voice channel!***`

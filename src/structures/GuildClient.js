@@ -32,16 +32,10 @@ function GuildClient (guild) {
   this.voiceChannel = null
 
   /**
-   * The active connection to the VoiceChannel.
-   * @type {import('discord.js').VoiceConnection?}
+   * Whether this GuildClient is connected or not.
+   * @type {Boolean}
    */
-  this.connection = null
-
-  /**
-   * The array of videos in the song queue.
-   * @type {Object[]}
-   */
-  this.songQueue = []
+  this.connected = false
 
   /**
    * The current looping state.
@@ -105,9 +99,15 @@ function GuildClient (guild) {
 
   /**
    * The logger used for logging.
-   * @type {Pino}
+   * @type {import('pino')}
    */
   this.logger = Common.logger.child({ guild: guild.id, name: guild.name })
+
+  /**
+   * The playback manager for this GuildClient.
+   * @type {GuildPlayer}
+   */
+  this.guildPlayer = new GuildPlayer(this)
 
   this.logger.debug(this)
 }
@@ -167,7 +167,7 @@ GuildClient.prototype.cleanupGuildClient = function () {
     this.logger.debug('Attempting to clean up guildClient')
     // If the guild is currently connected, is not playing music, and has an active TextChannel,
     // notify, mark the guildClient for deletion, and leave
-    if (this.textChannel && this.connection && !this.playing) {
+    if (this.textChannel && this.connected && !this.playing) {
       this.logger.debug('Leaving voice channel')
       this.sendMsg(
         `${Emojis.happy} **It seems nobody needs me right now, so I'll be headed out. Call me when you do!**`
@@ -239,9 +239,8 @@ GuildClient.prototype.joinVoiceChannel = function (voiceChannel) {
   if (!this.checkVoicePermissions()) return
   voiceChannel.join().then(connection => {
     this.logger.info('Successfully connected!')
-    this.connection = connection
+    this.connected = true
     this.logger.info('Playing silence over connection')
-    Functions.playSilence(connection)
     /**
      * Connected event.
      *
@@ -266,37 +265,33 @@ GuildClient.prototype.joinVoiceChannel = function (voiceChannel) {
  * @fires GuildClient#disconnected
  */
 GuildClient.prototype.leaveVoiceChannel = function () {
-  if (!this.connection) {
+  if (!this.connected) {
     this.logger.debug('Not connected')
     return false
   }
 
   this.logger.debug('Leaving')
-  this.logger.trace('Disconnecting')
-  this.songQueue = []
-  if (this.connection.dispatcher) {
-    this.logger.trace('Ending dispatcher')
-    this.connection.dispatcher.end()
-  }
   this.logger.trace('Cleaning up members')
   this.memberClients.forEach(member => { if (member.snowClient) member.snowClient.stop() })
   this.memberClients.clear()
   this.logger.trace('Leaving channel')
-  this.connection.disconnect()
   this.voiceChannel.leave()
   this.logger.debug('Successfully left')
+  this.logger.trace('Emitting disconnected event')
   /**
    * Disconnected event.
    *
    * @event GuildClient#disconnected
    * @type {Object}
-   * @property {import('discord.js').VoiceConnection} connection The VoiceConnection previously made.
+   * @property {import('discord.js').VoiceChannel} channel The disconnected VoiceChannel.
    */
   this.emit('disconnected', {
-    connection: this.connection
+    channel: this.voiceChannel
   })
   this.voiceChannel = null
-  this.connection = null
+  this.connected = false
+  this.playing = false
+  this.downloading = false
   this.loopState = 0
   return true
 }

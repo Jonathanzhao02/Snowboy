@@ -17,7 +17,7 @@ function pause (memberClient, args) {
     return
   }
   logger.debug('Pausing music')
-  memberClient.guildClient.connection.dispatcher.pause()
+  memberClient.guildClient.guildPlayer.pause()
   memberClient.guildClient.sendMsg(
     `${Emojis.pause} ***Paused the music***`
   )

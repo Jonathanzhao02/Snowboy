@@ -20,7 +20,7 @@ function skip (memberClient, args) {
   memberClient.guildClient.sendMsg(
     `${Emojis.skip} ***Skipping the current song***`
   )
-  memberClient.guildClient.connection.dispatcher.end()
+  memberClient.guildClient.guildPlayer.end()
   logger.debug('Successfully skipped song')
 }
 

@@ -154,22 +154,6 @@ function checkVoicePermissions (channel) {
   }
 }
 
-/**
- * Plays silence frames in a voice channel.
- *
- * Necessary for 'speaking' event to continue functioning.
- *
- * @param {import('discord.js').VoiceConnection} connection The VoiceConnection to play over.
- */
-function playSilence (connection) {
-  const silence = new Streams.Silence()
-  const dispatcher = connection.play(silence, { type: 'opus' })
-  dispatcher.on('finish', () => {
-    silence.destroy()
-    dispatcher.destroy()
-  })
-}
-
 module.exports = {
   random: random,
   forEachAsync: forEachAsync,
@@ -177,6 +161,5 @@ module.exports = {
   replaceMentions: replaceMentions,
   validateURL: validateURL,
   checkTextPermissions: checkTextPermissions,
-  checkVoicePermissions: checkVoicePermissions,
-  playSilence: playSilence
+  checkVoicePermissions: checkVoicePermissions
 }

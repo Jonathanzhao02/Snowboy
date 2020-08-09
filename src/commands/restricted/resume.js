@@ -17,7 +17,7 @@ function resume (memberClient, args) {
     return
   }
   logger.debug('Resuming music')
-  memberClient.guildClient.connection.dispatcher.resume()
+  memberClient.guildClient.guildPlayer.resume()
   memberClient.guildClient.sendMsg(
     `${Emojis.playing} **Resuming!**`
   )

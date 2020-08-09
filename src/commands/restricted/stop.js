@@ -17,8 +17,7 @@ function stop (memberClient, args) {
     return
   }
   logger.debug('Stopping music')
-  memberClient.guildClient.songQueue = []
-  memberClient.guildClient.connection.dispatcher.end()
+  memberClient.guildClient.guildPlayer.stop()
   memberClient.guildClient.sendMsg(
     `${Emojis.stop} ***Stopped the music***`
   )

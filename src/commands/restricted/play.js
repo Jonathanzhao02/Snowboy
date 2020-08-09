@@ -1,5 +1,4 @@
 const { Emojis } = require('../../config')
-const Functions = require('../../bot-util/Functions')
 const Embeds = require('../../bot-util/Embeds')
 const YtdlDiscord = require('ytdl-core-discord')
 const Ytpl = require('ytpl')
@@ -17,8 +16,7 @@ function queuedPlay (video, guildClient) {
   if (!video) {
     logger.info('Reached end of current song queue')
     // End current dispatcher
-    if (guildClient.playing) guildClient.connection.dispatcher.end()
-    Functions.playSilence(guildClient)
+    if (guildClient.playing) guildClient.guildPlayer.end()
     guildClient.playing = false
     guildClient.startTimeout()
     return
@@ -29,7 +27,7 @@ function queuedPlay (video, guildClient) {
   guildClient.downloading = true
   YtdlDiscord(video.url).then(stream => {
     logger.debug('Successfully downloaded video, attempting to play audio')
-    if (!guildClient.connection) {
+    if (!guildClient.connected) {
       logger.debug('GuildClient no longer connected, returning')
       guildClient.downloading = false
       guildClient.playing = false
@@ -38,34 +36,18 @@ function queuedPlay (video, guildClient) {
     }
     guildClient.downloading = false
     guildClient.playing = true
-    const dispatcher = guildClient.connection.play(stream, {
+    const dispatcher = guildClient.guildPlayer.connection.play(stream, {
       type: 'opus',
       highWaterMark: 50
     })
       .on('finish', () => {
         // Cleans up stream and dispatcher
         logger.info('Finished song')
-        var queue = guildClient.songQueue
         guildClient.playing = false
         guildClient.downloading = false
         dispatcher.destroy()
         stream.destroy()
-
-        // Goes to next song in queue
-        if (guildClient.connection) {
-          if (guildClient.loopState === 0) {
-            logger.info('Moving to next song in queue')
-            queue.shift()
-            queuedPlay(queue[0], guildClient)
-          } else if (guildClient.loopState === 1) {
-            logger.info('Looping song')
-            queuedPlay(queue[0], guildClient)
-          } else if (guildClient.loopState === 2) {
-            logger.info('Moving to next song in looped queue')
-            queue.push(queue.shift())
-            queuedPlay(queue[0], guildClient)
-          }
-        }
+        queuedPlay(guildClient.guildPlayer.next(), guildClient)
       })
   }).catch('error', error => {
     // Uh oh
@@ -103,7 +85,7 @@ async function queue (memberClient, video, query) {
     return
   }
   video.requester = memberClient.id
-  memberClient.guildClient.songQueue.push(video)
+  memberClient.guildClient.guildPlayer.queue(video)
 
   // If not playing anything, play this song
   if (!memberClient.guildClient.playing && !memberClient.guildClient.downloading) {
@@ -114,7 +96,7 @@ async function queue (memberClient, video, query) {
     logger.info('Queued %s', video.url)
     if (video.description) {
       video.channel = `${Emojis.queue} Queued! - ${video.channel}`
-      video.position = memberClient.guildClient.songQueue.length - 1
+      video.position = memberClient.guildClient.guildPlayer.songQueueLength - 1
       memberClient.guildClient.sendMsg(
         Embeds.createVideoEmbed(video, memberClient.member.displayName)
       )
@@ -212,7 +194,7 @@ function play (memberClient, args) {
   const logger = memberClient.logger
   logger.info('Received play command')
   // If not connected, notify and return
-  if (!memberClient.guildClient.connection) {
+  if (!memberClient.guildClient.connected) {
     logger.debug('Not connected to a voice channel')
     memberClient.guildClient.sendMsg(
       `${Emojis.error} ***I am not in a voice channel!***`

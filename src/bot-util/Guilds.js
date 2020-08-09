@@ -74,46 +74,7 @@ async function createClientsFromMember (member) {
   }
 }
 
-/**
- * Creates a processed audio stream listening to a GuildMember.
- *
- * Returned stream is formatted 16kHz, mono, 16-bit, little-endian, signed integers.
- *
- * @param {MemberClient} memberClient The MemberClient to listen to.
- * @returns {ReadableStream} Returns a stream to read audio data from.
- */
-function createAudioStream (memberClient) {
-  Common.logger.debug('Attempting to create audio stream for %s in %s', memberClient.member.displayName, memberClient.member.guild.name)
-  const audioStream = memberClient.guildClient.connection.receiver.createStream(memberClient.member, {
-    mode: 'pcm',
-    end: 'manual'
-  })
-  // Turns from stereo to mono
-  const transformStream = new Streams.TransformStream()
-  // Turns from 48k to 16k
-  const resample = new Resampler({
-    type: 3,
-    channels: 1,
-    fromRate: 48000,
-    fromDepth: 16,
-    toRate: 16000,
-    toDepth: 16
-  })
-
-  // Ensures proper stream cleanup
-  resample.on('close', () => {
-    transformStream.removeAllListeners()
-    audioStream.removeAllListeners()
-    resample.removeAllListeners()
-    transformStream.destroy()
-    audioStream.destroy()
-    resample.destroy()
-  })
-  return audioStream.pipe(transformStream).pipe(resample)
-}
-
 module.exports = {
   getClientsFromMember: getClientsFromMember,
-  createClientsFromMember: createClientsFromMember,
-  createAudioStream: createAudioStream
+  createClientsFromMember: createClientsFromMember
 }
