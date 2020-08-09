@@ -9,7 +9,6 @@ const Common = require('./Common')
  * Creates an embed for a video.
  *
  * @param {Object} vid The videoConstruct object representing the video.
- * @param {String} username The username of the video requester.
  * @returns {Discord.MessageEmbed} Returns a message embed detailing the video.
  */
 function createVideoEmbed (vid, username) {
@@ -17,10 +16,10 @@ function createVideoEmbed (vid, username) {
     .setColor('#0099ff')
     .setTitle(Entities.decode(vid.title))
     .setAuthor(Entities.decode(vid.channel))
-    .addField('Queue position', vid.position, true)
+    .addField('Queue position', vid.position === 0 ? 'Now!' : vid.position, true)
     .addField('Length', vid.duration, true)
     .setThumbnail(vid.thumbnail)
-    .setFooter(`Requested by ${username}`)
+    .setFooter(`Requested by ${vid.requester}`)
     .setURL(vid.url)
 }
 

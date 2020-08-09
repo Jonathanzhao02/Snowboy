@@ -1,5 +1,6 @@
 const Streams = require('./Streams')
 const Resampler = require('node-libsamplerate')
+const YtQueuer = require('./YtQueuer')
 
 /**
  * Handles all playback-related operations for a GuildClient.
@@ -20,22 +21,16 @@ function GuildPlayer (guildClient) {
   this.connection = null
 
   /**
-   * The array of videos queued for playback.
-   * @type {Array}
-   */
-  this.songQueue = []
-
-  /**
-   * The length of the current queue.
-   * @type {Number}
-   */
-  this.songQueueLength = 0
-
-  /**
    * The logger to use for logging.
    * @type {import('pino')}
    */
   this.logger = guildClient.logger
+
+  /**
+   * The array of videos queued for playback.
+   * @type {YtQueuer}
+   */
+  this.queuer = new YtQueuer(this)
 
   guildClient.on('connected', result => {
     this.logger.debug('Received GuildClient#connected event')
@@ -94,31 +89,18 @@ GuildPlayer.prototype.resume = function () {
  */
 GuildPlayer.prototype.clearQueue = function () {
   this.logger.debug('Clearing song queue')
-  this.songQueue = []
-  this.songQueueLength = 0
+  this.queuer = new YtQueuer(this)
 }
 
 /**
- * Adds an object to the songQueue.
+ * Adds an object to the queue.
  *
  * @param {Object} item The object to push.
  */
 GuildPlayer.prototype.queue = function (item) {
   this.logger.debug('Pushing item %o into queue', item)
-  this.songQueue.push(item)
-  this.songQueueLength += 1
-}
-
-/**
- * Shifts the songQueue by one item.
- *
- * @returns {Object} Returns the shifted item.
- */
-GuildPlayer.prototype.shift = function () {
-  // FIXME: remember to adjust the position of each object!
-  this.logger.debug('Shifting queue over by 1')
-  this.songQueueLength -= 1
-  return this.songQueue.shift()
+  item.position = this.queuer.length
+  this.queuer.push(item)
 }
 
 /**
@@ -132,20 +114,20 @@ GuildPlayer.prototype.next = function () {
   switch (this.guildClient.loopState) {
     case 0:
       this.logger.info('Moving to next song in queue')
-      this.shift()
+      this.queuer.shift()
       break
     case 1:
       this.logger.info('Looping song')
       break
     case 2:
       this.logger.info('Moving to next song in looped queue')
-      this.queue(this.shift())
+      this.queue(this.queuer.shift())
       break
     default:
       throw new Error(`Unhandled loopstate ${this.guildClient.loopState}!`)
   }
 
-  return this.songQueue[0]
+  return this.queuer[0]
 }
 
 /**
