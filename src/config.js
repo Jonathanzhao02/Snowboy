@@ -31,6 +31,9 @@ const SILENCE_QUERY_TIME = 2500
 // User IDs of users who are able to use debug commands, feel free to add your's
 const DEBUG_IDS = ['290237225596092416']
 
+// Maximum number of songs from a playlist, 0 = unlimited.
+const MAX_SONGS = 50
+
 // Impression value changes for each action
 const HAPPY_VALUE = +2
 const GREET_VALUE = +1
@@ -90,6 +93,7 @@ const EMOJIS = {
 module.exports = {
   CONFIDENCE_THRESHOLD: CONFIDENCE_THRESHOLD,
   DEBUG_IDS: DEBUG_IDS,
+  MAX_SONGS: MAX_SONGS,
   Timeouts: {
     GUILD_TIMEOUT: GUILD_TIMEOUT,
     ALONE_TIMEOUT: ALONE_TIMEOUT,

@@ -1,4 +1,4 @@
-const { Emojis } = require('../config')
+const { Emojis, MAX_SONGS } = require('../config')
 const Embeds = require('../bot-util/Embeds')
 const YtdlDiscord = require('ytdl-core-discord')
 const Ytpl = require('ytpl')
@@ -191,7 +191,7 @@ YtQueuer.prototype.urlSearch = async function (url) {
 }
 
 YtQueuer.prototype.playlistSearch = async function (url) {
-  const result = await Ytpl(url, { limit: 0 })
+  const result = await Ytpl(url, { limit: MAX_SONGS })
   const name = result.title
   const vids = result.items
   this.guildClient.sendMsg(
