@@ -24,6 +24,29 @@ function createVideoEmbed (vid, username) {
 }
 
 /**
+ * Creates an embed for a queue.
+ *
+ * @param {Array} queue The array of all videos.
+ * @returns {Discord.MessageEmbed} Returns a message embed detailing the queue.
+ */
+function createQueueEmbed (queue) {
+  const embed = new Discord.MessageEmbed()
+    .setColor('#0099ff')
+    .setTitle('__**Up Next!**__')
+  console.log(queue.length)
+  if (queue.length <= 1) {
+    embed.setDescription('***ABSOLUTELY NOTHING***')
+  } else {
+    queue.forEach((vid, index) => {
+      if (index === 0) return
+      embed.addField(`\`\`\`${index}. ${Entities.decode(vid.title)}\`\`\``, '\u200b')
+    })
+  }
+
+  return embed
+}
+
+/**
  * Creates an embed for a search result.
  *
  * @param {Object} result The JSON object representing the search result, returned by Custom Search API.
@@ -85,6 +108,7 @@ function createAboutEmbed () {
  */
 function createSettingsEmbed (guildSettings, userSettings) {
   const embed = new Discord.MessageEmbed()
+    .setColor('#fffafa')
     .setTitle(`${Emojis.settings} __**Settings**__`)
     .setDescription('Use `settings <optionname>` to see more information about each option.')
     .addField('Server Settings', 'These settings apply on the server level.')
@@ -104,20 +128,23 @@ function createSettingsEmbed (guildSettings, userSettings) {
 function createHelpEmbed (commands, command) {
   if (command) {
     return new Discord.MessageEmbed()
+      .setColor('#fffafa')
       .setTitle(`${Emojis.settings}__**${command}**__`)
-      .addField('Usage', `\`\`\`${commands.get(command).form}\`\`\``, true)
+      .addField('Usage', `\`\`\`${commands.get(command).form}\`\`\``)
       .addField('Description', commands.get(command).description)
   }
   const embed = new Discord.MessageEmbed()
+    .setColor('#fffafa')
     .setTitle(`${Emojis.settings}__**Commands**__`)
   commands.forEach((val, index) => {
-    if (val.form && val.description) embed.addField(`\`\`\`${index}\`\`\``, '\u200b', false)
+    if (val.form && val.description) embed.addField(`\`\`\`${index}\`\`\``, '\u200b', true)
   })
   return embed
 }
 
 module.exports = {
   createVideoEmbed: createVideoEmbed,
+  createQueueEmbed: createQueueEmbed,
   createSearchEmbed: createSearchEmbed,
   createImageEmbed: createImageEmbed,
   createAboutEmbed: createAboutEmbed,
