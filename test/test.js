@@ -1,6 +1,4 @@
 const { assert } = require('chai')
-const commands = require('../commands')
-const util = require('../bot-util')
 
 describe('Array', function () {
   describe('functions', function () {
