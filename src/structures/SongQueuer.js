@@ -8,7 +8,7 @@ const YtdlDiscord = require('ytdl-core-discord')
  *
  * @param {import('./GuildPlayer')} player The GuildPlayer the queue is for.
  */
-function YtHelper (player) {
+function SongQueuer (player) {
   /**
    * The backing GuildPlayer.
    * @type {import('./GuildPlayer')}
@@ -48,14 +48,14 @@ function YtHelper (player) {
   })
 }
 
-YtHelper.prototype = Object.create(Array.prototype)
+SongQueuer.prototype = Object.create(Array.prototype)
 
 /**
  * Plays a song from the queue.
  *
  * @param {Object} video The videoConstruct object representing the video.
  */
-YtHelper.prototype.play = function (video) {
+SongQueuer.prototype.play = function (video) {
   // If no video or no connection, clean up connection and begin expiration timeout
   if (!video || !this.connection) {
     this.logger.info('Reached end of current song queue')
@@ -96,7 +96,7 @@ YtHelper.prototype.play = function (video) {
  * @param {Object} video The videoConstruct object of the video.
  * @param {String} query The search term used for the video.
  */
-YtHelper.prototype.queue = async function (video, query) {
+SongQueuer.prototype.queue = async function (video, query) {
   if (!video) {
     this.logger.info('No video results found')
     this.guildClient.sendMsg(
@@ -114,7 +114,7 @@ YtHelper.prototype.queue = async function (video, query) {
   this.push(video)
 
   // If not playing anything, play this song
-  if (!this.guildClient.playing && !this.downloading) {
+  if (!this.playing && !this.downloading) {
     this.logger.info('Playing %s', video.url)
     this.play(video)
   // If playing something, just say it's queued
@@ -135,7 +135,7 @@ YtHelper.prototype.queue = async function (video, query) {
  * @param {String} query The search term to search for.
  * @param {String} requester The name of the requester.
  */
-YtHelper.prototype.search = function (query, requester) {
+SongQueuer.prototype.search = function (query, requester) {
   Youtube.search(query, requester, this.guildClient).then(vid => {
     if (!vid) {
       this.guildClient.sendMsg(`${Emojis.error} ***No results found for ${query}***`)
@@ -160,7 +160,7 @@ YtHelper.prototype.search = function (query, requester) {
  *
  * @returns {Object} Returns the next object in the queue.
  */
-YtHelper.prototype.next = function () {
+SongQueuer.prototype.next = function () {
   switch (this.guildClient.loopState) {
     case 0:
       this.logger.info('Moving to next song in queue')
@@ -177,13 +177,14 @@ YtHelper.prototype.next = function () {
       throw new Error(`Unhandled loopstate ${this.guildClient.loopState}!`)
   }
 
+  // First item in queue should always correspond to currently playing song.
   return this[0]
 }
 
 /**
  * Clears the backing array data.
  */
-YtHelper.prototype.clear = function () {
+SongQueuer.prototype.clear = function () {
   this.splice(0, this.length)
 }
 
@@ -192,12 +193,12 @@ YtHelper.prototype.clear = function () {
  *
  * @param {Object} item The item to push into the queue.
  */
-YtHelper.prototype.push = function (item) {
+SongQueuer.prototype.push = function (item) {
   item.position = this.length
   Array.prototype.push.call(this, item)
 }
 
-YtHelper.prototype.cleanUp = function () {
+SongQueuer.prototype.cleanUp = function () {
   this.clear()
   this.downloading = false
   this.playing = false
@@ -205,4 +206,4 @@ YtHelper.prototype.cleanUp = function () {
   if (this.connection) this.player.idle()
 }
 
-module.exports = YtHelper
+module.exports = SongQueuer

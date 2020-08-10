@@ -100,7 +100,7 @@ function GuildClient (guild) {
   })
 
   Object.defineProperty(this, 'playing', {
-    get: () => this.guildPlayer.ytHelper.playing
+    get: () => this.guildPlayer.songQueuer.playing
   })
 
   this.logger.debug(this)
