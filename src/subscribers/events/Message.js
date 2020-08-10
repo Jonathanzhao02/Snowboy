@@ -1,5 +1,5 @@
 const Common = require('../../bot-util/Common')
-const Guilds = require('../../bot-util/Guilds')
+const Clients = require('../../bot-util/Clients')
 const Commands = require('../../commands')
 const Emojis = require('../../config').Emojis
 const DEBUG_IDS = require('../../config').DEBUG_IDS
@@ -42,7 +42,7 @@ module.exports = function (client) {
   async function onMessage (msg) {
     // If it is an automated message of some sort, return
     if (msg.author.bot || msg.system) return
-    const { userClient, guildClient, memberClient } = await Guilds.createClientsFromMember(msg.member ? msg.member : msg.author)
+    const { userClient, guildClient, memberClient } = await Clients.createClientsFromMember(msg.member ? msg.member : msg.author)
 
     // If it is in Snowboy's DMs, log a new bug report and start the 24 hour cooldown.
     if (!guildClient) {

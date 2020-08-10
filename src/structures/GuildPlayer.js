@@ -40,9 +40,7 @@ function GuildPlayer (guildClient) {
 
   guildClient.on('disconnected', () => {
     this.logger.debug('Received GuildClient#disconnected event')
-    if (this.connection.dispatcher) {
-      this.end()
-    }
+    this.end()
     this.logger.trace('Disconnecting')
     this.connection.disconnect()
     this.connection = null
@@ -54,7 +52,6 @@ function GuildPlayer (guildClient) {
  */
 GuildPlayer.prototype.stop = function () {
   this.logger.debug('Stopping dispatcher')
-  this.ytHelper.clear()
   this.end()
   this.idle()
 }

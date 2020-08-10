@@ -1,6 +1,5 @@
 const Discord = require('discord.js')
 const Https = require('https')
-const Streams = require('../structures/Streams')
 
 // NOT EXPORTED
 
