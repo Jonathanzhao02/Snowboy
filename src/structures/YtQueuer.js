@@ -61,7 +61,6 @@ YtQueuer.prototype.play = function (video) {
   if (!video || !this.connection) {
     this.logger.info('Reached end of current song queue')
     this.cleanUp()
-    if (this.connection) this.player.idle()
     return
   }
 
@@ -179,7 +178,10 @@ YtQueuer.prototype.urlSearch = async function (url) {
   // Truncates description
   let description = topResult.shortDescription.length > 122 ? topResult.shortDescription.substr(0, 122) + '...' : topResult.shortDescription
   description = description.replace(/\n/gi, ' ')
-  const duration = Math.floor(topResult.lengthSeconds / 60) + ':' + topResult.lengthSeconds % 60
+  const secs = topResult.lengthSeconds % 60
+  const mins = Math.floor(topResult.lengthSeconds / 60) % 60
+  const hrs = Math.floor(topResult.lengthSeconds / 3600)
+  const duration = (hrs > 0 ? hrs + ':' : '') + (mins < 10 ? '0' + mins : mins) + ':' + (secs < 10 ? '0' + secs : secs)
   // Modifies properties to allow better context within functions
   const videoConstruct = {
     url: 'https://www.youtube.com/watch?v=' + topResult.videoId,
@@ -307,6 +309,7 @@ YtQueuer.prototype.cleanUp = function () {
   this.downloading = false
   this.playing = false
   this.guildClient.startTimeout()
+  if (this.connection) this.player.idle()
 }
 
 module.exports = YtQueuer
