@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.7.0 (PR #31)
+More refactoring, bug fixes, code cleanup, and new help command.
+* Resolves #3 with new `help.js`.
+* Moved all code to src folder.
+* Added new limit to playlist songs.
+* Created new GuildPlayer and YtQueuer objects.
+* Added new `Dotenv.js` for environment config.
+* Added new `Paths.js` to refactor all relative paths into absolute paths.
+* Refactored a lot of code around in attempt to simplify responsibility.
+* Cleaned up some redundant code.
+
 ## v0.6.1 (PR #30)
 Bug fixes and more refactoring.
 * Changed all classes to use prototypes for performance.
