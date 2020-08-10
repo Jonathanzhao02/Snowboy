@@ -29,14 +29,16 @@ function join (memberClient, args, msg) {
     return
   }
 
-  // Greet the user
-  memberClient.guildClient.sendMsg(
-    `${Emojis.greeting} **${Responses.randomGreeting()},** <@${memberClient.id}>!`
-  )
-
   // Attempt to join and handle the connection, or error
   logger.trace('Attempting to join')
-  memberClient.guildClient.joinVoiceChannel(msg.member.voice.channel)
+  memberClient.guildClient.joinVoiceChannel(msg.member.voice.channel).then(connection => {
+    if (connection) {
+      // Greet the user
+      memberClient.guildClient.sendMsg(
+        `${Emojis.greeting} **${Responses.randomGreeting()},** <@${memberClient.id}>!`
+      )
+    }
+  })
 }
 
 module.exports = {

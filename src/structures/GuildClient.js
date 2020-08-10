@@ -227,11 +227,13 @@ GuildClient.prototype.checkVoicePermissions = function () {
  *
  * @param {import('discord.js').VoiceChannel} voiceChannel The VoiceChannel to join.
  * @fires GuildClient#connected
+ * @returns {import('discord.js').VoiceConnection} Returns the created VoiceConnection, if any.
  */
-GuildClient.prototype.joinVoiceChannel = function (voiceChannel) {
+GuildClient.prototype.joinVoiceChannel = async function (voiceChannel) {
   this.voiceChannel = voiceChannel
   if (!this.checkVoicePermissions()) return
-  voiceChannel.join().then(connection => {
+  try {
+    const connection = await voiceChannel.join()
     this.logger.info('Successfully connected!')
     this.logger.trace('Emitting connected event')
     /**
@@ -244,11 +246,12 @@ GuildClient.prototype.joinVoiceChannel = function (voiceChannel) {
     this.emit('connected', {
       connection: connection
     })
-  }).catch(e => {
+    return connection
+  } catch (error) {
     this.sendMsg(
       `${Emojis.error} ***Could not connect! \\;(***`
-    ).then(() => { throw e })
-  })
+    ).then(() => { throw error })
+  }
 }
 
 /**

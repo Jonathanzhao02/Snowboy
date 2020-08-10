@@ -58,7 +58,7 @@ SongQueuer.prototype = Object.create(Array.prototype)
 SongQueuer.prototype.play = function (video) {
   // If no video or no connection, clean up connection and begin expiration timeout
   if (!video || !this.connection) {
-    this.logger.info('Reached end of current song queue')
+    this.logger.info('Reached end of current song queue/disconnected')
     this.cleanUp()
     return
   }
