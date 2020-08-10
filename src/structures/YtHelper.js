@@ -1,8 +1,7 @@
-const { Emojis, MAX_SONGS } = require('../config')
+const { Emojis } = require('../config')
 const Embeds = require('../bot-util/Embeds')
+const Youtube = require('../bot-util/Youtube')
 const YtdlDiscord = require('ytdl-core-discord')
-const Ytpl = require('ytpl')
-const Ytsearch = require('yt-search')
 
 /**
  * Handles all youtube-related and queue-related operations.
@@ -94,11 +93,10 @@ YtHelper.prototype.play = function (video) {
 /**
  * Queues a song up for playback.
  *
- * @param {String} requester The name of the requester.
  * @param {Object} video The videoConstruct object of the video.
  * @param {String} query The search term used for the video.
  */
-YtHelper.prototype.queue = async function (requester, video, query) {
+YtHelper.prototype.queue = async function (video, query) {
   if (!video) {
     this.logger.info('No video results found')
     this.guildClient.sendMsg(
@@ -106,7 +104,13 @@ YtHelper.prototype.queue = async function (requester, video, query) {
     )
     return
   }
-  video.requester = requester
+  // Ensure URL is accessible
+  try {
+    await YtdlDiscord.getBasicInfo(video.url)
+  } catch (error) {
+    return
+  }
+
   this.push(video)
 
   // If not playing anything, play this song
@@ -126,138 +130,27 @@ YtHelper.prototype.queue = async function (requester, video, query) {
 }
 
 /**
- * Searches YouTube for videos from a query.
- *
- * @param {String} query The search query.
- * @returns {Object} A videoConstruct if a result is found, else null.
- */
-YtHelper.prototype.querySearch = async function (query) {
-  this.logger.info('Searching query %s', query)
-  // Attempt to get result from Youtube
-  const result = await Ytsearch(query)
-
-  if (!result.videos || !result.videos[0]) {
-    this.logger.debug('No results found for %s', query)
-    return
-  }
-
-  this.logger.debug('Successfully received results for query')
-  this.logger.debug(result)
-  const topResult = result.videos[0]
-  // Modifies properties to allow better context within functions
-  const videoConstruct = {
-    url: topResult.url,
-    title: topResult.title,
-    channel: topResult.author.name,
-    description: topResult.description,
-    thumbnail: topResult.thumbnail,
-    duration: topResult.timestamp
-  }
-  return videoConstruct
-}
-
-/**
- * Searches YouTube for videos from a URL.
- *
- * @param {String} url The URL.
- * @returns {Object} A videoConstruct if a result is found, else null.
- */
-YtHelper.prototype.urlSearch = async function (url) {
-  this.logger.info('Searching URL %s', url)
-  // Attempt to get info from url
-  const result = await YtdlDiscord.getBasicInfo(url)
-
-  if (!result || result.player_response.videoDetails.isPrivate) {
-    this.logger.debug('No info found for %s', url)
-    return
-  }
-
-  this.logger.debug('Successfully received results from URL')
-  this.logger.debug(result)
-  const topResult = result.player_response.videoDetails
-  // Truncates description
-  let description = topResult.shortDescription.length > 122 ? topResult.shortDescription.substr(0, 122) + '...' : topResult.shortDescription
-  description = description.replace(/\n/gi, ' ')
-  const secs = topResult.lengthSeconds % 60
-  const mins = Math.floor(topResult.lengthSeconds / 60) % 60
-  const hrs = Math.floor(topResult.lengthSeconds / 3600)
-  const duration = (hrs > 0 ? hrs + ':' : '') + (mins < 10 ? '0' + mins : mins) + ':' + (secs < 10 ? '0' + secs : secs)
-  // Modifies properties to allow better context within functions
-  const videoConstruct = {
-    url: 'https://www.youtube.com/watch?v=' + topResult.videoId,
-    title: topResult.title,
-    channel: topResult.author,
-    description: description,
-    thumbnail: topResult.thumbnail.thumbnails[0].url,
-    duration: duration
-  }
-  return videoConstruct
-}
-
-/**
- * Searches a YouTube playlist and queues songs from it.
- *
- * @param {String} url The playlist URL.
- * @returns {Array} Returns the Array of created video constructs.
- */
-YtHelper.prototype.playlistSearch = async function (url) {
-  const result = await Ytpl(url, { limit: MAX_SONGS })
-  const name = result.title
-  const vids = result.items
-  this.guildClient.sendMsg(
-    `${Emojis.checkmark} **Adding \`${vids.length}\` videos from \`${name}\`**`
-  )
-
-  vids.forEach((vid, index) => {
-    vids[index] = {
-      url: vid.url_simple,
-      title: vid.title,
-      channel: vid.author.name,
-      thumbnail: vid.thumbnail,
-      duration: vid.duration
-    }
-  })
-
-  return vids
-}
-
-/**
  * Searches and queues up a query.
  *
  * @param {String} query The search term to search for.
  * @param {String} requester The name of the requester.
  */
 YtHelper.prototype.search = function (query, requester) {
-  // Add each video from Youtube playlist
-  if (Ytpl.validateURL(query)) {
-    this.guildClient.sendMsg(
-      `${Emojis.search} ***Searching for*** \`${query}\``
-    )
-    this.playlistSearch(query).then(vids => {
-      vids.forEach(video => {
-        this.logger.info('Adding %s to queue as playlist item', video.url)
-        this.queue(requester, video, query)
+  Youtube.search(query, requester, this.guildClient).then(vid => {
+    if (!vid) {
+      this.guildClient.sendMsg(`${Emojis.error} ***No results found for ${query}***`)
+      return
+    }
+    if (vid.playlist) {
+      vid.forEach(val => {
+        this.logger.debug('Adding %s to queue', val.url)
+        this.queue(val, query)
       })
-    })
-  // Directly get info from URL
-  } else if (YtdlDiscord.validateURL(query)) {
-    this.guildClient.sendMsg(
-      `${Emojis.search} ***Searching for*** \`${query}\``
-    )
-    this.urlSearch(query).then(video => {
-      this.logger.info('Adding %s to queue', video.url)
-      this.queue(requester, video, query)
-    })
-  // Search query from Youtube
-  } else {
-    this.guildClient.sendMsg(
-      `${Emojis.search} ***Searching for*** \`${query}\``
-    )
-    this.querySearch(query).then(video => {
-      this.logger.info('Adding %s to queue', video.url)
-      this.queue(requester, video, query)
-    })
-  }
+    } else {
+      this.logger.debug('Adding %s to queue', vid.url)
+      this.queue(vid, query)
+    }
+  })
 }
 
 /**
