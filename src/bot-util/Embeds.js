@@ -161,6 +161,12 @@ function createStatsEmbed () {
       `${Emojis.clock} **I've been up for \`${hrs}\` hrs, \`${mins}\` min, \`${secs}\` sec!**`)
 }
 
+/**
+ * Creates an embed detailing the bot's invite link.
+ *
+ * @param {String} link The invite link.
+ * @returns {Discord.MessageEmbed} Returns a message embed detailing the bot's invite link.
+ */
 function createInviteEmbed (link) {
   return new Discord.MessageEmbed()
     .setColor('#32cd32')
