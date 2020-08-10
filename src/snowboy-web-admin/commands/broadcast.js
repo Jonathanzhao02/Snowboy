@@ -1,4 +1,5 @@
 const Common = require('../../bot-util/Common')
+const Discord = require('discord.js')
 
 /**
  * Broadcasts a message across all current Guilds.
@@ -13,11 +14,16 @@ function broadcast (args) {
     if (guild.available) {
       const chan = guild.channels.resolve(guild.systemChannelID)
       if (chan) {
-        try {
-          chan.send('**SYSTEM BROADCAST: **' + msg, { split: true })
-        } catch (error) {
-          Common.logger.debug('Could not send broadcast to %s', guild.name)
-        }
+        chan.send('**SYSTEM BROADCAST: **' + msg, { split: true }).catch(() => Common.logger.debug('Could not send broadcast to %s', guild.name))
+      } else {
+        let textChannel
+        guild.channels.cache.forEach(val => {
+          if (!textChannel && val instanceof Discord.TextChannel) {
+            textChannel = val
+            console.log(val.name)
+          }
+        })
+        if (textChannel) textChannel.send('**SYSTEM BROADCAST: **' + msg, { split: true }).catch(() => Common.logger.debug('Could not send broadcast to %s', guild.name))
       }
     }
   })
