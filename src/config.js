@@ -58,6 +58,7 @@ const MIN_IMPRESSION = -100
 const EMOJIS = {
   checkmark: '✅',
   error: '❌',
+  invite: '✉️',
   settings: '⚙️',
   stats: '📊',
   ping: '📶',

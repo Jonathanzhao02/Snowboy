@@ -32,7 +32,7 @@ function createVideoEmbed (vid, username) {
 function createQueueEmbed (queue) {
   const embed = new Discord.MessageEmbed()
     .setColor('#0099ff')
-    .setTitle('__**Up Next!**__')
+    .setTitle(`${Emojis.playing} **Up Next!**`)
   if (queue.length <= 1) {
     embed.setDescription('***ABSOLUTELY NOTHING***')
   } else {
@@ -128,19 +128,25 @@ function createHelpEmbed (commands, command) {
   if (command) {
     return new Discord.MessageEmbed()
       .setColor('#fffafa')
-      .setTitle(`${Emojis.settings}__**${command}**__`)
+      .setTitle(`**${command}**`)
       .addField('Usage', `\`${commands.get(command).form}\``)
       .addField('Description', commands.get(command).description)
   }
   const embed = new Discord.MessageEmbed()
     .setColor('#fffafa')
-    .setTitle(`${Emojis.settings}__**Commands**__`)
+    .setTitle(`${Emojis.settings} **Commands**`)
+    .setDescription('Use `help <command name>` to get more information about each command!')
   commands.forEach((val, index) => {
     if (val.form && val.description) embed.addField(`\`${index}\``, '\u200b', true)
   })
   return embed
 }
 
+/**
+ * Creates an embed detailing the bot's stats.
+ *
+ * @returns {Discord.MessageEmbed} Returns a message embed detailing the bot's stats.
+ */
 function createStatsEmbed () {
   const servers = Common.botClient.guilds.cache.size
 
@@ -155,6 +161,14 @@ function createStatsEmbed () {
       `${Emojis.clock} **I've been up for \`${hrs}\` hrs, \`${mins}\` min, \`${secs}\` sec!**`)
 }
 
+function createInviteEmbed (link) {
+  return new Discord.MessageEmbed()
+    .setColor('#32cd32')
+    .setTitle(`${Emojis.invite} Invite me here!`)
+    .setAuthor('Snowboy', Common.botClient.user.displayAvatarURL({ size: 512, format: 'png' }), link)
+    .setURL(link)
+}
+
 module.exports = {
   createVideoEmbed: createVideoEmbed,
   createQueueEmbed: createQueueEmbed,
@@ -163,5 +177,6 @@ module.exports = {
   createAboutEmbed: createAboutEmbed,
   createSettingsEmbed: createSettingsEmbed,
   createHelpEmbed: createHelpEmbed,
-  createStatsEmbed: createStatsEmbed
+  createStatsEmbed: createStatsEmbed,
+  createInviteEmbed: createInviteEmbed
 }
