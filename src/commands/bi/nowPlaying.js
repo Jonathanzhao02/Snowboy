@@ -11,7 +11,7 @@ const { Emojis } = require('../../config')
 function nowPlaying (memberClient, args, msg) {
   const logger = memberClient.logger
   logger.info('Received now playing command')
-  const video = memberClient.guildClient.guildPlayer.queuer[0]
+  const video = memberClient.guildClient.guildPlayer.ytHelper[0]
   if (video && memberClient.guildClient.playing) {
     memberClient.guildClient.sendMsg(Embeds.createVideoEmbed(video))
   } else {

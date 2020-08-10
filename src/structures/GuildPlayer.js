@@ -1,6 +1,6 @@
 const Streams = require('./Streams')
 const Resampler = require('node-libsamplerate')
-const YtQueuer = require('./YtQueuer')
+const YtHelper = require('./YtHelper')
 
 /**
  * Handles all playback-related operations for a GuildClient.
@@ -28,9 +28,9 @@ function GuildPlayer (guildClient) {
 
   /**
    * The array of videos queued for playback.
-   * @type {YtQueuer}
+   * @type {YtHelper}
    */
-  this.queuer = new YtQueuer(this)
+  this.ytHelper = new YtHelper(this)
 
   guildClient.on('connected', result => {
     this.logger.debug('Received GuildClient#connected event')
@@ -54,7 +54,7 @@ function GuildPlayer (guildClient) {
  */
 GuildPlayer.prototype.stop = function () {
   this.logger.debug('Stopping dispatcher')
-  this.queuer.clear()
+  this.ytHelper.clear()
   this.end()
   this.idle()
 }

@@ -29,8 +29,7 @@ function play (memberClient, args) {
 
   const query = args.join(' ')
   logger.debug('Searching up %s', query)
-
-  memberClient.guildClient.guildPlayer.queuer.search(query, memberClient.member.displayName)
+  memberClient.guildClient.guildPlayer.ytHelper.search(query, memberClient.member.displayName)
 }
 
 module.exports = {

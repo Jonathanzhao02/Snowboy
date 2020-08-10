@@ -9,7 +9,7 @@ const Ytsearch = require('yt-search')
  *
  * @param {import('./GuildPlayer')} player The GuildPlayer the queue is for.
  */
-function YtQueuer (player) {
+function YtHelper (player) {
   /**
    * The backing GuildPlayer.
    * @type {import('./GuildPlayer')}
@@ -49,14 +49,14 @@ function YtQueuer (player) {
   })
 }
 
-YtQueuer.prototype = Object.create(Array.prototype)
+YtHelper.prototype = Object.create(Array.prototype)
 
 /**
  * Plays a song from the queue.
  *
  * @param {Object} video The videoConstruct object representing the video.
  */
-YtQueuer.prototype.play = function (video) {
+YtHelper.prototype.play = function (video) {
   // If no video or no connection, clean up connection and begin expiration timeout
   if (!video || !this.connection) {
     this.logger.info('Reached end of current song queue')
@@ -98,7 +98,7 @@ YtQueuer.prototype.play = function (video) {
  * @param {Object} video The videoConstruct object of the video.
  * @param {String} query The search term used for the video.
  */
-YtQueuer.prototype.queue = async function (requester, video, query) {
+YtHelper.prototype.queue = async function (requester, video, query) {
   if (!video) {
     this.logger.info('No video results found')
     this.guildClient.sendMsg(
@@ -131,7 +131,7 @@ YtQueuer.prototype.queue = async function (requester, video, query) {
  * @param {String} query The search query.
  * @returns {Object} A videoConstruct if a result is found, else null.
  */
-YtQueuer.prototype.querySearch = async function (query) {
+YtHelper.prototype.querySearch = async function (query) {
   this.logger.info('Searching query %s', query)
   // Attempt to get result from Youtube
   const result = await Ytsearch(query)
@@ -162,7 +162,7 @@ YtQueuer.prototype.querySearch = async function (query) {
  * @param {String} url The URL.
  * @returns {Object} A videoConstruct if a result is found, else null.
  */
-YtQueuer.prototype.urlSearch = async function (url) {
+YtHelper.prototype.urlSearch = async function (url) {
   this.logger.info('Searching URL %s', url)
   // Attempt to get info from url
   const result = await YtdlDiscord.getBasicInfo(url)
@@ -200,7 +200,7 @@ YtQueuer.prototype.urlSearch = async function (url) {
  * @param {String} url The playlist URL.
  * @returns {Array} Returns the Array of created video constructs.
  */
-YtQueuer.prototype.playlistSearch = async function (url) {
+YtHelper.prototype.playlistSearch = async function (url) {
   const result = await Ytpl(url, { limit: MAX_SONGS })
   const name = result.title
   const vids = result.items
@@ -227,7 +227,7 @@ YtQueuer.prototype.playlistSearch = async function (url) {
  * @param {String} query The search term to search for.
  * @param {String} requester The name of the requester.
  */
-YtQueuer.prototype.search = function (query, requester) {
+YtHelper.prototype.search = function (query, requester) {
   // Add each video from Youtube playlist
   if (Ytpl.validateURL(query)) {
     this.guildClient.sendMsg(
@@ -267,7 +267,7 @@ YtQueuer.prototype.search = function (query, requester) {
  *
  * @returns {Object} Returns the next object in the queue.
  */
-YtQueuer.prototype.next = function () {
+YtHelper.prototype.next = function () {
   switch (this.guildClient.loopState) {
     case 0:
       this.logger.info('Moving to next song in queue')
@@ -290,7 +290,7 @@ YtQueuer.prototype.next = function () {
 /**
  * Clears the backing array data.
  */
-YtQueuer.prototype.clear = function () {
+YtHelper.prototype.clear = function () {
   this.splice(0, this.length)
 }
 
@@ -299,12 +299,12 @@ YtQueuer.prototype.clear = function () {
  *
  * @param {Object} item The item to push into the queue.
  */
-YtQueuer.prototype.push = function (item) {
+YtHelper.prototype.push = function (item) {
   item.position = this.length
   Array.prototype.push.call(this, item)
 }
 
-YtQueuer.prototype.cleanUp = function () {
+YtHelper.prototype.cleanUp = function () {
   this.clear()
   this.downloading = false
   this.playing = false
@@ -312,4 +312,4 @@ YtQueuer.prototype.cleanUp = function () {
   if (this.connection) this.player.idle()
 }
 
-module.exports = YtQueuer
+module.exports = YtHelper

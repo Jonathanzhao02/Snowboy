@@ -12,7 +12,7 @@ function queue (memberClient, args, msg) {
   const logger = memberClient.logger
   logger.info('Received queue command')
   if (memberClient.guildClient.playing) {
-    memberClient.guildClient.sendMsg(Embeds.createQueueEmbed(memberClient.guildClient.guildPlayer.queuer))
+    memberClient.guildClient.sendMsg(Embeds.createQueueEmbed(memberClient.guildClient.guildPlayer.ytHelper))
   } else {
     memberClient.guildClient.sendMsg(`${Emojis.error} ***Nothing currently playing!***`)
   }

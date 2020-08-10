@@ -33,7 +33,6 @@ function createQueueEmbed (queue) {
   const embed = new Discord.MessageEmbed()
     .setColor('#0099ff')
     .setTitle('__**Up Next!**__')
-  console.log(queue.length)
   if (queue.length <= 1) {
     embed.setDescription('***ABSOLUTELY NOTHING***')
   } else {
