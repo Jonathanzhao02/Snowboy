@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.7.1 (PR #32)
+New commands and formatting changes!
+* Resolves #8 
+  * Added `queue.js` command.
+  * Added `nowPlaying.js` command.
+* Added colors to a few embeds.
+* Fixed timestamp formatting for `YtQueuer.js`.
+
 ## v0.7.0 (PR #31)
 More refactoring, bug fixes, code cleanup, and new help command.
 * Resolves #3 with new `help.js`.
