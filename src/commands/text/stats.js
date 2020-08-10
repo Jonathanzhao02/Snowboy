@@ -1,5 +1,5 @@
 const Common = require('../../bot-util/Common')
-const { Emojis } = require('../../config')
+const Embeds = require('../../bot-util/Embeds')
 
 /**
  * Prints the stats of Snowboy.
@@ -12,7 +12,7 @@ function stats (memberClient, args, msg) {
   const logger = memberClient.logger
   logger.info('Received stats command')
   memberClient.guildClient.sendMsg(
-    `${Emojis.stats} **I am currently in \`${Common.botClient.guilds.cache.size}\` servers!**`
+    Embeds.createStatsEmbed()
   )
 }
 

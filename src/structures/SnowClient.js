@@ -115,9 +115,9 @@ SnowClient.prototype.hotword = function (index, hotword, buffer) {
   })
 
   // Every 50ms, check if the query time has been exceeded, and finish if it has
-  const intervalID = setInterval(() => {
+  const intervalID = Common.botClient.setInterval(() => {
     if (Date.now() - this.timeSinceLastChunk > Timeouts.SILENCE_QUERY_TIME || Date.now() - initialTime > Timeouts.MAX_QUERY_TIME) {
-      clearInterval(intervalID)
+      Common.botClient.clearInterval(intervalID)
       flag.emit('finish')
       this.stream.removeAllListeners()
       this.stream.pipe(this.detector)

@@ -38,7 +38,7 @@ function createQueueEmbed (queue) {
   } else {
     queue.forEach((vid, index) => {
       if (index === 0) return
-      embed.addField(`\`\`\`${index}. ${Entities.decode(vid.title)}\`\`\``, '\u200b')
+      embed.addField(`\`${index}. ${Entities.decode(vid.title)}\``, '\u200b')
     })
   }
 
@@ -129,16 +129,30 @@ function createHelpEmbed (commands, command) {
     return new Discord.MessageEmbed()
       .setColor('#fffafa')
       .setTitle(`${Emojis.settings}__**${command}**__`)
-      .addField('Usage', `\`\`\`${commands.get(command).form}\`\`\``)
+      .addField('Usage', `\`${commands.get(command).form}\``)
       .addField('Description', commands.get(command).description)
   }
   const embed = new Discord.MessageEmbed()
     .setColor('#fffafa')
     .setTitle(`${Emojis.settings}__**Commands**__`)
   commands.forEach((val, index) => {
-    if (val.form && val.description) embed.addField(`\`\`\`${index}\`\`\``, '\u200b', true)
+    if (val.form && val.description) embed.addField(`\`${index}\``, '\u200b', true)
   })
   return embed
+}
+
+function createStatsEmbed () {
+  const servers = Common.botClient.guilds.cache.size
+
+  const secs = Math.floor(Common.botClient.uptime / 1000) % 60
+  const mins = Math.floor(Common.botClient.uptime / 60000) % 60
+  const hrs = Math.floor(Common.botClient.uptime / 3600000)
+
+  return new Discord.MessageEmbed()
+    .setColor('#fffafa')
+    .setDescription(
+      `${Emojis.stats} **I am currently in \`${servers}\` servers!**` + '\n' +
+      `${Emojis.clock} **I've been up for \`${hrs}\` hrs, \`${mins}\` min, \`${secs}\` sec!**`)
 }
 
 module.exports = {
@@ -148,5 +162,6 @@ module.exports = {
   createImageEmbed: createImageEmbed,
   createAboutEmbed: createAboutEmbed,
   createSettingsEmbed: createSettingsEmbed,
-  createHelpEmbed: createHelpEmbed
+  createHelpEmbed: createHelpEmbed,
+  createStatsEmbed: createStatsEmbed
 }

@@ -146,8 +146,8 @@ GuildClient.prototype.sendMsg = async function (msg, opts) {
 GuildClient.prototype.startTimeout = function () {
   this.logger.info('Starting expiration timer')
   this.lastCalled = Date.now()
-  if (this.timeoutId) clearTimeout(this.timeoutId)
-  this.timeoutId = setTimeout(() => { this.cleanupGuildClient() }, Timeouts.TIMEOUT + 500)
+  if (this.timeoutId) Common.botClient.clearTimeout(this.timeoutId)
+  this.timeoutId = Common.botClient.setTimeout(() => { this.cleanupGuildClient() }, Timeouts.TIMEOUT + 500)
 }
 
 /**

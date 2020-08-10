@@ -1,4 +1,5 @@
 const { Timeouts, Emojis } = require('../../config')
+const Common = require('../../bot-util/Common')
 
 module.exports = function (client) {
   client.on('voiceStateUpdate', (oldPresence, newPresence) => {
@@ -27,7 +28,7 @@ module.exports = function (client) {
       // If the bot has been left alone in a channel, wait a few seconds before leaving
       if (oldPresence.channel.members.size === 1 && userId !== client.user.id) {
         guildClient.logger.info('Started alone timeout timer')
-        setTimeout(() => {
+        Common.botClient.setTimeout(() => {
           // Check again that the channel is empty before leaving
           if (oldPresence.channel.members.size === 1) {
             guildClient.logger.info('Leaving channel, only member remaining')

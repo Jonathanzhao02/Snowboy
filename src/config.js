@@ -61,6 +61,7 @@ const EMOJIS = {
   settings: '⚙️',
   stats: '📊',
   ping: '📶',
+  clock: '🕒',
   playing: '▶️',
   pause: '⏸️',
   loop: '🔁',
