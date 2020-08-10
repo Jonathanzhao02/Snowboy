@@ -39,5 +39,7 @@ function search (memberClient, args) {
 
 module.exports = {
   name: 'search',
+  form: 'search <search terms>',
+  description: 'Searches up and tells you the first result of a query.',
   execute: search
 }

@@ -28,5 +28,7 @@ function leave (memberClient, args) {
 
 module.exports = {
   name: 'leave',
+  form: 'leave',
+  description: 'Tells Snowboy to leave the current voice channel.',
   execute: leave
 }

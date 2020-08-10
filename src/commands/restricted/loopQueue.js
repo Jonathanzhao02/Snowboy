@@ -31,5 +31,7 @@ function loopQueue (memberClient, args) {
 
 module.exports = {
   name: 'loopqueue',
+  form: 'loopqueue',
+  description: 'Tells Snowboy to loop the current queue.',
   execute: loopQueue
 }

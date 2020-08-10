@@ -113,5 +113,7 @@ function purge (memberClient, args, msg, total, snowflake) {
 
 module.exports = {
   name: 'purge',
+  form: 'purge <*all*, *true*, *me*, a mentioned user, or no arguments>',
+  description: 'Purges either every message within two weeks (all), every command and Snowboy response (true), every message sent by a user (me/mention), or every Snowboy response (none).',
   execute: purge
 }

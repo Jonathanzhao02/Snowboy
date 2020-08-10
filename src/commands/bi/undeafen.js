@@ -19,5 +19,7 @@ function undeafen (memberClient, args) {
 module.exports = {
   name: 'undeafen',
   aliases: ['unmute'],
+  form: 'undeafen',
+  description: 'Server undeafens the requester.',
   execute: undeafen
 }

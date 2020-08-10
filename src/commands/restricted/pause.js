@@ -26,5 +26,7 @@ function pause (memberClient, args) {
 
 module.exports = {
   name: 'pause',
+  form: 'pause',
+  description: 'Tells Snowboy to pause the current song.',
   execute: pause
 }

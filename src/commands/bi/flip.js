@@ -18,5 +18,7 @@ function flip (memberClient, args) {
 
 module.exports = {
   name: 'flip',
+  form: 'flip',
+  description: 'Flips a coin and tells you the result.',
   execute: flip
 }

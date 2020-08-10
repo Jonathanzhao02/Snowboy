@@ -26,5 +26,7 @@ function resume (memberClient, args) {
 
 module.exports = {
   name: 'resume',
+  form: 'resume',
+  description: 'Tells Snowboy to resume the current song.',
   execute: resume
 }

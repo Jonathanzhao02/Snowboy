@@ -94,10 +94,33 @@ function createSettingsEmbed (guildSettings, userSettings) {
   return embed
 }
 
+/**
+ * Creates an embed about either every command, or only a specific command.
+ *
+ * @param {Map<String, Object>} commands The map of all commands.
+ * @param {String?} command The name of the command to display information about.
+ * @returns {Discord.MessageEmbed} Returns a message embed detailing commands.
+ */
+function createHelpEmbed (commands, command) {
+  if (command) {
+    return new Discord.MessageEmbed()
+      .setTitle(`${Emojis.settings}__**${command}**__`)
+      .addField('Usage', `\`\`\`${commands.get(command).form}\`\`\``, true)
+      .addField('Description', commands.get(command).description)
+  }
+  const embed = new Discord.MessageEmbed()
+    .setTitle(`${Emojis.settings}__**Commands**__`)
+  commands.forEach((val, index) => {
+    if (val.form && val.description) embed.addField(`\`\`\`${index}\`\`\``, '\u200b', false)
+  })
+  return embed
+}
+
 module.exports = {
   createVideoEmbed: createVideoEmbed,
   createSearchEmbed: createSearchEmbed,
   createImageEmbed: createImageEmbed,
   createAboutEmbed: createAboutEmbed,
-  createSettingsEmbed: createSettingsEmbed
+  createSettingsEmbed: createSettingsEmbed,
+  createHelpEmbed: createHelpEmbed
 }

@@ -18,5 +18,7 @@ function stats (memberClient, args, msg) {
 
 module.exports = {
   name: 'stats',
+  form: 'stats',
+  description: 'Tells you about Snowboy\'s stats.',
   execute: stats
 }

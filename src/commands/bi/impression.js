@@ -12,5 +12,7 @@ function impression (memberClient, args) {
 
 module.exports = {
   name: 'impression',
+  form: 'impression',
+  description: 'Tells you Snowboy\'s impression of you.',
   execute: impression
 }

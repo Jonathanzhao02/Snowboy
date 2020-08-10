@@ -19,5 +19,7 @@ function deafen (memberClient, args) {
 module.exports = {
   name: 'deafen',
   aliases: ['mute'],
+  form: 'deafen',
+  description: 'Server deafens the requester.',
   execute: deafen
 }

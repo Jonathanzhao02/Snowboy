@@ -26,5 +26,7 @@ function skip (memberClient, args) {
 
 module.exports = {
   name: 'skip',
+  form: 'skip',
+  description: 'Tells Snowboy to skip the current song.',
   execute: skip
 }

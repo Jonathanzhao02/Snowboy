@@ -18,5 +18,7 @@ function ping (memberClient, args, msg) {
 
 module.exports = {
   name: 'ping',
+  form: 'ping',
+  description: 'Tells you Snowboy\'s ping to the server.',
   execute: ping
 }

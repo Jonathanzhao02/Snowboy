@@ -26,5 +26,7 @@ function stop (memberClient, args) {
 
 module.exports = {
   name: 'stop',
+  form: 'stop',
+  description: 'Tells Snowboy to stop the current song and clear the queue.',
   execute: stop
 }

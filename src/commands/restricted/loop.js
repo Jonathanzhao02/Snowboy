@@ -32,5 +32,7 @@ function loop (memberClient, args) {
 
 module.exports = {
   name: 'loop',
+  form: 'loop',
+  description: 'Tells Snowboy to loop the current song.',
   execute: loop
 }

@@ -41,5 +41,7 @@ function join (memberClient, args, msg) {
 
 module.exports = {
   name: 'join',
+  form: 'join',
+  description: 'Tells Snowboy to join the requester\'s voice channel.',
   execute: join
 }

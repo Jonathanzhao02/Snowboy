@@ -17,5 +17,7 @@ function about (memberClient, args, msg) {
 
 module.exports = {
   name: 'about',
+  form: 'about',
+  description: 'Asks Snowboy to send an embed about himself.',
   execute: about
 }

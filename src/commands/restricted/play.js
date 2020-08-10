@@ -35,5 +35,7 @@ function play (memberClient, args) {
 
 module.exports = {
   name: 'play',
+  form: 'play <URL or search terms>',
+  description: 'Searches up a playlist or video and adds it to the queue.',
   execute: play
 }
