@@ -1,11 +1,12 @@
 const { spawn } = require('child_process')
 const commands = require('./CommandMap')
+let dashboard
 
 /**
  * Starts the ipc server for dashboard communication.
  */
 function start () {
-  const dashboard = spawn('node', [process.env.DASHBOARD_PATH, process.env.LOG_PATH])
+  dashboard = spawn('node', [process.env.DASHBOARD_PATH, process.env.LOG_PATH])
   dashboard.stdout.on('data', data => {
     console.log(data.toString())
     const message = data.toString()
@@ -20,6 +21,13 @@ function start () {
   })
 }
 
+function stop () {
+  dashboard.kill()
+}
+
+process.on('exit', stop)
+
 module.exports = {
-  start: start
+  start: start,
+  stop: stop
 }

@@ -10,7 +10,6 @@ module.exports = function (Common) {
     heapdump.writeSnapshot(Common.defaultLogdir + `/${new Date().toISOString()}_ERR.heapdump`, (err, filename) => {
       Common.logger.error('Uncaught exception')
       Common.logger.error(error)
-      Common.botClient.destroy()
       if (err) process.exit(1)
       Common.logger.debug('Heapdump written to %s', filename)
       process.exit(1)
@@ -26,7 +25,6 @@ module.exports = function (Common) {
       Common.logger.error('Unhandled promise rejection')
       Common.logger.error(promise)
       Common.logger.error(error)
-      Common.botClient.destroy()
       if (err) process.exit(1)
       Common.logger.debug('Heapdump written to %s', filename)
       process.exit(1)
@@ -37,7 +35,6 @@ module.exports = function (Common) {
   process.on('SIGTERM', signal => {
     console.log('Received SIGTERM signal')
     Common.logger.info(`Process ${process.pid} received a SIGTERM signal`)
-    Common.botClient.destroy()
     process.exit(0)
   })
 
@@ -59,8 +56,12 @@ module.exports = function (Common) {
     })
 
     promise.then(() => {
-      Common.botClient.destroy()
       process.exit(0)
     })
+  })
+
+  // On process exit
+  process.on('exit', () => {
+    Common.botClient.destroy()
   })
 }
