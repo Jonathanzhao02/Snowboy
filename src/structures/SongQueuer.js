@@ -198,6 +198,9 @@ SongQueuer.prototype.push = function (item) {
   Array.prototype.push.call(this, item)
 }
 
+/**
+ * Clears the backing array data and stops playing.
+ */
 SongQueuer.prototype.cleanUp = function () {
   this.clear()
   this.downloading = false
