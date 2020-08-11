@@ -18,12 +18,6 @@ function SnowClient (memberClient, sensitivity) {
   this.memberClient = memberClient
 
   /**
-   * The EventEmitter for any events.
-   * @type {EventEmitter}
-   */
-  this.events = new EventEmitter()
-
-  /**
    * The Readable stream to read audio data from.
    * @type {Readable}
    */
@@ -39,7 +33,7 @@ function SnowClient (memberClient, sensitivity) {
    * The time since the last chunk of audio was read from the stream.
    * @type {Number}
    */
-  this.timeSinceLastChunk = 0
+  this.lastChunkTime = 0
 
   const models = new Models()
   models.add({
@@ -62,17 +56,17 @@ function SnowClient (memberClient, sensitivity) {
   this.detector.on('hotword', (index, hotword, buffer) => { this.hotword(index, hotword, buffer) })
 }
 
+SnowClient.prototype = Object.create(EventEmitter.prototype)
+
 /**
- * Updates the timeSinceLastChunk property whenever data is received.
+ * Updates the lastChunkTime property whenever data is received.
  *
  * @private
  * @param {Buffer} chunk The data received from the stream.
  */
 SnowClient.prototype.checkBuffer = function (chunk) {
-  if (this.triggered) {
-    if (Date.now() - this.timeSinceLastChunk < Timeouts.SILENCE_QUERY_TIME) {
-      this.timeSinceLastChunk = Date.now()
-    }
+  if (this.triggered && Date.now() - this.lastChunkTime < Timeouts.SILENCE_QUERY_TIME) {
+    this.lastChunkTime = Date.now()
   }
 }
 
@@ -88,14 +82,14 @@ SnowClient.prototype.hotword = function (index, hotword, buffer) {
   if (this.triggered) {
     this.memberClient.logger.trace('Emitted busy event')
     this.memberClient.logger.debug('Already processing query, rejected hotword trigger')
-    this.events.emit('busy', this.memberClient)
+    this.emit('busy', this.memberClient)
     return
   }
-  // Emit the 'hotword' event and set the timeSinceLastChunk and initialTime values
+  // Emit the 'hotword' event and set the lastChunkTime and initialTime values
   this.memberClient.logger.trace('Emitted hotword event')
-  this.events.emit('hotword', index, hotword, this.memberClient)
-  this.timeSinceLastChunk = Date.now()
-  const initialTime = this.timeSinceLastChunk
+  this.emit('hotword', index, hotword, this.memberClient)
+  this.lastChunkTime = Date.now()
+  const initialTime = this.lastChunkTime
 
   const flag = new EventEmitter()
   // Get the text of the audio stream from Wit.ai
@@ -104,40 +98,29 @@ SnowClient.prototype.hotword = function (index, hotword, buffer) {
     this.memberClient.logger.trace('Emitted result event')
     this.memberClient.logger.debug('Received result')
     this.memberClient.logger.debug(finalResult)
-    this.events.emit('result', finalResult, this.memberClient)
+    this.emit('result', finalResult, this.memberClient)
   },
   (error) => {
     this.triggered = false
     this.memberClient.logger.trace('Emitted error event')
     this.memberClient.logger.warn('Wit.ai failed')
     this.memberClient.logger.warn(error)
-    this.events.emit('error', error, this.memberClient)
+    this.emit('error', error, this.memberClient)
   })
 
-  // Every 50ms, check if the query time has been exceeded, and finish if it has
+  // Every 50ms, check if the query time has been exceeded or enough silence has elapsed, and finish if it has
   const intervalID = Common.botClient.setInterval(() => {
-    if (Date.now() - this.timeSinceLastChunk > Timeouts.SILENCE_QUERY_TIME || Date.now() - initialTime > Timeouts.MAX_QUERY_TIME) {
+    if (Date.now() - this.lastChunkTime > Timeouts.SILENCE_QUERY_TIME || Date.now() - initialTime > Timeouts.MAX_QUERY_TIME) {
       Common.botClient.clearInterval(intervalID)
       flag.emit('finish')
-      this.stream.removeAllListeners()
-      this.stream.pipe(this.detector)
+      this.stream.removeListener('data', this.checkBuffer)
       this.triggered = false
       this.memberClient.logger.info('Finished query')
     }
   }, 50)
 
-  this.stream.on('data', chunk => this.checkBuffer(chunk))
+  this.stream.on('data', this.checkBuffer)
   this.triggered = true
-}
-
-/**
- * Adds a callback for an event.
- *
- * @param {String} event The event to add the callback to.
- * @param {Function} callback The function to be called whenever that event is emitted.
- */
-SnowClient.prototype.on = function (event, callback) {
-  this.events.on(event, callback)
 }
 
 /**
