@@ -42,7 +42,6 @@ function GuildPlayer (guildClient) {
     this.logger.debug('Received GuildClient#disconnected event')
     this.end()
     this.logger.trace('Disconnecting')
-    this.connection.disconnect()
     this.connection = null
   })
 }
@@ -52,8 +51,7 @@ function GuildPlayer (guildClient) {
  */
 GuildPlayer.prototype.stop = function () {
   this.logger.debug('Stopping dispatcher')
-  this.end()
-  this.idle()
+  this.songQueuer.cleanUp()
 }
 
 /**
@@ -138,7 +136,6 @@ GuildPlayer.prototype.play = function (stream, callback, opts) {
   dispatcher.on('finish', () => {
     this.logger.trace('Finished dispatcher')
     stream.destroy()
-    dispatcher.destroy()
     if (callback) callback()
   })
 }

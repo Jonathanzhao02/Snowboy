@@ -33,7 +33,7 @@ module.exports = function (client) {
           if (oldPresence.channel.members.size === 1) {
             guildClient.logger.info('Leaving channel, only member remaining')
             guildClient.sendMsg(
-              `${Emojis.sad} I'm leaving, I'm all by myself!`
+              `${Emojis.sad} **I'm leaving, I'm all by myself!**`
             )
             guildClient.leaveVoiceChannel()
           }
