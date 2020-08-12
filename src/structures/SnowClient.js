@@ -59,18 +59,6 @@ function SnowClient (memberClient, sensitivity) {
 SnowClient.prototype = Object.create(EventEmitter.prototype)
 
 /**
- * Updates the lastChunkTime property whenever data is received.
- *
- * @private
- * @param {Buffer} chunk The data received from the stream.
- */
-SnowClient.prototype.checkBuffer = function (chunk) {
-  if (this.triggered && Date.now() - this.lastChunkTime < Timeouts.SILENCE_QUERY_TIME) {
-    this.lastChunkTime = Date.now()
-  }
-}
-
-/**
  * Triggered whenever a hotword is detected.
  *
  * @param {Number} index The index of the hotword within the model. Always '0'.
@@ -90,6 +78,14 @@ SnowClient.prototype.hotword = function (index, hotword, buffer) {
   this.emit('hotword', index, hotword, this.memberClient)
   this.lastChunkTime = Date.now()
   const initialTime = this.lastChunkTime
+
+  function checkBuffer (chunk) {
+    if (this.triggered) {
+      this.lastChunkTime = Date.now()
+    }
+  }
+
+  const dataListener = checkBuffer.bind(this)
 
   const flag = new EventEmitter()
   // Get the text of the audio stream from Wit.ai
@@ -113,13 +109,13 @@ SnowClient.prototype.hotword = function (index, hotword, buffer) {
     if (Date.now() - this.lastChunkTime > Timeouts.SILENCE_QUERY_TIME || Date.now() - initialTime > Timeouts.MAX_QUERY_TIME) {
       Common.botClient.clearInterval(intervalID)
       flag.emit('finish')
-      this.stream.removeListener('data', this.checkBuffer)
+      this.stream.removeListener('data', dataListener)
       this.triggered = false
       this.memberClient.logger.info('Finished query')
     }
   }, 50)
 
-  this.stream.on('data', this.checkBuffer)
+  this.stream.on('data', dataListener)
   this.triggered = true
 }
 
