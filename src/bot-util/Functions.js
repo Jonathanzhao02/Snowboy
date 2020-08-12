@@ -35,6 +35,48 @@ async function replaceAsync (str, regex, asyncFn) {
   return str.replace(regex, () => data.shift())
 }
 
+/**
+ * Converts an alphabetic character to its script counterpart.
+ *
+ * @param {String} char The character to convert.
+ * @returns {String} Returns the script character.
+ */
+function toScript (char) {
+  const code = char.charCodeAt(0)
+  switch (char) {
+    case 'B':
+      return '\u{212c}'
+    case 'E':
+      return '\u{2130}'
+    case 'F':
+      return '\u{2131}'
+    case 'H':
+      return '\u{210b}'
+    case 'I':
+      return '\u{2110}'
+    case 'L':
+      return '\u{2112}'
+    case 'M':
+      return '\u{2133}'
+    case 'R':
+      return '\u{211b}'
+    case 'e':
+      return '\u{212f}'
+    case 'g':
+      return '\u{210a}'
+    case 'o':
+      return '\u{2134}'
+    default:
+      if (code >= 65 && code <= 90) {
+        return String.fromCharCode(55349) + String.fromCharCode(56463 + code)
+      } else if (code >= 97 && code <= 122) {
+        return String.fromCharCode(55349) + String.fromCharCode(56457 + code)
+      } else {
+        return char
+      }
+  }
+}
+
 // EXPORTED
 
 /**
@@ -153,6 +195,21 @@ function checkVoicePermissions (channel) {
   }
 }
 
+/**
+ * Beautifies (makes cursive) a string.
+ *
+ * @param {String} str The string to beautify.
+ * @returns {String} Returns the beautified string.
+ */
+function beautify (str) {
+  let res = ''
+  const capitalPhrase = str.split(' ').map(val => val.charAt(0).toUpperCase() + val.slice(1)).join(' ')
+  capitalPhrase.split('').forEach(val => {
+    res += toScript(val)
+  })
+  return res
+}
+
 module.exports = {
   random: random,
   forEachAsync: forEachAsync,
@@ -160,5 +217,6 @@ module.exports = {
   replaceMentions: replaceMentions,
   validateURL: validateURL,
   checkTextPermissions: checkTextPermissions,
-  checkVoicePermissions: checkVoicePermissions
+  checkVoicePermissions: checkVoicePermissions,
+  beautify: beautify
 }
