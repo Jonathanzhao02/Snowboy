@@ -135,7 +135,6 @@ GuildClient.prototype.sendMsg = async function (msg, opts) {
     return
   }
   this.logger.debug('Attempting to send %o to %s', msg, this.textChannel.name)
-  this.checkTextPermissions()
   if (this.settings.mentions === false) msg = await Functions.replaceMentions(msg, this.guild)
   return this.textChannel.send(msg, opts)
 }
@@ -178,7 +177,7 @@ GuildClient.prototype.cleanupGuildClient = function () {
 /**
  * Checks the GuildClient has necessary permissions in the bound TextChannel.
  *
- * @returns {Boolean} Returns whether any permissions are missing.
+ * @returns {Boolean} Returns whether the bot has all required permissions.
  */
 GuildClient.prototype.checkTextPermissions = function () {
   // Check that Snowboy has all necessary permissions in text channel
@@ -186,7 +185,7 @@ GuildClient.prototype.checkTextPermissions = function () {
   if (missingPerms) {
     this.logger.debug('Missing permissions: %o', missingPerms)
     if (missingPerms.includes('SEND_MESSAGES')) return
-    this.sendMsg(
+    this.textChannel.send(
       [
         `${Emojis.error} ***Please ensure I have all the following permissions in your text channel! I won't completely work otherwise!***`,
         Functions.formatList(missingPerms)

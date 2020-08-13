@@ -63,6 +63,8 @@ module.exports = function (client) {
     guildClient.logger.info('Received %s', msg.content)
     guildClient.logger.debug('Understood command as %s and arguments as %o', commandName, args)
 
+    if (!guildClient.checkTextPermissions()) return
+
     // If the Guild is sending commands too fast, notify and return
     if (msg.createdAt.getTime() - guildClient.lastCalled < 1000) {
       guildClient.logger.info('Rejecting message, too fast')

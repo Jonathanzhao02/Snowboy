@@ -40,7 +40,7 @@ function GuildPlayer (guildClient) {
 
   guildClient.on('disconnected', () => {
     this.logger.debug('Received GuildClient#disconnected event')
-    this.end()
+    if (this.connection.dispatcher) this.end()
     this.logger.trace('Disconnecting')
     this.connection = null
   })

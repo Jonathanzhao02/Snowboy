@@ -3,6 +3,8 @@ const Common = require('../../bot-util/Common')
 
 module.exports = function (client) {
   client.on('voiceStateUpdate', (oldPresence, newPresence) => {
+    // If wasn't previously in a voice channel, ignore
+    if (!oldPresence.channel) return
     const guildClient = client.guildClients.get(newPresence.guild.id)
     const userId = newPresence.id
 
@@ -29,8 +31,8 @@ module.exports = function (client) {
       if (oldPresence.channel.members.size === 1 && userId !== client.user.id) {
         guildClient.logger.info('Started alone timeout timer')
         Common.botClient.setTimeout(() => {
-          // Check again that the channel is empty before leaving
-          if (oldPresence.channel.members.size === 1) {
+          // Check again that the channel exists and is empty before leaving
+          if (oldPresence.channel && oldPresence.channel.members.size === 1) {
             guildClient.logger.info('Leaving channel, only member remaining')
             guildClient.sendMsg(
               `${Emojis.sad} **I'm leaving, I'm all by myself!**`
