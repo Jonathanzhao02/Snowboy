@@ -126,17 +126,21 @@ GuildClient.prototype.init = async function () {
  * Also takes into consideration the GuildSettings.
  *
  * @param {String[] | String | import('discord.js').MessageEmbed[] | import('discord.js').MessageEmbed} msg The message to send.
- * @param {Object} opts The options to send the message with.
+ * @param {Object?} opts The options to send the message with.
+ * @property {import('discord.js').TextChannel} opts.textChannel The channel to send the message through.
  * @returns {Promise<import('discord.js').Message[] | import('discord.js').Message>} Returns a promise for the sent messages.
  */
 GuildClient.prototype.sendMsg = async function (msg, opts) {
-  if (!this.textChannel) {
+  const channel = Functions.extractProperty(opts || {}, 'textChannel') || this.textChannel
+  if (!channel) {
     this.logger.warn('Attempted to send %o, but no text channel found!', msg)
     return
   }
-  this.logger.debug('Attempting to send %o to %s', msg, this.textChannel.name)
+  if (!this.checkTextPermissions(channel)) return
+  this.logger.debug('Attempting to send %o to %s', msg, channel.name)
   if (this.settings.mentions === false) msg = await Functions.replaceMentions(msg, this.guild)
-  return this.textChannel.send(msg, opts)
+  if (opts && Functions.isEmpty(opts)) opts = null
+  return channel.send(msg, opts)
 }
 
 /**
@@ -177,11 +181,12 @@ GuildClient.prototype.cleanupGuildClient = function () {
 /**
  * Checks the GuildClient has necessary permissions in the bound TextChannel.
  *
+ * @param {import('discord.js').TextChannel?} channel The TextChannel to check.
  * @returns {Boolean} Returns whether the bot has all required permissions.
  */
-GuildClient.prototype.checkTextPermissions = function () {
+GuildClient.prototype.checkTextPermissions = function (channel = this.textChannel) {
   // Check that Snowboy has all necessary permissions in text channel
-  const missingPerms = Functions.checkTextPermissions(this.textChannel)
+  const missingPerms = Functions.checkTextPermissions(channel)
   if (missingPerms) {
     this.logger.debug('Missing permissions: %o', missingPerms)
     if (missingPerms.includes('SEND_MESSAGES')) return
@@ -203,9 +208,9 @@ GuildClient.prototype.checkTextPermissions = function () {
  *
  * @returns {Boolean} Returns whether any permissions are missing.
  */
-GuildClient.prototype.checkVoicePermissions = function () {
+GuildClient.prototype.checkVoicePermissions = function (channel = this.voiceChannel) {
   // Check that Snowboy has all necessary permissions in text channel and voice channel
-  const missingPerms = Functions.checkVoicePermissions(this.voiceChannel)
+  const missingPerms = Functions.checkVoicePermissions(channel)
   if (missingPerms) {
     this.logger.debug('Missing permissions: %o', missingPerms)
     this.sendMsg(

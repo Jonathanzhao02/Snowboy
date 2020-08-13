@@ -174,7 +174,8 @@ function checkTextPermissions (channel) {
       Discord.Permissions.FLAGS.MANAGE_MESSAGES,
       Discord.Permissions.FLAGS.EMBED_LINKS,
       Discord.Permissions.FLAGS.ATTACH_FILES,
-      Discord.Permissions.FLAGS.READ_MESSAGE_HISTORY
+      Discord.Permissions.FLAGS.READ_MESSAGE_HISTORY,
+      Discord.Permissions.FLAGS.ADD_REACTIONS
     ])).toArray()
 
     if (textMissingPermissions.length > 0) return textMissingPermissions
@@ -217,6 +218,34 @@ function beautify (str) {
   return res
 }
 
+/**
+ * Checks if an object is empty ({}).
+ *
+ * @param {Object} obj The object to check.
+ * @returns {Boolean} Returns whether the object is empty or not.
+ */
+function isEmpty (obj) {
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      return false
+    }
+  }
+  return true
+}
+
+/**
+ * Deletes and returns the value of a property in an object, if it exists.
+ *
+ * @param {Object} obj The object to extract the property from.
+ * @param {String} key The name of the extracted property.
+ * @returns {Object} Returns the extracted property value.
+ */
+function extractProperty (obj, key) {
+  const val = obj[key]
+  if (val) delete obj[key]
+  return val
+}
+
 module.exports = {
   random: random,
   forEachAsync: forEachAsync,
@@ -225,5 +254,7 @@ module.exports = {
   validateURL: validateURL,
   checkTextPermissions: checkTextPermissions,
   checkVoicePermissions: checkVoicePermissions,
-  beautify: beautify
+  beautify: beautify,
+  isEmpty: isEmpty,
+  extractProperty: extractProperty
 }

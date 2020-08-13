@@ -5,7 +5,7 @@ const Functions = require('../../bot-util/Functions')
  * Repeats a message in chat.
  *
  * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args Unused parameter.
+ * @param {String[]} args The message to repeat.
  */
 function repeat (memberClient, args) {
   const logger = memberClient.logger

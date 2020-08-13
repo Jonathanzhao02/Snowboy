@@ -53,8 +53,8 @@ module.exports = function (client) {
     // If the message is not a command for Snowboy, return
     if (!msg.content.startsWith(guildClient.settings.prefix)) return
 
-    // If there is no TextChannel associated with the guildClient, associate the current one
-    if (!guildClient.textChannel || !guildClient.connection) guildClient.textChannel = msg.channel
+    // Associate the current TextChannel with the GuildClient
+    guildClient.textChannel = msg.channel
 
     // Parse out command name and arguments
     const args = msg.content.slice(guildClient.settings.prefix.length).trim().split(/ +/)
@@ -74,14 +74,9 @@ module.exports = function (client) {
       return
     }
 
-    // If Snowboy is currently connected in the guild, and the GuildMember tries to run a restricted command (affects Snowboy's behavior
-    // in the voice channel) in another text channel, notify the GuildMember and return
-    if (guildClient.connection && msg.channel.id !== guildClient.textChannel.id && Commands.restricted.get(commandName)) {
-      msg.channel.send(`${Emojis.error} ***Sorry, I am not actively listening to this channel!***`)
-      return
     // If Snowboy is currently connected in the guild, and the GuildMember tries to run a restricted command without being in the active
     // voice channel, notify the GuildMember and return
-    } else if (guildClient.connection && msg.member.voice.channelID !== guildClient.voiceChannel.id && Commands.restricted.get(commandName)) {
+    if (guildClient.connection && msg.member.voice.channelID !== guildClient.voiceChannel.id && Commands.restricted.get(commandName)) {
       guildClient.sendMsg(
         `${Emojis.error} ***Sorry, you are not in my voice channel!***`
       )

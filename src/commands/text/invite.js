@@ -20,7 +20,8 @@ function invite (memberClient, args, msg) {
     Discord.Permissions.FLAGS.MANAGE_MESSAGES,
     Discord.Permissions.FLAGS.EMBED_LINKS,
     Discord.Permissions.FLAGS.ATTACH_FILES,
-    Discord.Permissions.FLAGS.READ_MESSAGE_HISTORY
+    Discord.Permissions.FLAGS.READ_MESSAGE_HISTORY,
+    Discord.Permissions.FLAGS.ADD_REACTIONS
   ]).then(link => {
     memberClient.guildClient.sendMsg(
       Embeds.createInviteEmbed(link)
