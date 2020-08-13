@@ -18,5 +18,7 @@ function repeat (memberClient, args) {
 
 module.exports = {
   name: 'repeat',
+  form: 'repeat <message>',
+  description: 'Tells Snowboy to repeat a message.',
   execute: repeat
 }
