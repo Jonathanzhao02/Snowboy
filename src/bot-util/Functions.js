@@ -93,12 +93,19 @@ function random (bound) {
 /**
  * Function to asynchronously iterate over an array.
  *
- * @param {Array} ar The Array to be iterated over.
+ * @param {Array | Map} ar The Array to be iterated over.
  * @param {Function} asyncFn The asynchronous function to be called.
  */
 async function forEachAsync (ar, asyncFn) {
-  for (let i = 0; i < ar.length; i++) {
-    await asyncFn(ar[i], i, ar)
+  if (ar instanceof Array) {
+    for (let i = 0; i < ar.length; i++) {
+      await asyncFn(ar[i], i, ar)
+    }
+  } else if (ar instanceof Map) {
+    const vals = Array.from(ar)
+    for (let i = 0; i < vals.length; i++) {
+      await asyncFn(vals[i][1], vals[i][0], vals)
+    }
   }
 }
 
