@@ -9,7 +9,7 @@ const Functions = require('../../bot-util/Functions')
  * @param {import('discord.js').Message?} msg The sent message.
  */
 function flip (memberClient, args, msg) {
-  const channel = msg ? msg.channel : undefined
+  const channel = msg?.channel
   const logger = memberClient.logger
   logger.info('Received flip command')
   const result = Functions.random(2)

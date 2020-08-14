@@ -8,7 +8,7 @@ const { Emojis } = require('../../config')
  * @param {import('discord.js').Message?} msg The sent message.
  */
 function undeafen (memberClient, args, msg) {
-  const channel = msg ? msg.channel : undefined
+  const channel = msg?.channel
   const logger = memberClient.logger
   logger.info('Setting deafen state of %s to `false`', memberClient.member.displayName)
   const userVoiceState = memberClient.member.voice

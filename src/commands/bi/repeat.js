@@ -9,7 +9,7 @@ const Functions = require('../../bot-util/Functions')
  * @param {import('discord.js').Message?} msg The sent message.
  */
 function repeat (memberClient, args, msg) {
-  const channel = msg ? msg.channel : undefined
+  const channel = msg?.channel
   const logger = memberClient.logger
   logger.info('Received repeat command')
   const message = args.join(' ')

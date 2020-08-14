@@ -10,7 +10,7 @@ const Gsearch = require('../../web-apis/Gsearch')
  * @param {import('discord.js').Message?} msg The sent message.
  */
 function search (memberClient, args, msg) {
-  const channel = msg ? msg.channel : undefined
+  const channel = msg?.channel
   const logger = memberClient.logger
   logger.info('Received search command')
   if (!args || args.length === 0) {

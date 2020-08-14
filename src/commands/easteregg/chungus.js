@@ -10,7 +10,7 @@ const Common = require('../../bot-util/Common')
  * @param {import('discord.js').Message?} msg The sent message.
  */
 function chungus (memberClient, args, msg) {
-  const channel = msg ? msg.channel : undefined
+  const channel = msg?.channel
   const logger = memberClient.logger
   logger.info('Received chungus command')
   memberClient.guildClient.sendMsg(
