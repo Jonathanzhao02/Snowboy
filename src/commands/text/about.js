@@ -5,13 +5,14 @@ const Embeds = require('../../bot-util/Embeds')
  *
  * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
- * @param {import('discord.js').Message} msg Unused parameter.
+ * @param {import('discord.js').Message} msg The sent message.
  */
 function about (memberClient, args, msg) {
   const logger = memberClient.logger
   logger.info('Received about command')
   memberClient.guildClient.sendMsg(
-    Embeds.createAboutEmbed()
+    Embeds.createAboutEmbed(),
+    msg.channel
   )
 }
 

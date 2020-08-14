@@ -53,9 +53,6 @@ module.exports = function (client) {
     // If the message is not a command for Snowboy, return
     if (!msg.content.startsWith(guildClient.settings.prefix)) return
 
-    // Associate the current TextChannel with the GuildClient
-    guildClient.textChannel = msg.channel
-
     // Parse out command name and arguments
     const args = msg.content.slice(guildClient.settings.prefix.length).trim().split(/ +/)
     const commandName = args.shift().toLowerCase()
@@ -63,13 +60,14 @@ module.exports = function (client) {
     guildClient.logger.info('Received %s', msg.content)
     guildClient.logger.debug('Understood command as %s and arguments as %o', commandName, args)
 
-    if (!guildClient.checkTextPermissions()) return
+    if (!guildClient.checkTextPermissions(msg.channel)) return
 
     // If the Guild is sending commands too fast, notify and return
     if (msg.createdAt.getTime() - guildClient.lastCalled < 1000) {
       guildClient.logger.info('Rejecting message, too fast')
       guildClient.sendMsg(
-        `${Emojis.error} ***Please only send one command a second!***`
+        `${Emojis.error} ***Please only send one command a second!***`,
+        msg.channel
       )
       return
     }
@@ -78,25 +76,27 @@ module.exports = function (client) {
     // voice channel, notify the GuildMember and return
     if (guildClient.connection && msg.member.voice.channelID !== guildClient.voiceChannel.id && Commands.restricted.get(commandName)) {
       guildClient.sendMsg(
-        `${Emojis.error} ***Sorry, you are not in my voice channel!***`
+        `${Emojis.error} ***Sorry, you are not in my voice channel!***`,
+        msg.channel
       )
       return
     }
 
     // Check all relevant command maps for the current command name, and execute it
     if (Commands.bi.get(commandName)) {
-      Commands.bi.get(commandName).execute(memberClient, args)
+      Commands.bi.get(commandName).execute(memberClient, args, msg)
     } else if (Commands.restricted.get(commandName)) {
-      Commands.restricted.get(commandName).execute(memberClient, args)
+      Commands.restricted.get(commandName).execute(memberClient, args, msg)
     } else if (Commands.text.get(commandName)) {
       Commands.text.get(commandName).execute(memberClient, args, msg)
     } else if (DEBUG_IDS.includes(memberClient.id) && Commands.debug.get(commandName)) {
       Commands.debug.get(commandName).execute(memberClient, args, msg)
     } else if (Commands.easteregg.get(commandName)) {
-      Commands.easteregg.get(commandName).execute(memberClient, args)
+      Commands.easteregg.get(commandName).execute(memberClient, args, msg)
     } else {
       guildClient.sendMsg(
-        `${Emojis.confused} ***Sorry, I don't understand.***`
+        `${Emojis.confused} ***Sorry, I don't understand.***`,
+        msg.channel
       )
     }
 

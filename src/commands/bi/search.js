@@ -7,21 +7,25 @@ const Gsearch = require('../../web-apis/Gsearch')
  *
  * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args The search query.
+ * @param {import('discord.js').Message?} msg The sent message.
  */
-function search (memberClient, args) {
+function search (memberClient, args, msg) {
+  const channel = msg ? msg.channel : undefined
   const logger = memberClient.logger
   logger.info('Received search command')
   if (!args || args.length === 0) {
     logger.debug('No query found')
     memberClient.guildClient.sendMsg(
-      `${Emojis.error} ***I need something to search up!***`
+      `${Emojis.error} ***I need something to search up!***`,
+      channel
     )
     return
   }
 
   const query = args.join(' ')
   memberClient.guildClient.sendMsg(
-    `${Emojis.search} ***Searching*** \`${query}\``
+    `${Emojis.search} ***Searching*** \`${query}\``,
+    channel
   )
 
   logger.debug('Searching up %s', query)
@@ -32,7 +36,8 @@ function search (memberClient, args) {
       Embeds.createSearchEmbed(
         result,
         memberClient.member.displayName
-      )
+      ),
+      channel
     )
   })
 }

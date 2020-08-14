@@ -5,7 +5,7 @@ const { ImpressionThresholds } = require('../../config')
  *
  * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args The arguments passed with the command.
- * @param {import('discord.js').Message} msg The sent Message that may contain mentions.
+ * @param {import('discord.js').Message} msg The sent message.
  */
 function setImpression (memberClient, args, msg) {
   const logger = memberClient.logger
@@ -25,7 +25,8 @@ function setImpression (memberClient, args, msg) {
   if (!memberClient || isNaN(val) || val > ImpressionThresholds.MAX_IMPRESSION || val < ImpressionThresholds.MIN_IMPRESSION) return
   memberClient.userClient.updateImpression(val - memberClient.userClient.impression)
   memberClient.guildClient.sendMsg(
-    `Set impression of \`${memberClient.member.displayName}\` to \`${val}\``
+    `Set impression of \`${memberClient.member.displayName}\` to \`${val}\``,
+    msg.channel
   )
 }
 

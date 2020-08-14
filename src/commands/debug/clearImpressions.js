@@ -6,7 +6,7 @@ const Keyv = require('../../bot-util/Keyv')
  *
  * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
- * @param {import('discord.js').Message} msg Unused parameter.
+ * @param {import('discord.js').Message} msg The sent message.
  */
 function clearImpressions (memberClient, args, msg) {
   const logger = memberClient.logger
@@ -22,7 +22,8 @@ function clearImpressions (memberClient, args, msg) {
       Keyv.setImpression(member.id, 0)
     })
     memberClient.guildClient.sendMsg(
-      'Cleared all guild impressions'
+      'Cleared all guild impressions',
+      msg.channel
     )
   })
 }

@@ -1,7 +1,6 @@
 const { Emojis } = require('../../config')
 const Functions = require('../../bot-util/Functions')
 const Embeds = require('../../bot-util/Embeds')
-
 const Imgsearch = require('g-i-s')
 
 /**
@@ -9,21 +8,25 @@ const Imgsearch = require('g-i-s')
  *
  * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args The search query.
+ * @param {import('discord.js').Message?} msg The sent message.
  */
-function showMe (memberClient, args) {
+function showMe (memberClient, args, msg) {
+  const channel = msg ? msg.channel : undefined
   const logger = memberClient.logger
   logger.info('Received showme command')
   if (!args || args.length === 0) {
     logger.debug('No query found')
     memberClient.guildClient.sendMsg(
-      `${Emojis.error} ***I need something to search up!***`
+      `${Emojis.error} ***I need something to search up!***`,
+      channel
     )
     return
   }
 
   const query = args.join(' ')
   memberClient.guildClient.sendMsg(
-    `${Emojis.search} ***Searching*** \`${query}\``
+    `${Emojis.search} ***Searching*** \`${query}\``,
+    channel
   )
   logger.debug('Searching up %s', query)
   Imgsearch(query, async (error, results) => {
@@ -41,7 +44,8 @@ function showMe (memberClient, args) {
           Embeds.createImageEmbed(
             result,
             memberClient.member.displayName
-          )
+          ),
+          channel
         )
         return
       } catch (err) {
@@ -52,7 +56,8 @@ function showMe (memberClient, args) {
 
     logger.info('No results found for %s', query)
     memberClient.guildClient.sendMsg(
-      `${Emojis.error} ***No results found for \`${query}\`!***`
+      `${Emojis.error} ***No results found for \`${query}\`!***`,
+      channel
     )
   })
 }

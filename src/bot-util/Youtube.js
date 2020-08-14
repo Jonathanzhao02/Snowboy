@@ -110,17 +110,20 @@ async function playlistSearch (url) {
  *
  * @param {String} query The search term to search for.
  * @param {String} requester The name of the requester.
+ * @param {import('discord.js').TextChannel?} channel The TextChannel to notify through.
  * @returns {VideoConstruct | VideoConstruct[] | null} Returns the searched video(s), if any.
  */
-async function search (query, requester, guildClient) {
+async function search (query, requester, guildClient, channel) {
   // Add each video from Youtube playlist
   if (Ytpl.validateURL(query)) {
     guildClient.sendMsg(
-      `${Emojis.search} ***Searching for*** \`${query}\``
+      `${Emojis.search} ***Searching for*** \`${query}\``,
+      channel
     )
     const playlist = await playlistSearch(query)
     guildClient.sendMsg(
-      `${Emojis.checkmark} **Adding \`${playlist.length}\` videos from \`${playlist.name}\`**`
+      `${Emojis.checkmark} **Adding \`${playlist.length}\` videos from \`${playlist.name}\`**`,
+      channel
     )
     if (playlist) {
       playlist.forEach(video => {
@@ -132,7 +135,8 @@ async function search (query, requester, guildClient) {
   // Directly get info from URL
   } else if (YtdlDiscord.validateURL(query)) {
     guildClient.sendMsg(
-      `${Emojis.search} ***Searching for*** \`${query}\``
+      `${Emojis.search} ***Searching for*** \`${query}\``,
+      channel
     )
     const video = await urlSearch(query)
     if (video) video.requester = requester
@@ -140,7 +144,8 @@ async function search (query, requester, guildClient) {
   // Search query from Youtube
   } else {
     guildClient.sendMsg(
-      `${Emojis.search} ***Searching for*** \`${query}\``
+      `${Emojis.search} ***Searching for*** \`${query}\``,
+      channel
     )
     const video = await querySearch(query)
     if (video) video.requester = requester

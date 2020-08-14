@@ -95,12 +95,14 @@ SongQueuer.prototype.play = function (video) {
  *
  * @param {Object} video The videoConstruct object of the video.
  * @param {String} query The search term used for the video.
+ * @param {import('discord.js').TextChannel?} channel The TextChannel to notify through.
  */
-SongQueuer.prototype.queue = async function (video, query) {
+SongQueuer.prototype.queue = async function (video, query, channel) {
   if (!video) {
     this.logger.info('No video results found')
     this.guildClient.sendMsg(
-      `${Emojis.sad} ***Could not find any results for \`${query}\`!***`
+      `${Emojis.sad} ***Could not find any results for \`${query}\`!***`,
+      channel
     )
     return
   }
@@ -123,7 +125,8 @@ SongQueuer.prototype.queue = async function (video, query) {
     if (video.description) {
       video.channel = `${Emojis.queue} Queued! - ${video.channel}`
       this.guildClient.sendMsg(
-        Embeds.createVideoEmbed(video)
+        Embeds.createVideoEmbed(video),
+        channel
       )
     }
   }
@@ -134,21 +137,22 @@ SongQueuer.prototype.queue = async function (video, query) {
  *
  * @param {String} query The search term to search for.
  * @param {String} requester The name of the requester.
+ * @param {import('discord.js').TextChannel?} channel The TextChannel to notify through.
  */
-SongQueuer.prototype.search = function (query, requester) {
+SongQueuer.prototype.search = function (query, requester, channel) {
   Youtube.search(query, requester, this.guildClient).then(vid => {
     if (!vid) {
-      this.guildClient.sendMsg(`${Emojis.error} ***No results found for ${query}***`)
+      this.guildClient.sendMsg(`${Emojis.error} ***No results found for ${query}***`, channel)
       return
     }
     if (vid.playlist) {
       vid.forEach(val => {
         this.logger.debug('Adding %s to queue', val.url)
-        this.queue(val, query)
+        this.queue(val, query, channel)
       })
     } else {
       this.logger.debug('Adding %s to queue', vid.url)
-      this.queue(vid, query)
+      this.queue(vid, query, channel)
     }
   })
 }

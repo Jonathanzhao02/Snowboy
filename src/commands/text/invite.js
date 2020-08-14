@@ -7,7 +7,7 @@ const Discord = require('discord.js')
  *
  * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
- * @param {Discord.Message} msg The Message the user sent.
+ * @param {Discord.Message} msg The sent message.
  */
 function invite (memberClient, args, msg) {
   const logger = memberClient.logger
@@ -24,7 +24,8 @@ function invite (memberClient, args, msg) {
     Discord.Permissions.FLAGS.ADD_REACTIONS
   ]).then(link => {
     memberClient.guildClient.sendMsg(
-      Embeds.createInviteEmbed(link)
+      Embeds.createInviteEmbed(link),
+      msg.channel
     )
   })
 }

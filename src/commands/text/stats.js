@@ -1,4 +1,3 @@
-const Common = require('../../bot-util/Common')
 const Embeds = require('../../bot-util/Embeds')
 
 /**
@@ -6,13 +5,14 @@ const Embeds = require('../../bot-util/Embeds')
  *
  * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
- * @param {import('discord.js').Message} msg Unused parameter.
+ * @param {import('discord.js').Message} msg The sent message.
  */
 function stats (memberClient, args, msg) {
   const logger = memberClient.logger
   logger.info('Received stats command')
   memberClient.guildClient.sendMsg(
-    Embeds.createStatsEmbed()
+    Embeds.createStatsEmbed(),
+    msg.channel
   )
 }
 

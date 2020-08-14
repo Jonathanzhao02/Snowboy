@@ -6,12 +6,15 @@ const Functions = require('../../bot-util/Functions')
  *
  * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
+ * @param {import('discord.js').Message?} msg The sent message.
  */
-function roll (memberClient, args) {
+function roll (memberClient, args, msg) {
+  const channel = msg ? msg.channel : undefined
   const logger = memberClient.logger
   logger.info('Received roll command')
   memberClient.guildClient.sendMsg(
-    `${Emojis.dice} **I rolled a \`${Functions.random(6) + 1}\`, <@${memberClient.id}>!**`
+    `${Emojis.dice} **I rolled a \`${Functions.random(6) + 1}\`, <@${memberClient.id}>!**`,
+    channel
   )
 }
 

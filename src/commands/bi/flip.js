@@ -6,13 +6,16 @@ const Functions = require('../../bot-util/Functions')
  *
  * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
+ * @param {import('discord.js').Message?} msg The sent message.
  */
-function flip (memberClient, args) {
+function flip (memberClient, args, msg) {
+  const channel = msg ? msg.channel : undefined
   const logger = memberClient.logger
   logger.info('Received flip command')
   const result = Functions.random(2)
   memberClient.guildClient.sendMsg(
-    `${result === 0 ? Emojis.heads : Emojis.tails} **I flipped \`${result === 0 ? 'heads' : 'tails'}\`, <@${memberClient.id}>!**`
+    `${result === 0 ? Emojis.heads : Emojis.tails} **I flipped \`${result === 0 ? 'heads' : 'tails'}\`, <@${memberClient.id}>!**`,
+    channel
   )
 }
 
