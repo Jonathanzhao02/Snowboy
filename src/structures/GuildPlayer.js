@@ -18,7 +18,7 @@ function GuildPlayer (guildClient) {
    * The current VoiceConnection.
    * @type {import('discord.js').VoiceConnection}
    */
-  this.connection = undefined
+  this.connection = null
 
   /**
    * The logger to use for logging.
@@ -42,7 +42,7 @@ function GuildPlayer (guildClient) {
     this.logger.debug('Received GuildClient#disconnected event')
     if (this.connection.dispatcher) this.end()
     this.logger.trace('Disconnecting')
-    this.connection = undefined
+    this.connection = null
   })
 }
 
@@ -120,14 +120,14 @@ GuildPlayer.prototype.listenTo = function (member) {
  * Plays silence over the VoiceConnection to await new commands.
  */
 GuildPlayer.prototype.idle = function () {
-  this.play(new Streams.Silence(), undefined, { type: 'opus' })
+  this.play(new Streams.Silence(), null, { type: 'opus' })
 }
 
 /**
  * Plays a stream over the connection.
  *
  * @param {ReadableStream} stream The stream to read from.
- * @param {Function} callback The callback upon dispatcher finish.
+ * @param {Function?} callback The callback upon dispatcher finish.
  * @param {Object} opts The options to play the stream with.
  */
 GuildPlayer.prototype.play = function (stream, callback, opts) {

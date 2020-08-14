@@ -23,13 +23,13 @@ function GuildClient (guild) {
    * The bound TextChannel.
    * @type {import('discord.js').TextChannel?}
    */
-  this.boundTextChannel = undefined
+  this.boundTextChannel = null
 
   /**
    * The connected VoiceChannel.
    * @type {import('discord.js').VoiceChannel?}
    */
-  this.voiceChannel = undefined
+  this.voiceChannel = null
 
   /**
    * The current looping state.
@@ -71,13 +71,13 @@ function GuildClient (guild) {
    * The ID of the timeout interval function.
    * @type {Number?}
    */
-  this.timeoutId = undefined
+  this.timeoutId = null
 
   /**
    * The GuildSettings for this Guild.
    * @type {GuildSettings?}
    */
-  this.settings = undefined
+  this.settings = null
 
   /**
    * The logger used for logging.
@@ -288,9 +288,9 @@ GuildClient.prototype.leaveVoiceChannel = function () {
   this.memberClients.clear()
   this.logger.trace('Leaving channel')
   this.voiceChannel.leave()
-  this.boundTextChannel = undefined
+  this.boundTextChannel = null
   this.logger.debug('Successfully left')
-  this.voiceChannel = undefined
+  this.voiceChannel = null
   this.loopState = 0
   return true
 }

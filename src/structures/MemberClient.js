@@ -19,7 +19,7 @@ function MemberClient (member, guildClient) {
    * The SnowClient listening to this MemberClient.
    * @type {import('./SnowClient')?}
    */
-  this.snowClient = undefined
+  this.snowClient = null
 
   /**
    * The GuildMember associated with this MemberClient.
