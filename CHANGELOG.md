@@ -1,5 +1,32 @@
 # Changelog
 
+## v0.8.0 (PR #33)
+Major bug fixes, code cleanup, and new commands!
+* New commands!
+  * Added broadcast command to dashboard.
+  * Added new invite command.
+  * Added new repeat command.
+  * Added new poll command.
+* Refactoring
+  * Refactored Guilds => Clients.
+  * Refactored Youtube functions => Youtube.js under bot-util.
+  * Refactored YtHelper => SongQueuer.
+  * Refactored SnowClient to extend EventEmitter instead of having one.
+* Bug fixes
+  * Fixed text channel binding disallowing Snowboy to reply to messages in the same channel.
+    * This fix involves adding new arguments to many commands and functions specifying the channel.
+  * Fixed permission checking.
+    * Permission checking should now happen outside of the GuildClient.
+  * Fixed join command greeting user too early.
+    * Now only greets AFTER Snowboy connects.
+  * Fixed multiple crashes.
+    * AKA fixed errors being thrown by poor practices.
+  * Miscellaneous code cleanup.
+    * Mainly duplicate code removal.
+    * Changed dashboard to use child-process communication instead of IPC.
+    * Added map support to forEachAsync.
+    * Added isEmpty and extractProperty methods to Functions, currently unused.
+
 ## v0.7.1 (PR #32)
 New commands and formatting changes!
 * Resolves #8 
