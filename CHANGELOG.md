@@ -106,7 +106,7 @@ Play command overhaul, new image search command, new emojis, and more
 * Uninstalled unused packages
 * Edited video embeds to no longer include description, but rather duration and queue position
 * Added new image search command showme
-* Fixed requester name being undefined in search command
+* Fixed requester name being null in search command
 
 ## v0.3.2 (PR #24)
 Bug fixes, improved logging, voice command fix (very important), and looping support!

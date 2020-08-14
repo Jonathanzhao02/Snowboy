@@ -13,7 +13,7 @@ const Discord = require('discord.js')
  *
  * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args The arguments passed with the command.
- * @param {import('discord.js').Message} msg Unused parameter.
+ * @param {import('discord.js').Message} msg The sent message.
  */
 function settings (memberClient, args, msg) {
   const logger = memberClient.logger
@@ -25,7 +25,8 @@ function settings (memberClient, args, msg) {
   if (args.length === 0) {
     logger.debug('Printing settings')
     memberClient.guildClient.sendMsg(
-      Embeds.createSettingsEmbed(guildClient.settings, memberClient.userClient.settings)
+      Embeds.createSettingsEmbed(guildClient.settings, memberClient.userClient.settings),
+      msg.channel
     )
     return
   }
@@ -34,7 +35,8 @@ function settings (memberClient, args, msg) {
   if (!GuildSettings.descriptions[settingName] && !UserSettings.descriptions[settingName]) {
     logger.debug('No setting found for %s', settingName)
     memberClient.guildClient.sendMsg(
-      `${Emojis.error} ***Could not find option named \`${settingName}\`***`
+      `${Emojis.error} ***Could not find option named \`${settingName}\`***`,
+      msg.channel
     )
     return
   }
@@ -45,7 +47,8 @@ function settings (memberClient, args, msg) {
     if (args.length === 0) {
       logger.debug('Printing info about %s', settingName)
       memberClient.guildClient.sendMsg(
-        GuildSettings.descriptions[settingName](guildClient.settings)
+        GuildSettings.descriptions[settingName](guildClient.settings),
+        msg.channel
       )
       return
     }
@@ -53,7 +56,8 @@ function settings (memberClient, args, msg) {
     // Check that the user is an administrator
     if (!msg.member.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR, { checkAdmin: true, checkOwner: true })) {
       memberClient.guildClient.sendMsg(
-        `${Emojis.error} ***You do not have permission to use this command!***`
+        `${Emojis.error} ***You do not have permission to use this command!***`,
+        msg.channel
       )
       return
     }
@@ -61,14 +65,16 @@ function settings (memberClient, args, msg) {
     const val = args.join()
     logger.debug('Attempting to set %s to %s', settingName, val)
     memberClient.guildClient.sendMsg(
-      guildClient.settings.set(settingName, val)
+      guildClient.settings.set(settingName, val),
+      msg.channel
     )
   // Setting option is for users
   } else {
     if (args.length === 0) {
       logger.debug('Printing info about %s', settingName)
       memberClient.guildClient.sendMsg(
-        UserSettings.descriptions[settingName](memberClient.userClient.settings)
+        UserSettings.descriptions[settingName](memberClient.userClient.settings),
+        msg.channel
       )
       return
     }
@@ -76,7 +82,8 @@ function settings (memberClient, args, msg) {
     const val = args.join()
     logger.debug('Attempting to set %s to %s', settingName, val)
     memberClient.guildClient.sendMsg(
-      memberClient.userClient.settings.set(settingName, val)
+      memberClient.userClient.settings.set(settingName, val),
+      msg.channel
     )
   }
 }

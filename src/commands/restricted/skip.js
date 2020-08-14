@@ -5,22 +5,26 @@ const { Emojis } = require('../../config')
  *
  * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Unused parameter.
+ * @param {import('discord.js').Message?} msg The sent message.
  */
-function skip (memberClient, args) {
+function skip (memberClient, args, msg) {
+  const channel = msg ? msg.channel : undefined
   const logger = memberClient.logger
   logger.info('Received skip command')
   if (!memberClient.guildClient.playing) {
     logger.debug('Not playing anything')
     memberClient.guildClient.sendMsg(
-      `${Emojis.error} ***Nothing currently playing!***`
+      `${Emojis.error} ***Nothing currently playing!***`,
+      channel
     )
     return
   }
   logger.debug('Skipping song')
-  memberClient.guildClient.sendMsg(
-    `${Emojis.skip} ***Skipping the current song***`
-  )
   memberClient.guildClient.guildPlayer.end()
+  memberClient.guildClient.sendMsg(
+    `${Emojis.skip} ***Skipping the current song***`,
+    channel
+  )
   logger.debug('Successfully skipped song')
 }
 

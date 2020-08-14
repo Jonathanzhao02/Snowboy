@@ -1,26 +1,33 @@
-const ipc = require('node-ipc')
+const { spawn } = require('child_process')
 const commands = require('./CommandMap')
+let dashboard
 
 /**
  * Starts the ipc server for dashboard communication.
  */
 function start () {
-  ipc.config.id = 'snowboy'
-  ipc.config.retry = 1500
-  ipc.config.silent = true
-  ipc.serve(() => {
-    ipc.server.on('message', message => {
-      console.log(message)
-      const args = message.split(/ +/)
-      const commandName = args.shift()
-      if (commands.get(commandName)) {
-        commands.get(commandName).execute(args)
-      }
-    })
+  dashboard = spawn('node', [process.env.DASHBOARD_PATH, process.env.LOG_PATH])
+  dashboard.stdout.on('data', data => {
+    console.log(data.toString())
+    const message = data.toString()
+    const args = message.split(/ +/)
+    const commandName = args.shift()
+    if (commands.get(commandName)) {
+      commands.get(commandName).execute(args)
+    }
   })
-  ipc.server.start()
+  dashboard.stderr.on('data', data => {
+    console.log(data.toString())
+  })
 }
 
+function stop () {
+  dashboard.kill()
+}
+
+process.on('exit', stop)
+
 module.exports = {
-  start: start
+  start: start,
+  stop: stop
 }

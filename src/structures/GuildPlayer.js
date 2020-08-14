@@ -1,6 +1,6 @@
 const Streams = require('./Streams')
 const Resampler = require('node-libsamplerate')
-const YtQueuer = require('./YtQueuer')
+const SongQueuer = require('./SongQueuer')
 
 /**
  * Handles all playback-related operations for a GuildClient.
@@ -28,9 +28,9 @@ function GuildPlayer (guildClient) {
 
   /**
    * The array of videos queued for playback.
-   * @type {YtQueuer}
+   * @type {SongQueuer}
    */
-  this.queuer = new YtQueuer(this)
+  this.songQueuer = new SongQueuer(this)
 
   guildClient.on('connected', result => {
     this.logger.debug('Received GuildClient#connected event')
@@ -40,11 +40,8 @@ function GuildPlayer (guildClient) {
 
   guildClient.on('disconnected', () => {
     this.logger.debug('Received GuildClient#disconnected event')
-    if (this.connection.dispatcher) {
-      this.end()
-    }
+    if (this.connection.dispatcher) this.end()
     this.logger.trace('Disconnecting')
-    this.connection.disconnect()
     this.connection = null
   })
 }
@@ -54,9 +51,7 @@ function GuildPlayer (guildClient) {
  */
 GuildPlayer.prototype.stop = function () {
   this.logger.debug('Stopping dispatcher')
-  this.queuer.clear()
-  this.end()
-  this.idle()
+  this.songQueuer.cleanUp()
 }
 
 /**
@@ -132,7 +127,7 @@ GuildPlayer.prototype.idle = function () {
  * Plays a stream over the connection.
  *
  * @param {ReadableStream} stream The stream to read from.
- * @param {Function} callback The callback upon dispatcher finish.
+ * @param {Function?} callback The callback upon dispatcher finish.
  * @param {Object} opts The options to play the stream with.
  */
 GuildPlayer.prototype.play = function (stream, callback, opts) {
@@ -141,7 +136,6 @@ GuildPlayer.prototype.play = function (stream, callback, opts) {
   dispatcher.on('finish', () => {
     this.logger.trace('Finished dispatcher')
     stream.destroy()
-    dispatcher.destroy()
     if (callback) callback()
   })
 }

@@ -6,16 +6,23 @@ const { Emojis } = require('../../config')
  *
  * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args The specific command to ask about.
- * @param {import('discord.js').Message} msg Unused parameter.
+ * @param {import('discord.js').Message?} msg The sent message.
  */
 function nowPlaying (memberClient, args, msg) {
+  const channel = msg ? msg.channel : undefined
   const logger = memberClient.logger
   logger.info('Received now playing command')
-  const video = memberClient.guildClient.guildPlayer.queuer[0]
+  const video = memberClient.guildClient.guildPlayer.songQueuer[0]
   if (video && memberClient.guildClient.playing) {
-    memberClient.guildClient.sendMsg(Embeds.createVideoEmbed(video))
+    memberClient.guildClient.sendMsg(
+      Embeds.createVideoEmbed(video),
+      channel
+    )
   } else {
-    memberClient.guildClient.sendMsg(`${Emojis.error} ***Nothing currently playing!***`)
+    memberClient.guildClient.sendMsg(
+      `${Emojis.error} ***Nothing currently playing!***`,
+      channel
+    )
   }
 }
 

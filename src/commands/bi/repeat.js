@@ -2,25 +2,26 @@ const { Emojis } = require('../../config')
 const Functions = require('../../bot-util/Functions')
 
 /**
- * Rolls a six-sided die.
+ * Repeats a message in chat.
  *
  * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args Unused parameter.
+ * @param {String[]} args The message to repeat.
  * @param {import('discord.js').Message?} msg The sent message.
  */
-function roll (memberClient, args, msg) {
+function repeat (memberClient, args, msg) {
   const channel = msg ? msg.channel : undefined
   const logger = memberClient.logger
-  logger.info('Received roll command')
+  logger.info('Received repeat command')
+  const message = args.join(' ')
   memberClient.guildClient.sendMsg(
-    `${Emojis.dice} **I rolled a \`${Functions.random(6) + 1}\`, <@${memberClient.id}>!**`,
+    `${Emojis.loop} *\u{201c}${Functions.beautify(message)}\u{201d}* \n   ***${('       \u{2013}  ' + memberClient.member.displayName)}***`,
     channel
   )
 }
 
 module.exports = {
-  name: 'roll',
-  form: 'roll',
-  description: 'Rolls a 6-sided die and tells you the result.',
-  execute: roll
+  name: 'repeat',
+  form: 'repeat <message>',
+  description: 'Tells Snowboy to repeat a message.',
+  execute: repeat
 }

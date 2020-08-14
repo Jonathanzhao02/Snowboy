@@ -1,4 +1,4 @@
-const Guilds = require('../../bot-util/Guilds')
+const Clients = require('../../bot-util/Clients')
 const Emojis = require('../../config').Emojis
 const CONFIDENCE_THRESHOLD = require('../../config').CONFIDENCE_THRESHOLD
 const Commands = require('../../commands')
@@ -14,7 +14,7 @@ module.exports = function (client) {
    */
   async function onSpeaking (member, speaking) {
     if (!member || speaking.equals(0) || member.id === client.user.id) return
-    const { userClient, guildClient, memberClient } = await Guilds.createClientsFromMember(member)
+    const { userClient, guildClient, memberClient } = await Clients.createClientsFromMember(member)
     if (!guildClient.connection || member.voice.channelID !== guildClient.voiceChannel.id || !guildClient.settings.voice) return
     const childLogger = guildClient.logger
 

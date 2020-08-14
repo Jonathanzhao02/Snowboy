@@ -5,15 +5,18 @@ const { Emojis } = require('../../config')
  *
  * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args The search query for the song.
+ * @param {import('discord.js').Message?} msg The sent message.
  */
-function play (memberClient, args) {
+function play (memberClient, args, msg) {
+  const channel = msg ? msg.channel : undefined
   const logger = memberClient.logger
   logger.info('Received play command')
   // If not connected, notify and return
   if (!memberClient.guildClient.connection) {
     logger.debug('Not connected to a voice channel')
     memberClient.guildClient.sendMsg(
-      `${Emojis.error} ***I am not in a voice channel!***`
+      `${Emojis.error} ***I am not in a voice channel!***`,
+      channel
     )
     return
   }
@@ -22,15 +25,15 @@ function play (memberClient, args) {
   if (!args || args.length === 0) {
     logger.debug('No query found')
     memberClient.guildClient.sendMsg(
-      `${Emojis.error} ***I need something to play!***`
+      `${Emojis.error} ***I need something to play!***`,
+      channel
     )
     return
   }
 
   const query = args.join(' ')
   logger.debug('Searching up %s', query)
-
-  memberClient.guildClient.guildPlayer.queuer.search(query, memberClient.member.displayName)
+  memberClient.guildClient.guildPlayer.songQueuer.search(query, memberClient.member.displayName, channel)
 }
 
 module.exports = {

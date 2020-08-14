@@ -10,7 +10,6 @@ module.exports = function (Common) {
     heapdump.writeSnapshot(Common.defaultLogdir + `/${new Date().toISOString()}_ERR.heapdump`, (err, filename) => {
       Common.logger.error('Uncaught exception')
       Common.logger.error(error)
-      Common.botClient.destroy()
       if (err) process.exit(1)
       Common.logger.debug('Heapdump written to %s', filename)
       process.exit(1)
@@ -26,7 +25,6 @@ module.exports = function (Common) {
       Common.logger.error('Unhandled promise rejection')
       Common.logger.error(promise)
       Common.logger.error(error)
-      Common.botClient.destroy()
       if (err) process.exit(1)
       Common.logger.debug('Heapdump written to %s', filename)
       process.exit(1)
@@ -37,7 +35,6 @@ module.exports = function (Common) {
   process.on('SIGTERM', signal => {
     console.log('Received SIGTERM signal')
     Common.logger.info(`Process ${process.pid} received a SIGTERM signal`)
-    Common.botClient.destroy()
     process.exit(0)
   })
 
@@ -46,21 +43,23 @@ module.exports = function (Common) {
     console.log('Received SIGINT signal')
     Common.logger.info(`Process ${process.pid} has been interrupted`)
     const promise = new Promise((resolve, reject) => {
-      const guilds = Array.from(Common.botClient.guildClients)
-      Functions.forEachAsync(guilds, async (pair, index, array) => {
-        if (pair[1]) pair[1].logger.debug('Sending interrupt message')
-        await pair[1].sendMsg(
+      Functions.forEachAsync(Common.botClient.guildClients, async (guildClient) => {
+        if (guildClient) guildClient.logger.debug('Sending interrupt message')
+        await guildClient.sendMsg(
           `${Emojis.joyful} ***Sorry, I'm going down for updates and maintenance! See you soon!***`
         )
-        if (index === array.length - 1) resolve()
-      })
+      }).then(resolve)
 
-      if (guilds.length === 0) resolve()
+      if (Common.botClient.guildClients.size === 0) resolve()
     })
 
     promise.then(() => {
-      Common.botClient.destroy()
       process.exit(0)
     })
+  })
+
+  // On process exit
+  process.on('exit', () => {
+    Common.botClient.destroy()
   })
 }

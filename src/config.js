@@ -19,6 +19,12 @@ const GUILD_TIMEOUT = 1800000
 // Time before Snowboy automatically disconnects from a channel after being alone
 const ALONE_TIMEOUT = 10000
 
+// Time before a poll ends by default
+const POLL_TIME = 30000
+
+// Max time before a poll ends
+const MAX_POLL_TIME = 1800000
+
 // Threshold of how confident Snowboy should be in an intent before accepting it
 const CONFIDENCE_THRESHOLD = 0.7
 
@@ -58,9 +64,11 @@ const MIN_IMPRESSION = -100
 const EMOJIS = {
   checkmark: '✅',
   error: '❌',
+  invite: '✉️',
   settings: '⚙️',
   stats: '📊',
   ping: '📶',
+  clock: '🕒',
   playing: '▶️',
   pause: '⏸️',
   loop: '🔁',
@@ -87,7 +95,9 @@ const EMOJIS = {
   neutral: '😐',
   content: '🙂',
   happy: '😊',
-  joyful: '😄'
+  joyful: '😄',
+  y: '🇾',
+  n: '🇳'
 }
 
 module.exports = {
@@ -98,7 +108,9 @@ module.exports = {
     GUILD_TIMEOUT: GUILD_TIMEOUT,
     ALONE_TIMEOUT: ALONE_TIMEOUT,
     MAX_QUERY_TIME: MAX_QUERY_TIME,
-    SILENCE_QUERY_TIME: SILENCE_QUERY_TIME
+    SILENCE_QUERY_TIME: SILENCE_QUERY_TIME,
+    POLL_TIME: POLL_TIME,
+    MAX_POLL_TIME: MAX_POLL_TIME
   },
   SettingsValues: {
     DEFAULT_BOT_PREFIX: DEFAULT_BOT_PREFIX,

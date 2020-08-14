@@ -111,8 +111,7 @@ function getStreamText (stream, flag, callback, handler) {
   })
   stream.pipe(req)
 
-  flag.on('finish', () => {
-    flag.removeAllListeners()
+  flag.once('finish', () => {
     stream.unpipe(req)
     req.end()
   })

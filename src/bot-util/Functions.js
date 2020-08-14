@@ -1,6 +1,5 @@
 const Discord = require('discord.js')
 const Https = require('https')
-const Streams = require('../structures/Streams')
 
 // NOT EXPORTED
 
@@ -36,6 +35,48 @@ async function replaceAsync (str, regex, asyncFn) {
   return str.replace(regex, () => data.shift())
 }
 
+/**
+ * Converts an alphabetic character to its script counterpart.
+ *
+ * @param {String} char The character to convert.
+ * @returns {String} Returns the script character.
+ */
+function toScript (char) {
+  const code = char.charCodeAt(0)
+  switch (char) {
+    case 'B':
+      return '\u{212c}'
+    case 'E':
+      return '\u{2130}'
+    case 'F':
+      return '\u{2131}'
+    case 'H':
+      return '\u{210b}'
+    case 'I':
+      return '\u{2110}'
+    case 'L':
+      return '\u{2112}'
+    case 'M':
+      return '\u{2133}'
+    case 'R':
+      return '\u{211b}'
+    case 'e':
+      return '\u{212f}'
+    case 'g':
+      return '\u{210a}'
+    case 'o':
+      return '\u{2134}'
+    default:
+      if (code >= 65 && code <= 90) {
+        return String.fromCharCode(55349) + String.fromCharCode(56463 + code)
+      } else if (code >= 97 && code <= 122) {
+        return String.fromCharCode(55349) + String.fromCharCode(56457 + code)
+      } else {
+        return char
+      }
+  }
+}
+
 // EXPORTED
 
 /**
@@ -52,12 +93,19 @@ function random (bound) {
 /**
  * Function to asynchronously iterate over an array.
  *
- * @param {Array} ar The Array to be iterated over.
+ * @param {Array | Map} ar The Array to be iterated over.
  * @param {Function} asyncFn The asynchronous function to be called.
  */
 async function forEachAsync (ar, asyncFn) {
-  for (let i = 0; i < ar.length; i++) {
-    await asyncFn(ar[i], i, ar)
+  if (ar instanceof Array) {
+    for (let i = 0; i < ar.length; i++) {
+      await asyncFn(ar[i], i, ar)
+    }
+  } else if (ar instanceof Map) {
+    const vals = Array.from(ar)
+    for (let i = 0; i < vals.length; i++) {
+      await asyncFn(vals[i][1], vals[i][0], vals)
+    }
   }
 }
 
@@ -126,7 +174,8 @@ function checkTextPermissions (channel) {
       Discord.Permissions.FLAGS.MANAGE_MESSAGES,
       Discord.Permissions.FLAGS.EMBED_LINKS,
       Discord.Permissions.FLAGS.ATTACH_FILES,
-      Discord.Permissions.FLAGS.READ_MESSAGE_HISTORY
+      Discord.Permissions.FLAGS.READ_MESSAGE_HISTORY,
+      Discord.Permissions.FLAGS.ADD_REACTIONS
     ])).toArray()
 
     if (textMissingPermissions.length > 0) return textMissingPermissions
@@ -154,6 +203,49 @@ function checkVoicePermissions (channel) {
   }
 }
 
+/**
+ * Beautifies (makes cursive) a string.
+ *
+ * @param {String} str The string to beautify.
+ * @returns {String} Returns the beautified string.
+ */
+function beautify (str) {
+  let res = ''
+  const capitalPhrase = str.split(' ').map(val => val.charAt(0).toUpperCase() + val.slice(1)).join(' ')
+  capitalPhrase.split('').forEach(val => {
+    res += toScript(val)
+  })
+  return res
+}
+
+/**
+ * Checks if an object is empty ({}).
+ *
+ * @param {Object} obj The object to check.
+ * @returns {Boolean} Returns whether the object is empty or not.
+ */
+function isEmpty (obj) {
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      return false
+    }
+  }
+  return true
+}
+
+/**
+ * Deletes and returns the value of a property in an object, if it exists.
+ *
+ * @param {Object} obj The object to extract the property from.
+ * @param {String} key The name of the extracted property.
+ * @returns {Object} Returns the extracted property value.
+ */
+function extractProperty (obj, key) {
+  const val = obj[key]
+  if (val) delete obj[key]
+  return val
+}
+
 module.exports = {
   random: random,
   forEachAsync: forEachAsync,
@@ -161,5 +253,8 @@ module.exports = {
   replaceMentions: replaceMentions,
   validateURL: validateURL,
   checkTextPermissions: checkTextPermissions,
-  checkVoicePermissions: checkVoicePermissions
+  checkVoicePermissions: checkVoicePermissions,
+  beautify: beautify,
+  isEmpty: isEmpty,
+  extractProperty: extractProperty
 }

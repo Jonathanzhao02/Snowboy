@@ -12,7 +12,7 @@ const Discord = require('discord.js')
  *
  * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args Any options sent with the command.
- * @param {import('discord.js').Message} msg The Message the user sent.
+ * @param {import('discord.js').Message} msg The sent message.
  * @param {Number?} total The total number of messages deleted. Passed recursively.
  * @param {String?} snowflake The ID of the latest deleted message. Passed recursively.
  */
@@ -31,7 +31,8 @@ function purge (memberClient, args, msg, total, snowflake) {
     if (!msg.member.hasPermission(Discord.Permissions.FLAGS.MANAGE_MESSAGES, { checkAdmin: true, checkOwner: true })) {
       logger.debug('Rejected user due to insufficient permissions: MANAGE_MESSAGES')
       memberClient.guildClient.sendMsg(
-        `${Emojis.error} ***You do not have permission to use this command!***`
+        `${Emojis.error} ***You do not have permission to use this command!***`,
+        msg.channel
       )
       return
     }
@@ -54,7 +55,8 @@ function purge (memberClient, args, msg, total, snowflake) {
         if (!msg.member.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR, { checkAdmin: true, checkOwner: true })) {
           logger.debug('Rejected user due to insufficient permissions: ADMINISTRATOR')
           memberClient.guildClient.sendMsg(
-            `${Emojis.error} ***You do not have permission to use this command!***`
+            `${Emojis.error} ***You do not have permission to use this command!***`,
+            msg.channel
           )
           return
         }
@@ -67,11 +69,12 @@ function purge (memberClient, args, msg, total, snowflake) {
         break
       // Delete the messages of the mentioned user
       default:
-        if (msg.mentions && msg.mentions.members.length > 0) mmbr = msg.mentions.members.array()[0]
+        if (msg.mentions && msg.mentions.members) mmbr = msg.mentions.members.first()
         if (!mmbr) {
           logger.debug('Rejected user due to invalid user: %s', args[0])
           memberClient.guildClient.sendMsg(
-            `${Emojis.error} ***Could not find user \`${args[0]}\`***`
+            `${Emojis.error} ***Could not find user \`${args[0]}\`***`,
+            msg.channel
           )
           return
         } else {
@@ -85,10 +88,10 @@ function purge (memberClient, args, msg, total, snowflake) {
   guildClient.purging = true
 
   // Fetch 100 messages before the snowflake
-  guildClient.textChannel.messages.fetch({ limit: 100, before: snowflake }).then(messages => {
+  msg.channel.messages.fetch({ limit: 100, before: snowflake }).then(messages => {
     logger.trace('Fetched messages')
     // Bulk delete all fetched messages that pass through the filter
-    guildClient.textChannel.bulkDelete(messages.filter(filter), { filterOld: true }).then(deletedMessages => {
+    msg.channel.bulkDelete(messages.filter(filter), { filterOld: true }).then(deletedMessages => {
       logger.trace('Deleting fetched messages')
       total += deletedMessages.size
 
@@ -104,7 +107,8 @@ function purge (memberClient, args, msg, total, snowflake) {
           [
             `${Emojis.checkmark} **Successfully finished purging, <@${memberClient.id}>!**`,
             `${Emojis.trash} **Deleted \`${total}\` messages ${mmbr ? `from user \`${mmbr.displayName}\`` : ''}!**`
-          ]
+          ],
+          msg.channel
         )
       }
     })

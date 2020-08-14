@@ -5,7 +5,7 @@ const Common = require('../../bot-util/Common')
  *
  * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
  * @param {String[]} args The arguments passed with the command.
- * @param {import('discord.js').Message} msg The sent Message which may contain mentions.
+ * @param {import('discord.js').Message} msg The sent message.
  */
 function rawImpression (memberClient, args, msg) {
   const logger = memberClient.logger
@@ -19,7 +19,8 @@ function rawImpression (memberClient, args, msg) {
   }
 
   memberClient.guildClient.sendMsg(
-    `Raw impression of ${member.displayName}: \`${userClient.impression}\``
+    `Raw impression of ${member.displayName}: \`${userClient.impression}\``,
+    msg.channel
   )
 }
 

@@ -59,10 +59,11 @@ MemberClient.prototype.init = async function () {
  * Sends the response of Snowboy to a User's command according to their impression.
  *
  * @param {String} func The name of the called command.
+ * @param {import('discord.js').TextChannel?} channel The TextChannel to send the response through.
  * @returns {Promise<import('discord.js').Message[] | import('discord.js').Message>} Returns a promise for the sent messages.
  */
-MemberClient.prototype.sendResponse = function (func) {
-  return this.guildClient.sendMsg(this.userClient.getResponse(func))
+MemberClient.prototype.sendResponse = function (func, channel) {
+  return this.guildClient.sendMsg(this.userClient.getResponse(func), channel)
 }
 
 module.exports = MemberClient

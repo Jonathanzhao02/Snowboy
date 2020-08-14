@@ -23,7 +23,7 @@ function GuildClient (guild) {
    * The bound TextChannel.
    * @type {import('discord.js').TextChannel?}
    */
-  this.textChannel = null
+  this.boundTextChannel = null
 
   /**
    * The connected VoiceChannel.
@@ -100,7 +100,7 @@ function GuildClient (guild) {
   })
 
   Object.defineProperty(this, 'playing', {
-    get: () => this.guildPlayer.queuer.playing
+    get: () => this.guildPlayer.songQueuer.playing
   })
 
   this.logger.debug(this)
@@ -121,23 +121,24 @@ GuildClient.prototype.init = async function () {
 }
 
 /**
- * Sends a message through this GuildClient's bound textChannel.
+ * Sends a message through a TextChannel.
  *
  * Also takes into consideration the GuildSettings.
  *
  * @param {String[] | String | import('discord.js').MessageEmbed[] | import('discord.js').MessageEmbed} msg The message to send.
- * @param {Object} opts The options to send the message with.
+ * @param {Object?} opts The options to send the message with.
+ * @param {import('discord.js').TextChannel} channel The TextChannel to send the message through.
  * @returns {Promise<import('discord.js').Message[] | import('discord.js').Message>} Returns a promise for the sent messages.
  */
-GuildClient.prototype.sendMsg = async function (msg, opts) {
-  if (!this.textChannel) {
+GuildClient.prototype.sendMsg = async function (msg, channel = this.boundTextChannel, opts) {
+  if (!channel) {
     this.logger.warn('Attempted to send %o, but no text channel found!', msg)
     return
   }
-  this.logger.debug('Attempting to send %o to %s', msg, this.textChannel.name)
-  this.checkTextPermissions()
+  if (!this.checkTextPermissions(channel)) return
+  this.logger.debug('Attempting to send %o to %s', msg, channel.name)
   if (this.settings.mentions === false) msg = await Functions.replaceMentions(msg, this.guild)
-  return this.textChannel.send(msg, opts)
+  return channel.send(msg, opts)
 }
 
 /**
@@ -146,8 +147,8 @@ GuildClient.prototype.sendMsg = async function (msg, opts) {
 GuildClient.prototype.startTimeout = function () {
   this.logger.info('Starting expiration timer')
   this.lastCalled = Date.now()
-  if (this.timeoutId) clearTimeout(this.timeoutId)
-  this.timeoutId = setTimeout(() => { this.cleanupGuildClient() }, Timeouts.TIMEOUT + 500)
+  if (this.timeoutId) Common.botClient.clearTimeout(this.timeoutId)
+  this.timeoutId = Common.botClient.setTimeout(() => { this.cleanupGuildClient() }, Timeouts.TIMEOUT + 500)
 }
 
 /**
@@ -161,7 +162,7 @@ GuildClient.prototype.cleanupGuildClient = function () {
     this.logger.debug('Attempting to clean up guildClient')
     // If the guild is currently connected, is not playing music, and has an active TextChannel,
     // notify, mark the guildClient for deletion, and leave
-    if (this.textChannel && this.connection && !this.playing) {
+    if (this.boundTextChannel && this.connection && !this.playing) {
       this.logger.debug('Leaving voice channel')
       this.sendMsg(
         `${Emojis.happy} **It seems nobody needs me right now, so I'll be headed out. Call me when you do!**`
@@ -178,15 +179,17 @@ GuildClient.prototype.cleanupGuildClient = function () {
 /**
  * Checks the GuildClient has necessary permissions in the bound TextChannel.
  *
- * @returns {Boolean} Returns whether any permissions are missing.
+ * @param {import('discord.js').TextChannel?} channel The TextChannel to check.
+ * @param {import('discord.js').TextChannel?} notificationChannel The TextChannel to notify of missing permissions. Defaults to previous parameter.
+ * @returns {Boolean} Returns whether the bot has all required permissions.
  */
-GuildClient.prototype.checkTextPermissions = function () {
+GuildClient.prototype.checkTextPermissions = function (channel = this.boundTextChannel, notificationChannel = channel) {
   // Check that Snowboy has all necessary permissions in text channel
-  const missingPerms = Functions.checkTextPermissions(this.textChannel)
+  const missingPerms = Functions.checkTextPermissions(channel)
   if (missingPerms) {
     this.logger.debug('Missing permissions: %o', missingPerms)
     if (missingPerms.includes('SEND_MESSAGES')) return
-    this.sendMsg(
+    notificationChannel.send(
       [
         `${Emojis.error} ***Please ensure I have all the following permissions in your text channel! I won't completely work otherwise!***`,
         Functions.formatList(missingPerms)
@@ -202,14 +205,16 @@ GuildClient.prototype.checkTextPermissions = function () {
 /**
  * Checks the GuildClient has necessary permissions in the bound VoiceChannel.
  *
+ * @param {import('discord.js').VoiceChannel?} channel The VoiceChannel to check.
+ * @param {import('discord.js').TextChannel?} notificationChannel The TextChannel to notify of missing permissions. Defaults to boundTextChannel.
  * @returns {Boolean} Returns whether any permissions are missing.
  */
-GuildClient.prototype.checkVoicePermissions = function () {
+GuildClient.prototype.checkVoicePermissions = function (channel = this.voiceChannel, notificationChannel = this.boundTextChannel) {
   // Check that Snowboy has all necessary permissions in text channel and voice channel
-  const missingPerms = Functions.checkVoicePermissions(this.voiceChannel)
+  const missingPerms = Functions.checkVoicePermissions(channel)
   if (missingPerms) {
     this.logger.debug('Missing permissions: %o', missingPerms)
-    this.sendMsg(
+    notificationChannel.send(
       [
         `${Emojis.error} ***Please ensure I have all the following permissions in your voice channel! I won't completely work otherwise!***`,
         Functions.formatList(missingPerms)
@@ -227,11 +232,13 @@ GuildClient.prototype.checkVoicePermissions = function () {
  *
  * @param {import('discord.js').VoiceChannel} voiceChannel The VoiceChannel to join.
  * @fires GuildClient#connected
+ * @returns {import('discord.js').VoiceConnection} Returns the created VoiceConnection, if any.
  */
-GuildClient.prototype.joinVoiceChannel = function (voiceChannel) {
+GuildClient.prototype.joinVoiceChannel = async function (voiceChannel) {
   this.voiceChannel = voiceChannel
   if (!this.checkVoicePermissions()) return
-  voiceChannel.join().then(connection => {
+  try {
+    const connection = await voiceChannel.join()
     this.logger.info('Successfully connected!')
     this.logger.trace('Emitting connected event')
     /**
@@ -244,11 +251,12 @@ GuildClient.prototype.joinVoiceChannel = function (voiceChannel) {
     this.emit('connected', {
       connection: connection
     })
-  }).catch(e => {
+    return connection
+  } catch (error) {
     this.sendMsg(
       `${Emojis.error} ***Could not connect! \\;(***`
-    ).then(() => { throw e })
-  })
+    ).then(() => { throw error })
+  }
 }
 
 /**
@@ -280,6 +288,7 @@ GuildClient.prototype.leaveVoiceChannel = function () {
   this.memberClients.clear()
   this.logger.trace('Leaving channel')
   this.voiceChannel.leave()
+  this.boundTextChannel = null
   this.logger.debug('Successfully left')
   this.voiceChannel = null
   this.loopState = 0
