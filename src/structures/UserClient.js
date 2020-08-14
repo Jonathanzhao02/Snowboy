@@ -33,13 +33,13 @@ function UserClient (user) {
    * The UserSettings of this UserClient.
    * @type {import('./UserSettings')?}
    */
-  this.settings = null
+  this.settings = undefined
 
   /**
    * The User's impression level with Snowboy.
    * @type {Number?}
    */
-  this.impression = null
+  this.impression = undefined
 
   /**
    * The logger used for logging.

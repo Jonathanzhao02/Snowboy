@@ -18,7 +18,7 @@ module.exports = function (client) {
         guildClient.logger.info('Stopping SnowClient for %s', newPresence.member.displayName)
         const snowClient = guildClient.memberClients.get(userId).snowClient
         if (snowClient) snowClient.stop()
-        guildClient.memberClients.get(userId).snowClient = null
+        guildClient.memberClients.get(userId).snowClient = undefined
       }
 
       // If the bot has been disconnected, clean up the guildClient

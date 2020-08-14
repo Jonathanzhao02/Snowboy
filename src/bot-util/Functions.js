@@ -162,7 +162,7 @@ function validateURL (url) {
  * Checks permissions in a TextChannel and returns any missing.
  *
  * @param {Discord.TextChannel} channel The TextChannel where permissions are required.
- * @returns {String[]?} The array of missing text permissions or null if all permissions are granted.
+ * @returns {String[]?} The array of missing text permissions or undefined if all permissions are granted.
  */
 function checkTextPermissions (channel) {
   if (channel) {
@@ -186,7 +186,7 @@ function checkTextPermissions (channel) {
  * Checks permissions in a VoiceChannel and returns any missing.
  *
  * @param {*} channel The VoiceChannel where permissions are required.
- * @returns {String[]?} The array of missing voice permissions or null if all permissions are granted.
+ * @returns {String[]?} The array of missing voice permissions or undefined if all permissions are granted.
  */
 function checkVoicePermissions (channel) {
   if (channel) {

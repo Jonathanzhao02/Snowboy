@@ -17,7 +17,7 @@ const Ytsearch = require('yt-search')
  * Searches YouTube for videos from a query.
  *
  * @param {String} query The search query.
- * @returns {VideoConstruct?} A videoConstruct if a result is found, else null.
+ * @returns {VideoConstruct?} A videoConstruct if a result is found, else undefined.
  */
 async function querySearch (query) {
   // Attempt to get result from Youtube
@@ -44,7 +44,7 @@ async function querySearch (query) {
  * Searches YouTube for videos from a URL.
  *
  * @param {String} url The URL.
- * @returns {VideoConstruct?} A videoConstruct if a result is found, else null.
+ * @returns {VideoConstruct?} A videoConstruct if a result is found, else undefined.
  */
 async function urlSearch (url) {
   // Attempt to get info from url
@@ -111,7 +111,7 @@ async function playlistSearch (url) {
  * @param {String} query The search term to search for.
  * @param {String} requester The name of the requester.
  * @param {import('discord.js').TextChannel?} channel The TextChannel to notify through.
- * @returns {VideoConstruct | VideoConstruct[] | null} Returns the searched video(s), if any.
+ * @returns {VideoConstruct | VideoConstruct[] | undefined} Returns the searched video(s), if any.
  */
 async function search (query, requester, guildClient, channel) {
   // Add each video from Youtube playlist

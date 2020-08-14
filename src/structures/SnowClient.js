@@ -21,7 +21,7 @@ function SnowClient (memberClient, sensitivity) {
    * The Readable stream to read audio data from.
    * @type {Readable}
    */
-  this.stream = null
+  this.stream = undefined
 
   /**
    * Whether the SnowClient is currently processing a hotword.
@@ -140,7 +140,7 @@ SnowClient.prototype.stop = function () {
   this.stream.unpipe(this.detector)
   this.stream.removeAllListeners()
   this.stream.destroy()
-  this.stream = null
+  this.stream = undefined
 }
 
 module.exports = SnowClient

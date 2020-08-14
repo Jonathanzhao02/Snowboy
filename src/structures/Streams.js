@@ -36,7 +36,7 @@ TransformStream.prototype = Object.create(Transform.prototype)
  * @param {Function} next The next function to call.
  */
 TransformStream.prototype._transform = function (data, encoding, next) {
-  next(null, convertTo1Channel(data))
+  next(undefined, convertTo1Channel(data))
 }
 
 const SILENCE_FRAME = Buffer.from([0xF8, 0xFF, 0xFE])

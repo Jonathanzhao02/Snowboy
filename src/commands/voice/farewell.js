@@ -11,7 +11,7 @@ function farewell (memberClient, args) {
   const logger = memberClient.logger
   logger.info('Received farewell command')
   const userVoiceState = memberClient.member.voice
-  if (userVoiceState) userVoiceState.setChannel(null)
+  if (userVoiceState) userVoiceState.setChannel(undefined)
 
   if (memberClient.guildClient) {
     memberClient.snowClient.stop()
