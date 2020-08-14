@@ -11,17 +11,10 @@ function farewell (memberClient, args) {
   const logger = memberClient.logger
   logger.info('Received farewell command')
   const userVoiceState = memberClient.member.voice
-  if (userVoiceState) userVoiceState.setChannel(undefined)
-
-  if (memberClient.guildClient) {
-    memberClient.snowClient.stop()
-    memberClient.guildClient.memberClients.delete(memberClient.id)
-    memberClient.guildClient.sendMsg(
-      `${Emojis.farewell} **${Responses.randomFarewell()},** <@${memberClient.id}>!`
-    )
-  } else {
-    logger.warn('No guildClient found!')
-  }
+  if (userVoiceState) userVoiceState.setChannel(null)
+  memberClient.guildClient.sendMsg(
+    `${Emojis.farewell} **${Responses.randomFarewell()},** <@${memberClient.id}>!`
+  )
 }
 
 module.exports = {
