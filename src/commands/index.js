@@ -1,14 +1,23 @@
 const Fs = require('fs')
 const Path = require('path')
 
+/**
+ * bi: Usable in voice or text
+ * text: Only usable in text
+ * voice: Only usable in voice
+ * debug: Usable only by authorized users.
+ * easteregg: Usable in voice/text, not listed in help
+ * restricted: Usable in voice/text, only by members in the same voice channel
+ */
+
 // Commands
 const commands = new Map([
   ['bi', { path: './bi', map: new Map() }],
-  ['restricted', { path: './restricted', map: new Map() }],
-  ['voice', { path: './voice', map: new Map() }],
   ['text', { path: './text', map: new Map() }],
+  ['voice', { path: './voice', map: new Map() }],
   ['debug', { path: './debug', map: new Map() }],
-  ['easteregg', { path: './easteregg', map: new Map() }]
+  ['easteregg', { path: './easteregg', map: new Map() }],
+  ['restricted', { path: './restricted', map: new Map() }]
 ])
 
 const allCommands = new Map()

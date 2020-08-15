@@ -196,7 +196,8 @@ function checkVoicePermissions (channel) {
       Discord.Permissions.FLAGS.VIEW_CHANNEL,
       Discord.Permissions.FLAGS.CONNECT,
       Discord.Permissions.FLAGS.SPEAK,
-      Discord.Permissions.FLAGS.DEAFEN_MEMBERS
+      Discord.Permissions.FLAGS.DEAFEN_MEMBERS,
+      Discord.Permissions.FLAGS.MOVE_MEMBERS
     ])).toArray()
 
     if (voiceMissingPermissions.length > 0) return voiceMissingPermissions

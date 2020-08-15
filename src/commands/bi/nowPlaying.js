@@ -9,7 +9,7 @@ const { Emojis } = require('../../config')
  * @param {import('discord.js').Message?} msg The sent message.
  */
 function nowPlaying (memberClient, args, msg) {
-  const channel = msg ? msg.channel : undefined
+  const channel = msg?.channel
   const logger = memberClient.logger
   logger.info('Received now playing command')
   const video = memberClient.guildClient.guildPlayer.songQueuer[0]

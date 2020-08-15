@@ -66,4 +66,9 @@ MemberClient.prototype.sendResponse = function (func, channel) {
   return this.guildClient.sendMsg(this.userClient.getResponse(func), channel)
 }
 
+MemberClient.prototype.stopListening () {
+  this.snowClient?.stop()
+  this.snowClient = null
+}
+
 module.exports = MemberClient

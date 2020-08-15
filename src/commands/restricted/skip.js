@@ -8,7 +8,7 @@ const { Emojis } = require('../../config')
  * @param {import('discord.js').Message?} msg The sent message.
  */
 function skip (memberClient, args, msg) {
-  const channel = msg ? msg.channel : undefined
+  const channel = msg?.channel
   const logger = memberClient.logger
   logger.info('Received skip command')
   if (!memberClient.guildClient.playing) {
