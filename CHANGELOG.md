@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.8.1 (PR #34)
+More Code Cleanup
+* Added optional chaining
+* Removed duplicate logic, particularly in VoiceStateUpdate
+* Refactored cleanup logic to GuildClient
+* Added additional required permission
+
 ## v0.8.0 (PR #33)
 Major bug fixes, code cleanup, and new commands!
 * New commands!
