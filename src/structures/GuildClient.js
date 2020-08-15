@@ -271,7 +271,7 @@ GuildClient.prototype.leaveVoiceChannel = function () {
     return false
   }
 
-  this.logger.debug('Leaving')
+  this.logger.info('Leaving voice channel')
   this.logger.trace('Emitting disconnected event')
   /**
    * Disconnected event.
@@ -292,6 +292,11 @@ GuildClient.prototype.leaveVoiceChannel = function () {
   this.logger.debug('Successfully left')
   this.voiceChannel = null
   this.loopState = 0
+
+  if (this.delete) {
+    Common.botClient.guildClients.delete(this.id)
+  }
+
   return true
 }
 
