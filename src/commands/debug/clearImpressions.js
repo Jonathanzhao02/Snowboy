@@ -1,5 +1,4 @@
 const Common = require('../../bot-util/Common')
-const Keyv = require('../../bot-util/Keyv')
 
 /**
  * Clears the impressions of all tracked users in a server.
@@ -16,10 +15,7 @@ function clearImpressions (memberClient, args, msg) {
     members.forEach(pair => {
       const member = pair[1]
       logger.debug('Deleting impression of %s', member.id)
-      if (Common.botClient.userClients.get(member.id)) {
-        Common.botClient.userClients.get(member.id).impression = 0
-      }
-      Keyv.setImpression(member.id, 0)
+      Common.botClient.userClients.get(member.id)?.setImpression(0) // eslint-disable-line no-unused-expressions
     })
     memberClient.guildClient.sendMsg(
       'Cleared all guild impressions',
