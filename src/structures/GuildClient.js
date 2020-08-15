@@ -148,7 +148,7 @@ GuildClient.prototype.startTimeout = function () {
   this.logger.info('Starting expiration timer')
   this.lastCalled = Date.now()
   if (this.timeoutId) Common.botClient.clearTimeout(this.timeoutId)
-  this.timeoutId = Common.botClient.setTimeout(() => { this.cleanupGuildClient() }, Timeouts.TIMEOUT + 500)
+  this.timeoutId = Common.botClient.setTimeout(() => { this.cleanUp() }, Timeouts.TIMEOUT + 500)
 }
 
 /**
@@ -157,7 +157,7 @@ GuildClient.prototype.startTimeout = function () {
  * If the GuildClient has an active voice connection, notify through the TextChannel and mark the GuildClient
  * for deletion to be handled by the voiceStateUpdate event before leaving the voice channel.
  */
-GuildClient.prototype.cleanupGuildClient = function () {
+GuildClient.prototype.cleanUp = function () {
   if (Date.now() - this.lastCalled >= Timeouts.GUILD_TIMEOUT) {
     this.logger.debug('Attempting to clean up guildClient')
     // If the guild is currently connected, is not playing music, and has an active TextChannel,

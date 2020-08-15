@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const { assert } = require('chai')
 
 describe('Array', function () {
@@ -9,3 +10,5 @@ describe('Array', function () {
     })
   })
 })
+
+/* eslint-disable no-undef */
