@@ -33,12 +33,12 @@ function join (memberClient, args, msg) {
 
   // Attempt to join and handle the connection, or error
   logger.trace('Attempting to join')
-  memberClient.guildClient.joinVoiceChannel(msg.member.voice.channel).then(connection => {
-    // Assign the boundTextChannel
-    if (!memberClient.guildClient.boundTextChannel || memberClient.guildClient.boundTextChannel.deleted) {
-      memberClient.guildClient.boundTextChannel = msg.channel
-    }
+  memberClient.guildClient.connect(msg.member.voice.channel).then(connection => {
     if (connection) {
+      // Assign the boundTextChannel
+      if (!memberClient.guildClient.boundTextChannel || memberClient.guildClient.boundTextChannel.deleted) {
+        memberClient.guildClient.boundTextChannel = msg.channel
+      }
       // Greet the user
       memberClient.guildClient.sendMsg(
         `${Emojis.greeting} **${Responses.randomGreeting()},** <@${memberClient.id}>!`,

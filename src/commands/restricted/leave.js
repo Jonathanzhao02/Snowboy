@@ -14,7 +14,8 @@ function leave (memberClient, args, msg) {
   logger.info('Received leave command')
 
   // If successfully left
-  if (memberClient.guildClient.leaveVoiceChannel()) {
+  if (memberClient.guildClient.connection) {
+    memberClient.guildClient.disconnect()
     logger.info('Successfully left')
     memberClient.guildClient.sendMsg(
       `${Emojis.farewell} **${Responses.randomFarewell()},** <@${memberClient.id}>!`,

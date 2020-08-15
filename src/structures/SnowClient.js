@@ -138,7 +138,6 @@ SnowClient.prototype.stop = function () {
   if (!this.stream) return
   this.stream.end()
   this.stream.unpipe(this.detector)
-  this.stream.removeAllListeners()
   this.stream.destroy()
   this.stream = null
 }

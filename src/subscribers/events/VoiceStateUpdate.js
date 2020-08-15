@@ -1,4 +1,4 @@
-const { Timeouts, Emojis } = require('../../config')
+const { Emojis } = require('../../config')
 
 module.exports = function (client) {
   client.on('voiceStateUpdate', (oldPresence, newPresence) => {
@@ -12,27 +12,18 @@ module.exports = function (client) {
       (!newPresence.channelID || newPresence.channelID !== guildClient.voiceChannel.id)) {
       guildClient.logger.info('User %s has left the voice channel', newPresence.member.displayName)
 
-      // If user is being listened to, stop listening
-      guildClient.memberClients.get(userId)?.stopListening() // eslint-disable-line no-unused-expressions
-
-      // If the bot has been disconnected, clean up the guildClient
-      if (userId === client.user.id && !newPresence.channelID) {
-        guildClient.leaveVoiceChannel()
-      }
+      // If user is tracked, start cleanup timeout.
+      guildClient.memberClients.get(userId)?.startTimeout() // eslint-disable-line no-unused-expressions
 
       // If the bot has been left alone in a channel, wait a few seconds before leaving
-      if (oldPresence.channel.members.size === 1 && userId !== client.user.id) {
-        guildClient.logger.info('Started alone timeout timer')
-        client.setTimeout(() => {
-          // Check again that the channel exists and is empty before leaving
-          if (oldPresence.channel && oldPresence.channel.members.size === 1) {
-            guildClient.logger.info('Leaving channel, only member remaining')
-            guildClient.sendMsg(
-              `${Emojis.sad} **I'm leaving, I'm all by myself!**`
-            )
-            guildClient.leaveVoiceChannel()
-          }
-        }, Timeouts.ALONE_TIMEOUT + 500)
+      if (guildClient.voiceChannel.members.size === 1 && userId !== client.user.id) {
+        guildClient.startAloneTimeout()
+      }
+
+      // If the bot has been moved
+      if (userId === client.user.id && newPresence.channelID !== guildClient.voiceChannel.id) {
+        guildClient.sendMsg(`${Emojis.angry} **Don't move me from my home!**`)
+        newPresence.channel.leave()
       }
     }
   })

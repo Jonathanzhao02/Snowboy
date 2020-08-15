@@ -40,8 +40,6 @@ function GuildPlayer (guildClient) {
 
   guildClient.on('disconnected', () => {
     this.logger.debug('Received GuildClient#disconnected event')
-    if (this.connection.dispatcher) this.end()
-    this.logger.trace('Disconnecting')
     this.connection = null
   })
 }
@@ -133,11 +131,15 @@ GuildPlayer.prototype.idle = function () {
 GuildPlayer.prototype.play = function (stream, callback, opts) {
   this.logger.trace('Playing stream over connection')
   const dispatcher = this.connection.play(stream, opts)
-  dispatcher.on('finish', () => {
+  const func = () => {
+    dispatcher.removeListener('close', func)
+    dispatcher.removeListener('finish', func)
     this.logger.trace('Finished dispatcher')
     stream.destroy()
     if (callback) callback()
-  })
+  }
+  dispatcher.once('close', func)
+  dispatcher.once('finish', func)
 }
 
 module.exports = GuildPlayer

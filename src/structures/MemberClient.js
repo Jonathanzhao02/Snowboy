@@ -1,4 +1,5 @@
 const Common = require('../bot-util/Common')
+const { Timeouts } = require('../config')
 
 /**
  * Wrapper object for a GuildMember so the bot is more easily able to access related resources.
@@ -40,6 +41,18 @@ function MemberClient (member, guildClient) {
   this.guildClient = guildClient
 
   /**
+   * The ID of the timeout interval function.
+   * @type {Number?}
+   */
+  this.timeoutId = null
+
+  /**
+   * The timestamp of last activity (voice, command).
+   * @type {Number}
+   */
+  this.lastCalled = Date.now() - 500
+
+  /**
    * The logger used for logging.
    * @type {import('pino')}
    */
@@ -66,9 +79,35 @@ MemberClient.prototype.sendResponse = function (func, channel) {
   return this.guildClient.sendMsg(this.userClient.getResponse(func), channel)
 }
 
-MemberClient.prototype.stopListening () {
-  this.snowClient?.stop()
+/**
+ * Ends the listening SnowClient, if it exists.
+ */
+MemberClient.prototype.stopListening = function () {
+  this.logger.debug('Stopping SnowClient')
+  this.snowClient?.stop() // eslint-disable-line no-unused-expressions
   this.snowClient = null
+}
+
+/**
+ * Starts timeout for cleanup.
+ */
+MemberClient.prototype.startTimeout = function () {
+  this.logger.debug('Starting timeout')
+  this.stopListening()
+  this.lastCalled = Date.now()
+  if (this.timeoutId) Common.botClient.clearTimeout(this.timeoutId)
+  this.timeoutId = Common.botClient.setTimeout(() => { this.cleanUp() }, Timeouts.MEMBER_TIMEOUT + 500)
+}
+
+/**
+ * Cleans up and dereferences this MemberClient.
+ */
+MemberClient.prototype.cleanUp = function () {
+  if (Date.now() - this.lastCalled >= Timeouts.MEMBER_TIMEOUT) {
+    this.logger.info('Cleaning up')
+    this.stopListening()
+    this.guildClient.memberClients.delete(this.id)
+  }
 }
 
 module.exports = MemberClient
