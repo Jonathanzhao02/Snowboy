@@ -50,7 +50,7 @@ function MemberClient (member, guildClient) {
    * The timestamp of last activity (voice, command).
    * @type {Number}
    */
-  this.lastCalled = Date.now() - 500
+  this.lastCalled = Date.now() - 2000
 
   /**
    * The logger used for logging.

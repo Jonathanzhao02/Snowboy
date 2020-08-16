@@ -53,7 +53,7 @@ function GuildClient (guild) {
    * The timestamp of the last command execution.
    * @type {Number}
    */
-  this.lastCalled = Date.now()
+  this.lastCalled = Date.now() - 2000
 
   /**
    * Whether the purge command is active in this Guild.
