@@ -12,7 +12,7 @@ function joke (memberClient, args, msg) {
   const channel = msg?.channel
   const logger = memberClient.logger
   logger.info('Received joke command')
-  DadJoke.get(joke => {
+  DadJoke.get().then(joke => {
     memberClient.guildClient.sendMsg(
       `${Emojis.joyful} **${joke}**`,
       channel

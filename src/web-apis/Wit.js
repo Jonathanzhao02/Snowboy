@@ -69,51 +69,50 @@ function getText (pcmData, callback, handler) {
  *
  * @param {ReadableStream} pcmData The ReadableStream containing raw audio.
  * @param {EventEmitter} flag The emitter that signifies when to stop reading from the stream.
- * @param {Function} callback The callback that receives the text after it is returned.
- * @param {Function} handler The handler for if the HTTP request errors.
+ * @returns {Promise<Object>} Returns the result of the Wit.ai intent and speech recognition.
  */
-function getStreamText (stream, flag, callback, handler) {
-  if (!handler) handler = console.log
-  if (!callback) callback = console.log
+function getStreamText (stream, flag) {
+  return new Promise((resolve, reject) => {
+    const headers = {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'audio/raw;encoding=signed-integer;bits=16;rate=16000;endian=little;',
+      'Transfer-encoding': 'chunked'
+    }
+    const method = 'POST'
+    const apiVersion = '20200513'
+    const path = `/speech?v=${apiVersion}`
+    const host = 'api.wit.ai'
 
-  const headers = {
-    Authorization: `Bearer ${accessToken}`,
-    'Content-Type': 'audio/raw;encoding=signed-integer;bits=16;rate=16000;endian=little;',
-    'Transfer-encoding': 'chunked'
-  }
-  const method = 'POST'
-  const apiVersion = '20200513'
-  const path = `/speech?v=${apiVersion}`
-  const host = 'api.wit.ai'
+    const options = {
+      host: host,
+      path: path,
+      headers: headers,
+      method: method
+    }
 
-  const options = {
-    host: host,
-    path: path,
-    headers: headers,
-    method: method
-  }
+    const req = http.request(options, resp => {
+      resp.setEncoding('utf8')
+      let message = ''
 
-  const req = http.request(options, resp => {
-    resp.setEncoding('utf8')
-    let message = ''
+      resp.on('data', chunk => {
+        message += chunk
+      })
 
-    resp.on('data', chunk => {
-      message += chunk
+      resp.on('end', () => {
+        if (resp.statusCode !== 200) reject(new Error(`Invalid status code ${resp.statusCode}`))
+        else resolve(JSON.parse(message))
+      })
+
+      resp.on('error', (err) => {
+        reject(err)
+      })
     })
+    stream.pipe(req)
 
-    resp.on('end', () => {
-      callback(JSON.parse(message))
+    flag.once('finish', () => {
+      stream.unpipe(req)
+      req.end()
     })
-
-    resp.on('error', (err) => {
-      handler(err)
-    })
-  })
-  stream.pipe(req)
-
-  flag.once('finish', () => {
-    stream.unpipe(req)
-    req.end()
   })
 }
 

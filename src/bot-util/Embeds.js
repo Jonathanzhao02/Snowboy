@@ -79,6 +79,16 @@ function createImageEmbed (result, username) {
 }
 
 /**
+ * Creates an embed for a pokemon.
+ *
+ * @param {Object} pokemon The object containing all pokemon information.
+ * @returns {Discord.MessageEmbed} Returns a message embed detailing the pokemon.
+ */
+function createPokemonEmbed (pokemon) {
+  return new Discord.MessageEmbed()
+}
+
+/**
  * Creates an embed detailing the bot.
  *
  * @returns {Discord.MessageEmbed} Returns a message embed detailing the bot.
@@ -180,6 +190,7 @@ module.exports = {
   createQueueEmbed: createQueueEmbed,
   createSearchEmbed: createSearchEmbed,
   createImageEmbed: createImageEmbed,
+  createPokemonEmbed: createPokemonEmbed,
   createAboutEmbed: createAboutEmbed,
   createSettingsEmbed: createSettingsEmbed,
   createHelpEmbed: createHelpEmbed,

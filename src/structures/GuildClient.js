@@ -1,6 +1,7 @@
 const GuildSettings = require('./GuildSettings')
 const Common = require('../bot-util/Common')
 const Functions = require('../bot-util/Functions')
+const Strings = require('../bot-util/Strings')
 const { Timeouts, Emojis } = require('../config')
 const { EventEmitter } = require('events')
 const GuildPlayer = require('./GuildPlayer')
@@ -131,7 +132,7 @@ GuildClient.prototype.sendMsg = async function (msg, channel = this.boundTextCha
   }
   if (!this.checkTextPermissions(channel)) return
   this.logger.debug('Attempting to send %o to %s', msg, channel.name)
-  if (this.settings.mentions === false) msg = await Functions.replaceMentions(msg, this.guild)
+  if (this.settings.mentions === false) msg = await Strings.replaceMentions(msg, this.guild)
   return channel.send(msg, opts)
 }
 
@@ -201,7 +202,7 @@ GuildClient.prototype.checkTextPermissions = function (channel = this.boundTextC
     notificationChannel.send(
       [
         `${Emojis.error} ***Please ensure I have all the following permissions in your text channel! I won't completely work otherwise!***`,
-        Functions.formatList(missingPerms)
+        Strings.formatList(missingPerms)
       ]
     )
 
@@ -226,7 +227,7 @@ GuildClient.prototype.checkVoicePermissions = function (channel = this.voiceChan
     notificationChannel.send(
       [
         `${Emojis.error} ***Please ensure I have all the following permissions in your voice channel! I won't completely work otherwise!***`,
-        Functions.formatList(missingPerms)
+        Strings.formatList(missingPerms)
       ]
     )
 
