@@ -132,7 +132,7 @@ GuildClient.prototype.sendMsg = async function (msg, channel = this.boundTextCha
   }
   if (!this.checkTextPermissions(channel)) return
   this.logger.debug('Attempting to send %o to %s', msg, channel.name)
-  if (this.settings.mentions === false) msg = await Strings.replaceMentions(msg, this.guild)
+  if (this.settings.mentions === false) msg = await Strings.replaceMentions(msg, this.guild.members)
   return channel.send(msg, opts)
 }
 

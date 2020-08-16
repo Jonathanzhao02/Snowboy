@@ -2,7 +2,6 @@ const Common = require('./Common')
 const Levenshtein = require('fastest-levenshtein')
 const Fs = require('fs')
 const Functions = require('./Functions')
-const Discord = require('discord.js')
 const CsvParse = require('csv-parse/lib/sync')
 const Pokemon = CsvParse(Fs.readFileSync(Common.defaultResdir + '/pokemon.csv').toString('utf-8')).map(val => val[1])
 
@@ -93,21 +92,21 @@ function formatList (list) {
 /**
  * Replaces the mentions in a message with their display name.
  *
- * @param {String[] | String} msg The message(s) to be formatted.
- * @param {Discord.Guild} guild The Guild whose members cache is to be searched for display names.
+ * @param {String[] | String | import('discord.js').MessageEmbed} msg The message(s) to be formatted.
+ * @param {import('discord.js').GuildMemberManager} memberManager The manager to be searched for display names.
  * @returns {String[] | String} Returns the formatted message(s).
  */
-async function replaceMentions (msg, guild) {
+async function replaceMentions (msg, memberManager) {
   if (msg instanceof Array) {
     await Functions.forEachAsync(msg, async (val, index) => {
-      msg[index] = await replaceMentions(val, guild)
+      msg[index] = await replaceMentions(val, memberManager)
     })
     return msg
-  } else if (msg instanceof Discord.MessageEmbed) {
+  } else if (msg.constructor.name !== 'String') {
     return msg
   } else {
     const regex = /<@!?(\d+)>/gi
-    return replaceAsync(msg, regex, async match => { return (await Functions.findMember(match, guild)).displayName })
+    return replaceAsync(msg, regex, async match => { return (await memberManager.fetch(match.match(/^<@!?(\d+)>$/)[1])).displayName })
   }
 }
 

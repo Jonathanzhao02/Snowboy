@@ -92,24 +92,10 @@ function checkVoicePermissions (channel) {
   }
 }
 
-/**
- * Finds the GuildMember object associated with a mention string.
- *
- * @param {String} str The mention string.
- * @param {Discord.Guild} guild The Guild whose members cache is to be searched.
- * @returns {Discord.GuildMember} Returns the first GuildMember associated with that identifier.
- */
-async function findMember (str, guild) {
-  const mentionId = str.match(/^<@!?(\d+)>$/)
-  if (!mentionId) return
-  return await guild.members.fetch(mentionId[1])
-}
-
 module.exports = {
   random: random,
   forEachAsync: forEachAsync,
   validateURL: validateURL,
   checkTextPermissions: checkTextPermissions,
-  checkVoicePermissions: checkVoicePermissions,
-  findMember: findMember
+  checkVoicePermissions: checkVoicePermissions
 }
