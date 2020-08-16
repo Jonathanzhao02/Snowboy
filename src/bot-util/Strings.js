@@ -3,8 +3,8 @@ const Levenshtein = require('fastest-levenshtein')
 const Fs = require('fs')
 const Functions = require('./Functions')
 const Discord = require('discord.js')
-
-const Pokemon = Fs.readFileSync(Common.defaultResdir + '/pokemon.txt').toString('utf-8').split('\n')
+const CsvParse = require('csv-parse/lib/sync')
+const Pokemon = CsvParse(Fs.readFileSync(Common.defaultResdir + '/pokemon.csv').toString('utf-8')).map(val => val[1])
 
 /**
  * Function to asynchronously replace mentions in a message.
@@ -112,6 +112,17 @@ async function replaceMentions (msg, guild) {
 }
 
 /**
+ * Capitalizes a string split by spaces to look more proper.
+ *
+ * @param {String | String[]} str The string or string array to capitalize.
+ * @returns {String} Returns the capitalized string.
+ */
+function capitalize (str) {
+  if (str instanceof Array) return str.map(capitalize)
+  else return str.split(' ').map(val => val.charAt(0).toUpperCase() + val.slice(1)).join(' ')
+}
+
+/**
  * Beautifies (makes cursive) a string.
  *
  * @param {String} str The string to beautify.
@@ -119,7 +130,7 @@ async function replaceMentions (msg, guild) {
  */
 function beautify (str) {
   let res = ''
-  const capitalPhrase = str.split(' ').map(val => val.charAt(0).toUpperCase() + val.slice(1)).join(' ')
+  const capitalPhrase = capitalize(str)
   capitalPhrase.split('').forEach(val => {
     res += toScript(val)
   })
@@ -130,5 +141,6 @@ module.exports = {
   closestPokemon: closestPokemon,
   formatList: formatList,
   replaceMentions: replaceMentions,
+  capitalize: capitalize,
   beautify: beautify
 }
