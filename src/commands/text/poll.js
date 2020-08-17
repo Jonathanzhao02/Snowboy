@@ -10,7 +10,7 @@ const { Emojis, Timeouts } = require('../../config')
 async function poll (memberClient, args, msg) {
   const logger = memberClient.logger
   logger.info('Received poll command')
-  let channel = memberClient.guildClient.boundTextChannel
+  let channel = msg.channel
   const mentionedChannel = msg.mentions.channels.first()
   if (mentionedChannel && mentionedChannel.toString() === args[0]) {
     channel = mentionedChannel
@@ -29,15 +29,16 @@ async function poll (memberClient, args, msg) {
     `**POLL:** *${args.join(' ')}*`,
     channel
   )
-  await message.react(Emojis.y)
-  await message.react(Emojis.n)
-  const reactions = await message.awaitReactions(reaction => reaction.emoji.name === Emojis.y || reaction.emoji.name === Emojis.n, { time: duration })
-  const ySize = reactions.get(Emojis.y).count - 1
-  const nSize = reactions.get(Emojis.n).count - 1
-  memberClient.guildClient.sendMsg(
-    `**Results** \n *Yes:* \`${ySize}\` \n *No:* \`${nSize}\``,
-    msg.channel
-  )
+  message.awaitReactions(reaction => reaction.emoji.name === Emojis.y || reaction.emoji.name === Emojis.n, { time: duration }).then(reactions => {
+    const ySize = reactions.get(Emojis.y)?.count - 1
+    const nSize = reactions.get(Emojis.n)?.count - 1
+    memberClient.guildClient.sendMsg(
+      `**Results** \n *Yes:* \`${ySize}\` \n *No:* \`${nSize}\``,
+      msg.channel
+    )
+  })
+  message.react(Emojis.y)
+  message.react(Emojis.n)
 }
 
 module.exports = {
