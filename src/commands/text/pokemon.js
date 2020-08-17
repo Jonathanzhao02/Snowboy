@@ -13,7 +13,7 @@ const { Emojis } = require('../../config')
 function pokemon (memberClient, args, msg) {
   const logger = memberClient.logger
   logger.info('Received pokemon command')
-  const name = args.shift()
+  const name = args.join(' ')
   const query = Strings.closestPokemon(name).toLowerCase()
   memberClient.guildClient.sendMsg(
     query === name ? `${Emojis.search} ***Searching*** \`${query}\`` : `${Emojis.confused} ***I think you meant*** \`${query}\`...`,
@@ -22,6 +22,12 @@ function pokemon (memberClient, args, msg) {
   PokeApi.get(query).then(pokemon => {
     memberClient.guildClient.sendMsg(
       Embeds.createPokemonEmbed(pokemon),
+      msg.channel
+    )
+  }).catch(err => {
+    logger.error(err)
+    memberClient.guildClient.sendMsg(
+      `${Emojis.error} *Could not find ${query}...*`,
       msg.channel
     )
   })

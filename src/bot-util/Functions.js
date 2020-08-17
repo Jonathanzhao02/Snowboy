@@ -35,6 +35,7 @@ async function forEachAsync (ar, asyncFn) {
  * Checks that a URL returns a 200 status code.
  *
  * @param {String} url The https URL to access.
+ * @throws {Error} Throws an error if the status code is not 200.
  * @returns {Promise} Returns a Promise that resolves if successful connection.
  */
 function validateURL (url) {
