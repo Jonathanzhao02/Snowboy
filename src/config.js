@@ -14,7 +14,7 @@ const DEFAULT_MENTIONS = true
 const DEFAULT_SENSITIVITY = '0.45'
 
 // Time before Snowboy automatically disconnects due to inactivity
-const GUILD_TIMEOUT = 1800000
+const GUILD_TIMEOUT = 300000
 
 // Time before a MemberClient is automatically cleaned up due to inactivity
 const MEMBER_TIMEOUT = 300000

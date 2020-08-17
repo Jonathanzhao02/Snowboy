@@ -63,6 +63,12 @@ function GuildClient (guild) {
   this.purging = false
 
   /**
+   * The active poll message.
+   * @type {import('discord.js').Message}
+   */
+  this.activePoll = null
+
+  /**
    * The ID of the timeout interval function.
    * @type {Number?}
    */
@@ -179,7 +185,7 @@ GuildClient.prototype.cleanUp = function () {
         `${Emojis.happy} **It seems nobody needs me right now, so I'll be headed out. Call me when you do!**`
       )
       this.disconnect()
-    } else {
+    } else if (!this.activePoll) {
       this.logger.debug('Deleting guildClient')
       Common.botClient.guildClients.delete(this.guild.id)
     }

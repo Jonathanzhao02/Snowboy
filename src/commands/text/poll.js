@@ -30,6 +30,7 @@ async function poll (memberClient, args, msg) {
     `**POLL:** *${pollPrompt}*`,
     channel
   )
+  memberClient.guildClient.activePoll = message
   message.awaitReactions(reaction => reaction.emoji.name === Emojis.y || reaction.emoji.name === Emojis.n, { time: duration }).then(reactions => {
     const ySize = reactions.get(Emojis.y)?.count - 1
     const nSize = reactions.get(Emojis.n)?.count - 1
@@ -37,6 +38,7 @@ async function poll (memberClient, args, msg) {
       `> ${pollPrompt}\n **Results** \n *Yes:* \`${ySize}\` \n *No:* \`${nSize}\``,
       msg.channel
     )
+    if (memberClient.guildClient.activePoll === message) memberClient.guildClient.activePoll = null
   })
   message.react(Emojis.y)
   message.react(Emojis.n)
