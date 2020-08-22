@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.8.2 (PR #35)
+Hopefully last code cleanup, new commands, more.
+* Added new pokemon command
+* Added new joke command
+* Added timeouts to MemberClients
+* Refactored String related functions, `Functions` => `Strings`
+* Edited config constants
+* Major code cleanups, bug fixes, streamlining
+
 ## v0.8.1 (PR #34)
 More Code Cleanup
 * Added optional chaining
