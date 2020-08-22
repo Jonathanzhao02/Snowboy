@@ -109,6 +109,7 @@ function GuildClient (guild) {
 
 // Extend the EventEmitter
 GuildClient.prototype = Object.create(EventEmitter.prototype)
+GuildClient.prototype.constructor = GuildClient
 
 /**
  * Initializes all database-related values and adds the GuildClient to the guildClients Map.
@@ -126,7 +127,7 @@ GuildClient.prototype.init = async function () {
  *
  * Also takes into consideration the GuildSettings.
  *
- * @param {String[] | String | import('discord.js').MessageEmbed[] | import('discord.js').MessageEmbed} msg The message to send.
+ * @param {String[] | String | import('discord.js').MessageEmbed} msg The message to send.
  * @param {Object?} opts The options to send the message with.
  * @param {import('discord.js').TextChannel} channel The TextChannel to send the message through.
  * @returns {Promise<import('discord.js').Message[] | import('discord.js').Message>} Returns a promise for the sent messages.

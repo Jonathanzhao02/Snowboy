@@ -10,7 +10,7 @@ const Embeds = require('../../bot-util/Embeds')
 function help (memberClient, args, msg) {
   const logger = memberClient.logger
   logger.info('Received help command')
-  memberClient.member.user.send(Embeds.createHelpEmbed(require('../index').all, args[0]))
+  memberClient.userClient.sendMsg(Embeds.createHelpEmbed(require('../index').all, args[0]))
 }
 
 module.exports = {

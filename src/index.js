@@ -13,3 +13,12 @@ if (process.argv.includes('-t') || process.argv.includes('--test')) {
 } else {
   client.login(process.env.SNOWBOY_BOT_TOKEN)
 }
+
+/**
+ * TODO:
+ * Allow user setting modification in DMs
+ * Add command cooldown to DMs
+ * Add usage checking
+ * Add requests
+ * Migrate to CommandContexts
+ */

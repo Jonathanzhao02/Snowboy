@@ -27,6 +27,7 @@ function TransformStream (source, options) {
 }
 
 TransformStream.prototype = Object.create(Transform.prototype)
+TransformStream.prototype.constructor = TransformStream
 
 /**
  * Transforms data to 1 channel.
@@ -49,6 +50,7 @@ function Silence () {
 }
 
 Silence.prototype = Object.create(Readable.prototype)
+Silence.prototype.constructor = Silence
 
 /**
  * Pushes a Buffer representing a silence frame.

@@ -49,6 +49,7 @@ function SongQueuer (player) {
 }
 
 SongQueuer.prototype = Object.create(Array.prototype)
+SongQueuer.prototype.constructor = SongQueuer
 
 /**
  * Plays a song from the queue.
