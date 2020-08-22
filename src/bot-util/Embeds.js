@@ -4,6 +4,7 @@ const GuildSettings = require('../structures/GuildSettings')
 const UserSettings = require('../structures/UserSettings')
 const { Emojis } = require('../config')
 const Common = require('./Common')
+const Strings = require('./Strings')
 
 /**
  * Creates an embed for a video.
@@ -76,6 +77,28 @@ function createImageEmbed (result, username) {
     .setURL(result.url)
     .setImage(result.url)
     .setFooter(`Requested by ${username}`)
+}
+
+/**
+ * Creates an embed for a pokemon.
+ *
+ * @param {Object} pokemon The object containing all pokemon information.
+ * @returns {Discord.MessageEmbed} Returns a message embed detailing the pokemon.
+ */
+function createPokemonEmbed (pokemon) {
+  const embed = new Discord.MessageEmbed()
+    .setColor('#ffff00')
+    .setTitle(Strings.capitalize(pokemon.name))
+    .setThumbnail(pokemon.sprites.front_default)
+    .setURL(`https://bulbapedia.bulbagarden.net/wiki/${pokemon.name}_(Pok%C3%A9mon)`)
+    .addField('**Types**', Strings.capitalize(pokemon.types.join(', ')))
+    .addField('**Evolves From**', Strings.capitalize(pokemon.evolves_from || 'none'), true)
+    .addField('**Evolves To**', Strings.capitalize(pokemon.evolves_to.join(', ') || 'none'), true)
+    .addField('**Abilities**', Strings.capitalize(pokemon.abilities.join(', ')))
+  pokemon.stats.forEach(val => {
+    embed.addField(`**${Strings.capitalize(val.name)}:**`, `Base: ${val.base} EV: ${val.ev}`)
+  })
+  return embed
 }
 
 /**
@@ -180,6 +203,7 @@ module.exports = {
   createQueueEmbed: createQueueEmbed,
   createSearchEmbed: createSearchEmbed,
   createImageEmbed: createImageEmbed,
+  createPokemonEmbed: createPokemonEmbed,
   createAboutEmbed: createAboutEmbed,
   createSettingsEmbed: createSettingsEmbed,
   createHelpEmbed: createHelpEmbed,

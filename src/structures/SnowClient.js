@@ -89,14 +89,13 @@ SnowClient.prototype.hotword = function (index, hotword, buffer) {
 
   const flag = new EventEmitter()
   // Get the text of the audio stream from Wit.ai
-  Wit.getStreamText(this.stream, flag, (finalResult) => {
+  Wit.getStreamText(this.stream, flag).then(finalResult => {
     this.triggered = false
     this.memberClient.logger.trace('Emitted result event')
     this.memberClient.logger.debug('Received result')
     this.memberClient.logger.debug(finalResult)
     this.emit('result', finalResult, this.memberClient)
-  },
-  (error) => {
+  }).catch((error) => {
     this.triggered = false
     this.memberClient.logger.trace('Emitted error event')
     this.memberClient.logger.warn('Wit.ai failed')
@@ -138,7 +137,6 @@ SnowClient.prototype.stop = function () {
   if (!this.stream) return
   this.stream.end()
   this.stream.unpipe(this.detector)
-  this.stream.removeAllListeners()
   this.stream.destroy()
   this.stream = null
 }

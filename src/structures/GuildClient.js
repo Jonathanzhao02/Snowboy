@@ -1,6 +1,7 @@
 const GuildSettings = require('./GuildSettings')
 const Common = require('../bot-util/Common')
 const Functions = require('../bot-util/Functions')
+const Strings = require('../bot-util/Strings')
 const { Timeouts, Emojis } = require('../config')
 const { EventEmitter } = require('events')
 const GuildPlayer = require('./GuildPlayer')
@@ -39,7 +40,7 @@ function GuildClient (guild) {
 
   /**
    * The Map of all MemberClients associated with the Guild, mapped by ID.
-   * @type {Map<String, MemberClient>}
+   * @type {Map<String, import('./MemberClient')>}
    */
   this.memberClients = new Map()
 
@@ -56,16 +57,16 @@ function GuildClient (guild) {
   this.lastCalled = Date.now() - 2000
 
   /**
-   * Whether this GuildClient is marked for deletion upon disconnect.
-   * @type {Boolean}
-   */
-  this.delete = false
-
-  /**
    * Whether the purge command is active in this Guild.
    * @type {Boolean}
    */
   this.purging = false
+
+  /**
+   * The active poll message.
+   * @type {import('discord.js').Message}
+   */
+  this.activePoll = null
 
   /**
    * The ID of the timeout interval function.
@@ -137,7 +138,7 @@ GuildClient.prototype.sendMsg = async function (msg, channel = this.boundTextCha
   }
   if (!this.checkTextPermissions(channel)) return
   this.logger.debug('Attempting to send %o to %s', msg, channel.name)
-  if (this.settings.mentions === false) msg = await Functions.replaceMentions(msg, this.guild)
+  if (this.settings.mentions === false) msg = await Strings.replaceMentions(msg, this.guild.members)
   return channel.send(msg, opts)
 }
 
@@ -148,18 +149,34 @@ GuildClient.prototype.startTimeout = function () {
   this.logger.info('Starting expiration timer')
   this.lastCalled = Date.now()
   if (this.timeoutId) Common.botClient.clearTimeout(this.timeoutId)
-  this.timeoutId = Common.botClient.setTimeout(() => { this.cleanUp() }, Timeouts.TIMEOUT + 500)
+  this.timeoutId = Common.botClient.setTimeout(() => { this.cleanUp() }, Timeouts.GUILD_TIMEOUT + 500)
 }
 
 /**
- * Deletes the GuildClient if it has been inactive for a certain amount of time.
+ * Starts the timeout for leaving after being alone in a VoiceChannel.
+ */
+GuildClient.prototype.startAloneTimeout = function () {
+  this.logger.info('Starting alone timer')
+  Common.botClient.setTimeout(() => {
+    // Check again that the channel exists and is empty before leaving
+    if (this.voiceChannel?.members.size === 1) {
+      this.logger.info('Leaving channel, only member remaining')
+      this.sendMsg(
+        `${Emojis.sad} **I'm leaving, I'm all by myself!**`
+      )
+      this.disconnect()
+    }
+  }, Timeouts.ALONE_TIMEOUT + 500)
+}
+
+/**
+ * Deletes the GuildClient and disconnects from the VoiceChannel.
  *
- * If the GuildClient has an active voice connection, notify through the TextChannel and mark the GuildClient
- * for deletion to be handled by the voiceStateUpdate event before leaving the voice channel.
+ * If the GuildClient has an active voice connection, disconnect instead.
  */
 GuildClient.prototype.cleanUp = function () {
   if (Date.now() - this.lastCalled >= Timeouts.GUILD_TIMEOUT) {
-    this.logger.debug('Attempting to clean up guildClient')
+    this.logger.info('Attempting to cleanup')
     // If the guild is currently connected, is not playing music, and has an active TextChannel,
     // notify, mark the guildClient for deletion, and leave
     if (this.boundTextChannel && this.connection && !this.playing) {
@@ -167,9 +184,8 @@ GuildClient.prototype.cleanUp = function () {
       this.sendMsg(
         `${Emojis.happy} **It seems nobody needs me right now, so I'll be headed out. Call me when you do!**`
       )
-      this.delete = true
-      this.leaveVoiceChannel()
-    } else {
+      this.disconnect()
+    } else if (!this.activePoll) {
       this.logger.debug('Deleting guildClient')
       Common.botClient.guildClients.delete(this.guild.id)
     }
@@ -192,7 +208,7 @@ GuildClient.prototype.checkTextPermissions = function (channel = this.boundTextC
     notificationChannel.send(
       [
         `${Emojis.error} ***Please ensure I have all the following permissions in your text channel! I won't completely work otherwise!***`,
-        Functions.formatList(missingPerms)
+        Strings.formatList(missingPerms)
       ]
     )
 
@@ -217,7 +233,7 @@ GuildClient.prototype.checkVoicePermissions = function (channel = this.voiceChan
     notificationChannel.send(
       [
         `${Emojis.error} ***Please ensure I have all the following permissions in your voice channel! I won't completely work otherwise!***`,
-        Functions.formatList(missingPerms)
+        Strings.formatList(missingPerms)
       ]
     )
 
@@ -234,13 +250,14 @@ GuildClient.prototype.checkVoicePermissions = function (channel = this.voiceChan
  * @fires GuildClient#connected
  * @returns {import('discord.js').VoiceConnection} Returns the created VoiceConnection, if any.
  */
-GuildClient.prototype.joinVoiceChannel = async function (voiceChannel) {
+GuildClient.prototype.connect = async function (voiceChannel) {
+  if (!this.checkVoicePermissions(voiceChannel)) return
   this.voiceChannel = voiceChannel
-  if (!this.checkVoicePermissions()) return
   try {
     const connection = await voiceChannel.join()
     this.logger.info('Successfully connected!')
     this.logger.trace('Emitting connected event')
+    connection.once('disconnect', this.disconnect.bind(this))
     /**
      * Connected event.
      *
@@ -262,16 +279,21 @@ GuildClient.prototype.joinVoiceChannel = async function (voiceChannel) {
 /**
  * Leaves a guildClient's voice channel.
  *
- * @returns {Boolean} Whether the disconnect was successful or not.
  * @fires GuildClient#disconnected
  */
-GuildClient.prototype.leaveVoiceChannel = function () {
-  if (!this.connection) {
-    this.logger.debug('Not connected')
-    return false
-  }
-
-  this.logger.info('Leaving voice channel')
+GuildClient.prototype.disconnect = function () {
+  if (!this.voiceChannel) return
+  this.logger.info('Disconnecting')
+  const tempChannel = this.voiceChannel
+  this.voiceChannel = null
+  this.logger.trace('Stopping SnowClients')
+  this.memberClients.forEach(member => { member.stopListening(); member.startTimeout() })
+  this.logger.trace('Leaving voice channel')
+  tempChannel.leave()
+  this.logger.debug('Successfully left')
+  this.boundTextChannel = null
+  this.loopState = 0
+  this.startTimeout()
   this.logger.trace('Emitting disconnected event')
   /**
    * Disconnected event.
@@ -281,23 +303,8 @@ GuildClient.prototype.leaveVoiceChannel = function () {
    * @property {import('discord.js').VoiceChannel} channel The disconnected VoiceChannel.
    */
   this.emit('disconnected', {
-    channel: this.voiceChannel
+    channel: tempChannel
   })
-  this.logger.trace('Cleaning up members')
-  this.memberClients.forEach(member => { if (member.snowClient) member.snowClient.stop() })
-  this.memberClients.clear()
-  this.logger.trace('Leaving channel')
-  this.voiceChannel.leave()
-  this.boundTextChannel = null
-  this.logger.debug('Successfully left')
-  this.voiceChannel = null
-  this.loopState = 0
-
-  if (this.delete) {
-    Common.botClient.guildClients.delete(this.id)
-  }
-
-  return true
 }
 
 module.exports = GuildClient

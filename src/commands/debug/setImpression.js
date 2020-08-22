@@ -23,7 +23,7 @@ function setImpression (memberClient, args, msg) {
   memberClient = memberClient.guildClient.memberClients.get(id)
   // Ensures a member is found, and that the value is a number between the maximum and minimum values
   if (!memberClient || isNaN(val) || val > ImpressionThresholds.MAX_IMPRESSION || val < ImpressionThresholds.MIN_IMPRESSION) return
-  memberClient.userClient.updateImpression(val - memberClient.userClient.impression)
+  memberClient.userClient.setImpression(val)
   memberClient.guildClient.sendMsg(
     `Set impression of \`${memberClient.member.displayName}\` to \`${val}\``,
     msg.channel

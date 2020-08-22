@@ -29,7 +29,7 @@ function search (memberClient, args, msg) {
   )
 
   logger.debug('Searching up %s', query)
-  Gsearch.search(query, result => {
+  Gsearch.search(query).then(result => {
     logger.debug('Received result')
     logger.debug(result)
     memberClient.guildClient.sendMsg(

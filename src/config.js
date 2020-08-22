@@ -14,7 +14,10 @@ const DEFAULT_MENTIONS = true
 const DEFAULT_SENSITIVITY = '0.45'
 
 // Time before Snowboy automatically disconnects due to inactivity
-const GUILD_TIMEOUT = 1800000
+const GUILD_TIMEOUT = 300000
+
+// Time before a MemberClient is automatically cleaned up due to inactivity
+const MEMBER_TIMEOUT = 300000
 
 // Time before Snowboy automatically disconnects from a channel after being alone
 const ALONE_TIMEOUT = 10000
@@ -106,6 +109,7 @@ module.exports = {
   MAX_SONGS: MAX_SONGS,
   Timeouts: {
     GUILD_TIMEOUT: GUILD_TIMEOUT,
+    MEMBER_TIMEOUT: MEMBER_TIMEOUT,
     ALONE_TIMEOUT: ALONE_TIMEOUT,
     MAX_QUERY_TIME: MAX_QUERY_TIME,
     SILENCE_QUERY_TIME: SILENCE_QUERY_TIME,

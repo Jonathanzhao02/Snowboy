@@ -1,5 +1,5 @@
 const { Emojis } = require('../../config')
-const Functions = require('../../bot-util/Functions')
+const Strings = require('../../bot-util/Strings')
 
 /**
  * Repeats a message in chat.
@@ -14,7 +14,7 @@ function repeat (memberClient, args, msg) {
   logger.info('Received repeat command')
   const message = args.join(' ')
   memberClient.guildClient.sendMsg(
-    `${Emojis.loop} *\u{201c}${Functions.beautify(message)}\u{201d}* \n   ***${('       \u{2013}  ' + memberClient.member.displayName)}***`,
+    `${Emojis.loop} *\u{201c}${Strings.beautify(message)}\u{201d}* \n   ***${('       \u{2013}  ' + memberClient.member.displayName)}***`,
     channel
   )
 }

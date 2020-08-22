@@ -101,6 +101,7 @@ module.exports = function (client) {
     }
 
     guildClient.startTimeout()
+    memberClient.startTimeout()
   }
 
   client.on('message', onMessage)

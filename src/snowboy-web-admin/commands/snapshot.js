@@ -8,7 +8,7 @@ const heapdump = require('heapdump')
  */
 function snapshot (args) {
   Common.logger.info('Taking heap snapshot!')
-  heapdump.writeSnapshot(Common.defaultLogdir + `/${args[0] ? args[0] : new Date().toISOString()}.heapdump`, (err, filename) => {
+  heapdump.writeSnapshot(Common.defaultLogdir + `/${args[0] ? args[0] : new Date().toISOString()}.heapsnapshot`, (err, filename) => {
     if (err) throw err
     Common.logger.info('Saved heap snapshot to %s!', filename)
   })

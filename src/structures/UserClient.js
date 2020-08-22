@@ -84,4 +84,13 @@ UserClient.prototype.updateImpression = function (value) {
   Impressions.updateImpression(this.id, this, value, this.settings.impressions)
 }
 
+/**
+ * Set the impression of the UserClient to the sent value.
+ *
+ * @param {Number} value The value to set.
+ */
+UserClient.prototype.setImpression = function (value) {
+  this.updateImpression(value - this.impression)
+}
+
 module.exports = UserClient

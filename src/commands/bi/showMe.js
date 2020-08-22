@@ -49,7 +49,7 @@ function showMe (memberClient, args, msg) {
         )
         return
       } catch (err) {
-        logger.warn(err)
+        logger.error(err)
         logger.debug('Invalid URL %s', result.url)
       }
     }

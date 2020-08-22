@@ -1,6 +1,7 @@
 const Discord = require('./Discord')
 const Logger = require('./Logger')
 const Keyv = require('./Keyv')
+const FlatCache = require('./FlatCache')
 const WebApis = require('./WebApis')
 const Process = require('./Process')
 const Paths = require('./Paths')
@@ -13,6 +14,7 @@ module.exports = function (client) {
   Discord(client, Common)
   Logger(Common)
   Keyv(Common)
+  FlatCache(Common)
   Process(Common)
   WebApis()
 }

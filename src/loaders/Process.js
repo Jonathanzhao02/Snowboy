@@ -60,6 +60,7 @@ module.exports = function (Common) {
 
   // On process exit
   process.on('exit', () => {
+    Common.pokeApiCache.save()
     Common.botClient.destroy()
   })
 }
