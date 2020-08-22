@@ -93,7 +93,6 @@ MemberClient.prototype.stopListening = function () {
  */
 MemberClient.prototype.startTimeout = function () {
   this.logger.debug('Starting timeout')
-  this.stopListening()
   this.lastCalled = Date.now()
   if (this.timeoutId) Common.botClient.clearTimeout(this.timeoutId)
   this.timeoutId = Common.botClient.setTimeout(() => { this.cleanUp() }, Timeouts.MEMBER_TIMEOUT + 500)

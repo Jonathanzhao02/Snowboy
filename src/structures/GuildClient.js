@@ -251,8 +251,8 @@ GuildClient.prototype.checkVoicePermissions = function (channel = this.voiceChan
  * @returns {import('discord.js').VoiceConnection} Returns the created VoiceConnection, if any.
  */
 GuildClient.prototype.connect = async function (voiceChannel) {
+  if (!this.checkVoicePermissions(voiceChannel)) return
   this.voiceChannel = voiceChannel
-  if (!this.checkVoicePermissions()) return
   try {
     const connection = await voiceChannel.join()
     this.logger.info('Successfully connected!')
@@ -282,7 +282,18 @@ GuildClient.prototype.connect = async function (voiceChannel) {
  * @fires GuildClient#disconnected
  */
 GuildClient.prototype.disconnect = function () {
-  this.logger.info('Leaving voice channel')
+  if (!this.voiceChannel) return
+  this.logger.info('Disconnecting')
+  const tempChannel = this.voiceChannel
+  this.voiceChannel = null
+  this.logger.trace('Stopping SnowClients')
+  this.memberClients.forEach(member => { member.stopListening(); member.startTimeout() })
+  this.logger.trace('Leaving voice channel')
+  tempChannel.leave()
+  this.logger.debug('Successfully left')
+  this.boundTextChannel = null
+  this.loopState = 0
+  this.startTimeout()
   this.logger.trace('Emitting disconnected event')
   /**
    * Disconnected event.
@@ -292,17 +303,8 @@ GuildClient.prototype.disconnect = function () {
    * @property {import('discord.js').VoiceChannel} channel The disconnected VoiceChannel.
    */
   this.emit('disconnected', {
-    channel: this.voiceChannel
+    channel: tempChannel
   })
-  this.logger.trace('Stopping SnowClients')
-  this.memberClients.forEach(member => { member.startTimeout() })
-  this.logger.trace('Leaving channel')
-  this.voiceChannel.leave()
-  this.logger.debug('Successfully left')
-  this.boundTextChannel = null
-  this.voiceChannel = null
-  this.loopState = 0
-  this.startTimeout()
 }
 
 module.exports = GuildClient

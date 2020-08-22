@@ -45,7 +45,7 @@ function GuildPlayer (guildClient) {
 }
 
 /**
- * Ends the current playback and clears the queue.
+ * Ends all current and queued playback.
  */
 GuildPlayer.prototype.stop = function () {
   this.logger.debug('Stopping dispatcher')
