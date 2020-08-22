@@ -3,21 +3,17 @@ const Keyv = require('../../bot-util/Keyv')
 /**
  * Clears Snowboy's database completely and shuts the bot down.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args Unused parameter.
- * @param {import('discord.js').Message} msg The sent message.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function clearDb (memberClient, args, msg) {
-  const logger = memberClient.logger
+function clearDb (context) {
+  const logger = context.logger
   logger.info('Received clear database command')
   Keyv.clearAll()
-  memberClient.guildClient.sendMsg(
-    'Cleared Database',
-    msg.channel
+  context.sendMsg(
+    'Cleared Database'
   ).then(() => {
-    memberClient.guildClient.sendMsg(
-      'Shutting down Snowboy, restart for database changes to take effect',
-      msg.channel
+    context.sendMsg(
+      'Shutting down Snowboy, restart for database changes to take effect'
     ).then(() => {
       process.emit('SIGINT')
     })

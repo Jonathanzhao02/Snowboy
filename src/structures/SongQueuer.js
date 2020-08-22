@@ -85,6 +85,7 @@ SongQueuer.prototype.play = function (video) {
       video.channel = `${Emojis.playing} Now Playing! - ${video.channel}`
       video.position = 0
       this.guildClient.sendMsg(
+        this.guildClient.boundTextChannel,
         Embeds.createVideoEmbed(video)
       )
     }
@@ -102,8 +103,8 @@ SongQueuer.prototype.queue = async function (video, query, channel) {
   if (!video) {
     this.logger.info('No video results found')
     this.guildClient.sendMsg(
-      `${Emojis.sad} ***Could not find any results for \`${query}\`!***`,
-      channel
+      channel,
+      `${Emojis.sad} ***Could not find any results for \`${query}\`!***`
     )
     return
   }
@@ -126,24 +127,27 @@ SongQueuer.prototype.queue = async function (video, query, channel) {
     if (video.description) {
       video.channel = `${Emojis.queue} Queued! - ${video.channel}`
       this.guildClient.sendMsg(
-        Embeds.createVideoEmbed(video),
-        channel
+        channel,
+        Embeds.createVideoEmbed(video)
       )
     }
   }
 }
 
 /**
- * Searches and queues up a query.
+ * Searches and queues up a YouTube query.
  *
- * @param {String} query The search term to search for.
+ * @param {String} query The search term/URL to search for.
  * @param {String} requester The name of the requester.
  * @param {import('discord.js').TextChannel?} channel The TextChannel to notify through.
  */
 SongQueuer.prototype.search = function (query, requester, channel) {
   Youtube.search(query, requester, this.guildClient).then(vid => {
     if (!vid) {
-      this.guildClient.sendMsg(`${Emojis.error} ***No results found for ${query}***`, channel)
+      this.guildClient.sendMsg(
+        channel,
+        `${Emojis.error} ***No results found for ${query}***`
+      )
       return
     }
     if (vid.playlist) {

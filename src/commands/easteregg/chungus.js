@@ -5,17 +5,13 @@ const Common = require('../../bot-util/Common')
 /**
  * No description needed.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args Unused parameter
- * @param {import('discord.js').Message?} msg The sent message.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function chungus (memberClient, args, msg) {
-  const channel = msg?.channel
-  const logger = memberClient.logger
+function chungus (context) {
+  const logger = context.logger
   logger.info('Received chungus command')
-  memberClient.guildClient.sendMsg(
+  context.sendMsg(
     `${Emojis.rabbit} ***B I G   C H U N G U S*** ${Emojis.rabbit}`,
-    channel,
     { files: [`${Common.defaultResdir}/chungus/chungus${Functions.random(6)}.jpg`] }
   )
 }

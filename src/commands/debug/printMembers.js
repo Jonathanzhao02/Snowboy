@@ -1,14 +1,12 @@
 /**
  * Prints the members map to console.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args Unused parameter.
- * @param {import('discord.js').Message} msg Unused parameter.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function printMembers (memberClient, args, msg) {
-  const logger = memberClient.logger
+function printMembers (context) {
+  const logger = context.logger
   logger.info('Received print members command')
-  console.log(memberClient.guildClient.memberClients)
+  console.log(context.guildClient.memberClients)
 }
 
 module.exports = {

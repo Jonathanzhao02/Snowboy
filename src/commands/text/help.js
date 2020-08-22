@@ -3,14 +3,12 @@ const Embeds = require('../../bot-util/Embeds')
 /**
  * Sends the help embed about Snowboy to a user.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args The specific command to ask about.
- * @param {import('discord.js').Message} msg Unused parameter.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function help (memberClient, args, msg) {
-  const logger = memberClient.logger
+function help (context) {
+  const logger = context.logger
   logger.info('Received help command')
-  memberClient.userClient.sendMsg(Embeds.createHelpEmbed(require('../index').all, args[0]))
+  context.sendMsg(Embeds.createHelpEmbed(require('../index').all, context.args[0]))
 }
 
 module.exports = {

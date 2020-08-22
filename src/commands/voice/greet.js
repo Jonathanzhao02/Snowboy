@@ -4,16 +4,15 @@ const { ImpressionValues, Emojis } = require('../../config')
 /**
  * Greets a user.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args Unused parameter.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function greet (memberClient, args) {
-  const logger = memberClient.logger
+function greet (context) {
+  const logger = context.logger
   logger.info('Received greet command')
-  memberClient.guildClient.sendMsg(
-    `${Emojis.greeting} **${Responses.randomGreeting()},** <@${memberClient.id}>!`
+  context.sendMsg(
+    `${Emojis.greeting} **${Responses.randomGreeting()},** <@${context.id}>!`
   )
-  memberClient.userClient.updateImpression(ImpressionValues.GREET_VALUE)
+  context.userClient.updateImpression(ImpressionValues.GREET_VALUE)
 }
 
 module.exports = {

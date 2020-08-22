@@ -3,37 +3,32 @@ const { Emojis } = require('../../config')
 /**
  * Plays or queues a song or playlist.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args The search query for the song.
- * @param {import('discord.js').Message?} msg The sent message.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function play (memberClient, args, msg) {
-  const channel = msg?.channel
-  const logger = memberClient.logger
+function play (context) {
+  const logger = context.logger
   logger.info('Received play command')
   // If not connected, notify and return
-  if (!memberClient.guildClient.connection) {
+  if (!context.guildClient.connection) {
     logger.debug('Not connected to a voice channel')
-    memberClient.guildClient.sendMsg(
-      `${Emojis.error} ***I am not in a voice channel!***`,
-      channel
+    context.sendMsg(
+      `${Emojis.error} ***I am not in a voice channel!***`
     )
     return
   }
 
   // If no query, notify and return
-  if (!args || args.length === 0) {
+  if (!context.args || context.args.length === 0) {
     logger.debug('No query found')
-    memberClient.guildClient.sendMsg(
-      `${Emojis.error} ***I need something to play!***`,
-      channel
+    context.sendMsg(
+      `${Emojis.error} ***I need something to play!***`
     )
     return
   }
 
-  const query = args.join(' ')
+  const query = context.args.join(' ')
   logger.debug('Searching up %s', query)
-  memberClient.guildClient.guildPlayer.songQueuer.search(query, memberClient.member.displayName, channel)
+  context.guildClient.guildPlayer.songQueuer.search(query, context.name, context.channel)
 }
 
 module.exports = {

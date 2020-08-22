@@ -3,16 +3,15 @@ const { ImpressionValues, Emojis } = require('../../config')
 /**
  * Makes Snowboy happy.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args Unused parameter.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function compliment (memberClient, args) {
-  const logger = memberClient.logger
+function compliment (context) {
+  const logger = context.logger
   logger.info('Received compliment command')
-  memberClient.guildClient.sendMsg(
+  context.sendMsg(
     `${Emojis.happy} **Thank you!**`
   )
-  memberClient.userClient.updateImpression(ImpressionValues.HAPPY_VALUE)
+  context.userClient.updateImpression(ImpressionValues.HAPPY_VALUE)
 }
 
 module.exports = {

@@ -66,8 +66,8 @@ module.exports = function (client) {
     if (msg.createdAt.getTime() - guildClient.lastCalled < 1000) {
       guildClient.logger.info('Rejecting message, too fast')
       guildClient.sendMsg(
-        `${Emojis.error} ***Please only send one command a second!***`,
-        msg.channel
+        msg.channel,
+        `${Emojis.error} ***Please only send one command a second!***`
       )
       return
     }
@@ -76,8 +76,8 @@ module.exports = function (client) {
     // voice channel, notify the GuildMember and return
     if (guildClient.connection && msg.member.voice.channelID !== guildClient.voiceChannel.id && Commands.restricted.get(commandName)) {
       guildClient.sendMsg(
-        `${Emojis.error} ***Sorry, you are not in my voice channel!***`,
-        msg.channel
+        msg.channel,
+        `${Emojis.error} ***Sorry, you are not in my voice channel!***`
       )
       return
     }
@@ -95,8 +95,8 @@ module.exports = function (client) {
       Commands.easteregg.get(commandName).execute(memberClient, args, msg)
     } else {
       guildClient.sendMsg(
-        `${Emojis.confused} ***Sorry, I don't understand.***`,
-        msg.channel
+        msg.channel,
+        `${Emojis.confused} ***Sorry, I don't understand.***`
       )
     }
 

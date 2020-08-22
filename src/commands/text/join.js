@@ -4,45 +4,40 @@ const Responses = require('../../bot-util/Responses')
 /**
  * Makes Snowboy join a VoiceChannel.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args Unused parameter.
- * @param {import('discord.js').Message} msg The sent message.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function join (memberClient, args, msg) {
-  const logger = memberClient.logger
+function join (context) {
+  const logger = context.logger
   logger.info('Received join command')
   // If the user is not connected to a VoiceChannel, notify and return
-  if (!msg.member.voice.channel) {
+  if (!context.memberClient.member.voice.channel) {
     logger.trace('Member not connected')
-    memberClient.guildClient.sendMsg(
-      `${Emojis.error} ***You are not connected to a voice channel!***`,
-      msg.channel
+    context.sendMsg(
+      `${Emojis.error} ***You are not connected to a voice channel!***`
     )
     return
   }
 
   // If already connected, notify and return
-  if (memberClient.guildClient.connection) {
+  if (context.guildClient.connection) {
     logger.trace('Already connected')
-    memberClient.guildClient.sendMsg(
-      `${Emojis.error} ***I'm already connected to a voice channel!***`,
-      msg.channel
+    context.sendMsg(
+      `${Emojis.error} ***I'm already connected to a voice channel!***`
     )
     return
   }
 
   // Attempt to join and handle the connection, or error
   logger.trace('Attempting to join')
-  memberClient.guildClient.connect(msg.member.voice.channel).then(connection => {
+  context.guildClient.connect(context.memberClient.member.voice.channel).then(connection => {
     if (connection) {
       // Assign the boundTextChannel
-      if (!memberClient.guildClient.boundTextChannel || memberClient.guildClient.boundTextChannel.deleted) {
-        memberClient.guildClient.boundTextChannel = msg.channel
+      if (!context.guildClient.boundTextChannel || context.guildClient.boundTextChannel.deleted) {
+        context.guildClient.boundTextChannel = context.channel
       }
       // Greet the user
-      memberClient.guildClient.sendMsg(
-        `${Emojis.greeting} **${Responses.randomGreeting()},** <@${memberClient.id}>!`,
-        msg.channel
+      context.sendMsg(
+        `${Emojis.greeting} **${Responses.randomGreeting()},** <@${context.id}>!`
       )
     }
   })

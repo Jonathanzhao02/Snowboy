@@ -3,16 +3,15 @@ const { ImpressionValues, Emojis } = require('../../config')
 /**
  * Makes Snowboy mildy irritated that someone called it just to say nevermind.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args Unused parameter.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function nevermind (memberClient, args) {
-  const logger = memberClient.logger
+function nevermind (context) {
+  const logger = context.logger
   logger.info('Received nevermind command')
-  memberClient.guildClient.sendMsg(
-    `${Emojis.angry} **Call me only when you need me, <@${memberClient.id}>!**`
+  context.sendMsg(
+    `${Emojis.angry} **Call me only when you need me, <@${context.id}>!**`
   )
-  memberClient.userClient.updateImpression(ImpressionValues.NEVERMIND_VALUE)
+  context.userClient.updateImpression(ImpressionValues.NEVERMIND_VALUE)
 }
 
 module.exports = {

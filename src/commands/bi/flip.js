@@ -4,18 +4,14 @@ const Functions = require('../../bot-util/Functions')
 /**
  * Flips a two-sided coin.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args Unused parameter.
- * @param {import('discord.js').Message?} msg The sent message.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function flip (memberClient, args, msg) {
-  const channel = msg?.channel
-  const logger = memberClient.logger
+function flip (context) {
+  const logger = context.logger
   logger.info('Received flip command')
   const result = Functions.random(2)
-  memberClient.guildClient.sendMsg(
-    `${result === 0 ? Emojis.heads : Emojis.tails} **I flipped \`${result === 0 ? 'heads' : 'tails'}\`, <@${memberClient.id}>!**`,
-    channel
+  context.sendMsg(
+    `${result === 0 ? Emojis.heads : Emojis.tails} **I flipped \`${result === 0 ? 'heads' : 'tails'}\`, <@${context.id}>!**`
   )
 }
 

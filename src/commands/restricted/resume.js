@@ -3,27 +3,22 @@ const { Emojis } = require('../../config')
 /**
  * Resumes the current song.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args Unused parameter.
- * @param {import('discord.js').Message?} msg The sent message.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function resume (memberClient, args, msg) {
-  const channel = msg?.channel
-  const logger = memberClient.logger
+function resume (context) {
+  const logger = context.logger
   logger.info('Received resume command')
-  if (!memberClient.guildClient.playing) {
+  if (!context.guildClient.playing) {
     logger.debug('Not playing anything')
-    memberClient.guildClient.sendMsg(
-      `${Emojis.error} ***Nothing currently playing!***`,
-      channel
+    context.sendMsg(
+      `${Emojis.error} ***Nothing currently playing!***`
     )
     return
   }
   logger.debug('Resuming music')
-  memberClient.guildClient.guildPlayer.resume()
-  memberClient.guildClient.sendMsg(
-    `${Emojis.playing} **Resuming!**`,
-    channel
+  context.guildClient.guildPlayer.resume()
+  context.sendMsg(
+    `${Emojis.playing} **Resuming!**`
   )
   logger.debug('Successfully resumed music')
 }

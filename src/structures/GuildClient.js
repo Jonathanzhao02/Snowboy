@@ -127,12 +127,12 @@ GuildClient.prototype.init = async function () {
  *
  * Also takes into consideration the GuildSettings.
  *
+ * @param {import('discord.js').TextChannel} channel The TextChannel to send the message through.
  * @param {String[] | String | import('discord.js').MessageEmbed} msg The message to send.
  * @param {Object?} opts The options to send the message with.
- * @param {import('discord.js').TextChannel} channel The TextChannel to send the message through.
  * @returns {Promise<import('discord.js').Message[] | import('discord.js').Message>} Returns a promise for the sent messages.
  */
-GuildClient.prototype.sendMsg = async function (msg, channel = this.boundTextChannel, opts) {
+GuildClient.prototype.sendMsg = async function (channel, msg, opts) {
   if (!channel) {
     this.logger.warn('Attempted to send %o, but no text channel found!', msg)
     return

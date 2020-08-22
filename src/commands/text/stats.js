@@ -3,16 +3,13 @@ const Embeds = require('../../bot-util/Embeds')
 /**
  * Prints the stats of Snowboy.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args Unused parameter.
- * @param {import('discord.js').Message} msg The sent message.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function stats (memberClient, args, msg) {
-  const logger = memberClient.logger
+function stats (context) {
+  const logger = context.logger
   logger.info('Received stats command')
-  memberClient.guildClient.sendMsg(
-    Embeds.createStatsEmbed(),
-    msg.channel
+  context.sendMsg(
+    Embeds.createStatsEmbed()
   )
 }
 

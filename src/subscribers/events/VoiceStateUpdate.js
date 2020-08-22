@@ -24,7 +24,10 @@ module.exports = function (client) {
 
       // If the bot has been moved
       if (userId === client.user.id && newPresence.channelID !== guildClient.voiceChannel.id) {
-        guildClient.sendMsg(`${Emojis.angry} **Don't move me from my home!**`)
+        guildClient.sendMsg(
+          guildClient.boundTextChannel,
+          `${Emojis.angry} **Don't move me from my home!**`
+        )
         newPresence.channel.leave()
       }
     }

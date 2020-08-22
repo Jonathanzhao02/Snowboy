@@ -3,30 +3,27 @@ const { ImpressionThresholds } = require('../../config')
 /**
  * Sets the impression of a member.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args The arguments passed with the command.
- * @param {import('discord.js').Message} msg The sent message.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function setImpression (memberClient, args, msg) {
-  const logger = memberClient.logger
+function setImpression (context) {
+  const logger = context.logger
   logger.info('Received set impression command')
-  let val = args[0]
-  let id = memberClient.id
+  let val = context.args[0]
+  let id = context.id
   // If insufficient arguments, return
-  if (args.length === 0 || args.length >= 3) return
+  if (context.args.length === 0 || context.args.length >= 3) return
   // If passed in 2 arguments, sets the mentioned user's impression to a value
-  if (args.length === 2 && msg.mentions && msg.mentions.members.length > 0) {
-    const member = msg.mentions.members.array()[0]
+  if (context.args.length === 2 && context.msg.mentions && context.msg.mentions.members.length > 0) {
+    const member = context.msg.mentions.members.array()[0]
     id = member.id
-    val = args[1]
+    val = context.args[1]
   }
-  memberClient = memberClient.guildClient.memberClients.get(id)
+  const memberClient = context.guildClient.memberClients.get(id)
   // Ensures a member is found, and that the value is a number between the maximum and minimum values
   if (!memberClient || isNaN(val) || val > ImpressionThresholds.MAX_IMPRESSION || val < ImpressionThresholds.MIN_IMPRESSION) return
   memberClient.userClient.setImpression(val)
-  memberClient.guildClient.sendMsg(
-    `Set impression of \`${memberClient.member.displayName}\` to \`${val}\``,
-    msg.channel
+  context.sendMsg(
+    `Set impression of \`${memberClient.member.displayName}\` to \`${val}\``
   )
 }
 

@@ -6,27 +6,22 @@ const Imgsearch = require('g-i-s')
 /**
  * Searches up and prints the top result of an image search query.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args The search query.
- * @param {import('discord.js').Message?} msg The sent message.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function showMe (memberClient, args, msg) {
-  const channel = msg?.channel
-  const logger = memberClient.logger
+function showMe (context) {
+  const logger = context.logger
   logger.info('Received showme command')
-  if (!args || args.length === 0) {
+  if (!context.args || context.args.length === 0) {
     logger.debug('No query found')
-    memberClient.guildClient.sendMsg(
-      `${Emojis.error} ***I need something to search up!***`,
-      channel
+    context.sendMsg(
+      `${Emojis.error} ***I need something to search up!***`
     )
     return
   }
 
-  const query = args.join(' ')
-  memberClient.guildClient.sendMsg(
-    `${Emojis.search} ***Searching*** \`${query}\``,
-    channel
+  const query = context.args.join(' ')
+  context.sendMsg(
+    `${Emojis.search} ***Searching*** \`${query}\``
   )
   logger.debug('Searching up %s', query)
   Imgsearch(query, async (error, results) => {
@@ -40,12 +35,11 @@ function showMe (memberClient, args, msg) {
         result.query = query
         logger.debug('Received valid result')
         logger.debug(result)
-        memberClient.guildClient.sendMsg(
+        context.sendMsg(
           Embeds.createImageEmbed(
             result,
-            memberClient.member.displayName
-          ),
-          channel
+            context.name
+          )
         )
         return
       } catch (err) {
@@ -55,9 +49,8 @@ function showMe (memberClient, args, msg) {
     }
 
     logger.info('No results found for %s', query)
-    memberClient.guildClient.sendMsg(
-      `${Emojis.error} ***No results found for \`${query}\`!***`,
-      channel
+    context.sendMsg(
+      `${Emojis.error} ***No results found for \`${query}\`!***`
     )
   })
 }

@@ -26,10 +26,12 @@ module.exports = function (client) {
       newClient.on('hotword', ack)
       newClient.on('result', parse)
       newClient.on('busy', (memberClient) => guildClient.sendMsg(
+        guildClient.boundTextChannel,
         `***I'm still working on your last request, <@${memberClient.id}>!***`
       ))
       newClient.on('error', msg => {
         guildClient.sendMsg(
+          guildClient.boundTextChannel,
           `${Emojis.error} ***Error:*** \`${msg}\``
         )
       })
@@ -57,6 +59,7 @@ module.exports = function (client) {
       memberClient.logger.debug('Rejected voice command')
       memberClient.logger.debug(result)
       memberClient.guildClient.sendMsg(
+        memberClient.guildClient.boundTextChannel,
         `${Emojis.unknown} ***Sorry, I didn't catch that...***`
       )
       return
@@ -78,6 +81,7 @@ module.exports = function (client) {
       Commands.easteregg.get(commandName).execute(memberClient, args)
     } else {
       memberClient.guildClient.sendMsg(
+        memberClient.guildClient.boundTextChannel,
         `${Emojis.confused} ***Sorry, I don't understand*** "\`${result.text}\`"`
       )
       memberClient.logger.warn('No command found for %s!', commandName)

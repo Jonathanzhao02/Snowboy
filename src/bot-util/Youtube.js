@@ -117,13 +117,13 @@ async function search (query, requester, guildClient, channel) {
   // Add each video from Youtube playlist
   if (Ytpl.validateURL(query)) {
     guildClient.sendMsg(
-      `${Emojis.search} ***Searching for*** \`${query}\``,
-      channel
+      channel,
+      `${Emojis.search} ***Searching for*** \`${query}\``
     )
     const playlist = await playlistSearch(query)
     guildClient.sendMsg(
-      `${Emojis.checkmark} **Adding \`${playlist.length}\` videos from \`${playlist.name}\`**`,
-      channel
+      channel,
+      `${Emojis.checkmark} **Adding \`${playlist.length}\` videos from \`${playlist.name}\`**`
     )
     if (playlist) {
       playlist.forEach(video => {
@@ -135,8 +135,8 @@ async function search (query, requester, guildClient, channel) {
   // Directly get info from URL
   } else if (YtdlDiscord.validateURL(query)) {
     guildClient.sendMsg(
-      `${Emojis.search} ***Searching for*** \`${query}\``,
-      channel
+      channel,
+      `${Emojis.search} ***Searching for*** \`${query}\``
     )
     const video = await urlSearch(query)
     if (video) video.requester = requester
@@ -144,8 +144,8 @@ async function search (query, requester, guildClient, channel) {
   // Search query from Youtube
   } else {
     guildClient.sendMsg(
-      `${Emojis.search} ***Searching for*** \`${query}\``,
-      channel
+      channel,
+      `${Emojis.search} ***Searching for*** \`${query}\``
     )
     const video = await querySearch(query)
     if (video) video.requester = requester

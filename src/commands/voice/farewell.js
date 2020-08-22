@@ -4,16 +4,15 @@ const Responses = require('../../bot-util/Responses')
 /**
  * Disconnects and says goodbye to a user.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args Unused parameter.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function farewell (memberClient, args) {
-  const logger = memberClient.logger
+function farewell (context) {
+  const logger = context.logger
   logger.info('Received farewell command')
-  const userVoiceState = memberClient.member.voice
-  if (userVoiceState) userVoiceState.setChannel(null)
-  memberClient.guildClient.sendMsg(
-    `${Emojis.farewell} **${Responses.randomFarewell()},** <@${memberClient.id}>!`
+  const userVoiceState = context.voice
+  if (userVoiceState.channel) userVoiceState.setChannel(null)
+  context.sendMsg(
+    `${Emojis.farewell} **${Responses.randomFarewell()},** <@${context.id}>!`
   )
 }
 

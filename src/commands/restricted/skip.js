@@ -3,27 +3,22 @@ const { Emojis } = require('../../config')
 /**
  * Skips to the next song in queue by ending the current dispatcher.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args Unused parameter.
- * @param {import('discord.js').Message?} msg The sent message.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function skip (memberClient, args, msg) {
-  const channel = msg?.channel
-  const logger = memberClient.logger
+function skip (context) {
+  const logger = context.logger
   logger.info('Received skip command')
-  if (!memberClient.guildClient.playing) {
+  if (!context.guildClient.playing) {
     logger.debug('Not playing anything')
-    memberClient.guildClient.sendMsg(
-      `${Emojis.error} ***Nothing currently playing!***`,
-      channel
+    context.sendMsg(
+      `${Emojis.error} ***Nothing currently playing!***`
     )
     return
   }
   logger.debug('Skipping song')
-  memberClient.guildClient.guildPlayer.end()
-  memberClient.guildClient.sendMsg(
-    `${Emojis.skip} ***Skipping the current song***`,
-    channel
+  context.guildClient.guildPlayer.end()
+  context.guildClient.sendMsg(
+    `${Emojis.skip} ***Skipping the current song***`
   )
   logger.debug('Successfully skipped song')
 }

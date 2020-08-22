@@ -3,24 +3,21 @@ const Common = require('../../bot-util/Common')
 /**
  * Prints the raw impression of a user.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args The arguments passed with the command.
- * @param {import('discord.js').Message} msg The sent message.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function rawImpression (memberClient, args, msg) {
-  const logger = memberClient.logger
+function rawImpression (context) {
+  const logger = context.logger
   logger.info('Received raw impression command')
-  let member = memberClient.member
-  let userClient = memberClient.userClient
+  let member = context.memberClient.member
+  let userClient = context.userClient
 
-  if (msg.mentions && msg.mentions.members.length > 0) {
-    member = msg.mentions.members.array()[0]
+  if (context.msg.mentions && context.msg.mentions.members.length > 0) {
+    member = context.msg.mentions.members.array()[0]
     userClient = Common.botClient.userClients.get(member.id)
   }
 
-  memberClient.guildClient.sendMsg(
-    `Raw impression of ${member.displayName}: \`${userClient.impression}\``,
-    msg.channel
+  context.sendMsg(
+    `Raw impression of ${member.displayName}: \`${userClient.impression}\``
   )
 }
 
