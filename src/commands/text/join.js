@@ -52,5 +52,6 @@ module.exports = {
   name: 'join',
   form: 'join',
   description: 'Tells Snowboy to join the requester\'s voice channel.',
+  usages: ['TEXT', 'GUILD_ONLY'],
   execute: join
 }

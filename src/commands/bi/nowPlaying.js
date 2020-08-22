@@ -30,5 +30,6 @@ module.exports = {
   name: 'nowplaying',
   form: 'nowplaying',
   description: 'Lists out what\'s currently playing.',
+  usages: ['VOICE', 'TEXT', 'GUILD_ONLY'],
   execute: nowPlaying
 }

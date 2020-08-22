@@ -20,5 +20,6 @@ module.exports = {
   name: 'about',
   form: 'about',
   description: 'Asks Snowboy to send an embed about himself.',
+  usages: ['TEXT'],
   execute: about
 }

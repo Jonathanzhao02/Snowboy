@@ -17,5 +17,6 @@ function insult (memberClient, args) {
 
 module.exports = {
   name: 'insult',
+  usages: ['VOICE', 'GUILD_ONLY', 'IN_VOICE'],
   execute: insult
 }

@@ -17,5 +17,6 @@ function nevermind (memberClient, args) {
 
 module.exports = {
   name: 'nevermind',
+  usages: ['VOICE', 'GUILD_ONLY', 'IN_VOICE'],
   execute: nevermind
 }

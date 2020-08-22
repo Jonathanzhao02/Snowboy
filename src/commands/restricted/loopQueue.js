@@ -37,5 +37,6 @@ module.exports = {
   name: 'loopqueue',
   form: 'loopqueue',
   description: 'Tells Snowboy to loop the current queue.',
+  usages: ['VOICE', 'TEXT', 'GUILD_ONLY', 'IN_VOICE'],
   execute: loopQueue
 }

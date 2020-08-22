@@ -26,5 +26,6 @@ function clearDb (memberClient, args, msg) {
 
 module.exports = {
   name: 'cleardb',
+  usages: ['TEXT', 'GUILD_ONLY', 'DEBUG_ONLY'],
   execute: clearDb
 }

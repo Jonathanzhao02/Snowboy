@@ -48,5 +48,6 @@ module.exports = {
   name: 'poll',
   form: 'poll <channel to poll, or none> <duration in seconds, or none> <prompt>',
   description: 'Creates a yes/no poll.',
+  usages: ['TEXT', 'GUILD_ONLY'],
   execute: poll
 }

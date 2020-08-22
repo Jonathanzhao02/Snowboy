@@ -16,5 +16,6 @@ module.exports = {
   name: 'impression',
   form: 'impression',
   description: 'Tells you Snowboy\'s impression of you.',
+  usages: ['VOICE', 'TEXT'],
   execute: impression
 }

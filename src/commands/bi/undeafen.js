@@ -24,5 +24,6 @@ module.exports = {
   aliases: ['unmute'],
   form: 'undeafen',
   description: 'Server undeafens the requester.',
+  usages: ['VOICE', 'TEXT', 'GUILD_ONLY'],
   execute: undeafen
 }

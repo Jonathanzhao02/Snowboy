@@ -19,5 +19,6 @@ function farewell (memberClient, args) {
 
 module.exports = {
   name: 'farewell',
+  usages: ['VOICE', 'GUILD_ONLY', 'IN_VOICE'],
   execute: farewell
 }

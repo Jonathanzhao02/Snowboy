@@ -67,5 +67,6 @@ module.exports = {
   aliases: ['imagesearch', 'imgsearch'],
   form: 'showme <search terms>',
   description: 'Searches up and tells you the first image result of a query.',
+  usages: ['VOICE', 'TEXT'],
   execute: showMe
 }

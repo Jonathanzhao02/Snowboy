@@ -29,5 +29,6 @@ module.exports = {
   name: 'queue',
   form: 'queue',
   description: 'Lists the current queue.',
+  usages: ['VOICE', 'TEXT', 'GUILD_ONLY'],
   execute: queue
 }

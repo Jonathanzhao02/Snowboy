@@ -22,5 +22,6 @@ function chungus (memberClient, args, msg) {
 
 module.exports = {
   name: 'chungus',
+  usages: ['VOICE', 'TEXT', 'GUILD_ONLY'],
   execute: chungus
 }

@@ -18,5 +18,6 @@ function greet (memberClient, args) {
 
 module.exports = {
   name: 'greet',
+  usages: ['VOICE', 'GUILD_ONLY', 'IN_VOICE'],
   execute: greet
 }

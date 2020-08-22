@@ -32,5 +32,6 @@ module.exports = {
   name: 'stop',
   form: 'stop',
   description: 'Tells Snowboy to stop the current song and clear the queue.',
+  usages: ['VOICE', 'TEXT', 'GUILD_ONLY', 'IN_VOICE'],
   execute: stop
 }

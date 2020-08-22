@@ -40,5 +40,6 @@ module.exports = {
   name: 'play',
   form: 'play <URL or search terms>',
   description: 'Searches up a playlist or video and adds it to the queue.',
+  usages: ['VOICE', 'TEXT', 'GUILD_ONLY', 'IN_VOICE'],
   execute: play
 }

@@ -17,5 +17,6 @@ function gross (memberClient, args) {
 
 module.exports = {
   name: 'gross',
+  usages: ['VOICE', 'GUILD_ONLY', 'IN_VOICE'],
   execute: gross
 }

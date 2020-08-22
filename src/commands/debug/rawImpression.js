@@ -26,5 +26,6 @@ function rawImpression (memberClient, args, msg) {
 
 module.exports = {
   name: 'rawimpression',
+  usages: ['TEXT', 'GUILD_ONLY', 'DEBUG_ONLY'],
   execute: rawImpression
 }

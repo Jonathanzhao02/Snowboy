@@ -20,5 +20,6 @@ module.exports = {
   name: 'stats',
   form: 'stats',
   description: 'Tells you about Snowboy\'s stats.',
+  usages: ['TEXT'],
   execute: stats
 }

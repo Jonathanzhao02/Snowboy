@@ -34,5 +34,6 @@ module.exports = {
   name: 'invite',
   form: 'invite',
   description: 'Gives you an invite link for Snowboy.',
+  usages: ['TEXT'],
   execute: invite
 }

@@ -17,5 +17,6 @@ function compliment (memberClient, args) {
 
 module.exports = {
   name: 'compliment',
+  usages: ['VOICE', 'GUILD_ONLY', 'IN_VOICE'],
   execute: compliment
 }

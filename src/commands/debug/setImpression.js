@@ -32,5 +32,6 @@ function setImpression (memberClient, args, msg) {
 
 module.exports = {
   name: 'setimpression',
+  usages: ['TEXT', 'GUILD_ONLY', 'DEBUG_ONLY'],
   execute: setImpression
 }

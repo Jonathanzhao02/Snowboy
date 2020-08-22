@@ -22,5 +22,6 @@ module.exports = {
   name: 'roll',
   form: 'roll',
   description: 'Rolls a 6-sided die and tells you the result.',
+  usages: ['VOICE', 'TEXT'],
   execute: roll
 }

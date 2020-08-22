@@ -23,5 +23,6 @@ module.exports = {
   name: 'flip',
   form: 'flip',
   description: 'Flips a coin and tells you the result.',
+  usages: ['VOICE', 'TEXT'],
   execute: flip
 }

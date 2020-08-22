@@ -17,5 +17,6 @@ module.exports = {
   name: 'help',
   form: 'help <command name, or no arguments>',
   description: 'Asks Snowboy about all available commands.',
+  usages: ['TEXT'],
   execute: help
 }

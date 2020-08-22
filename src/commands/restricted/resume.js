@@ -32,5 +32,6 @@ module.exports = {
   name: 'resume',
   form: 'resume',
   description: 'Tells Snowboy to resume the current song.',
+  usages: ['VOICE', 'TEXT', 'GUILD_ONLY', 'IN_VOICE'],
   execute: resume
 }

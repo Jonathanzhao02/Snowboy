@@ -35,5 +35,6 @@ module.exports = {
   name: 'leave',
   form: 'leave',
   description: 'Tells Snowboy to leave the current voice channel.',
+  usages: ['VOICE', 'TEXT', 'GUILD_ONLY', 'IN_VOICE'],
   execute: leave
 }

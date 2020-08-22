@@ -32,5 +32,6 @@ module.exports = {
   name: 'skip',
   form: 'skip',
   description: 'Tells Snowboy to skip the current song.',
+  usages: ['VOICE', 'TEXT', 'GUILD_ONLY', 'IN_VOICE'],
   execute: skip
 }

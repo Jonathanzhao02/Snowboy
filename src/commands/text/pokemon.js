@@ -37,5 +37,6 @@ module.exports = {
   name: 'pokemon',
   form: 'pokemon <name>',
   description: 'Asks Snowboy about a specific pokemon.',
+  usages: ['TEXT', 'GUILD_ONLY'],
   execute: pokemon
 }

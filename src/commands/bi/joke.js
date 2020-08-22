@@ -24,5 +24,6 @@ module.exports = {
   name: 'joke',
   form: 'joke',
   description: 'Tells a random joke.',
+  usages: ['VOICE', 'TEXT'],
   execute: joke
 }

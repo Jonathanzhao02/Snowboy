@@ -13,5 +13,6 @@ function printGuild (memberClient, args, msg) {
 
 module.exports = {
   name: 'printguild',
+  usages: ['TEXT', 'GUILD_ONLY', 'DEBUG_ONLY'],
   execute: printGuild
 }

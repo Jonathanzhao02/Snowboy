@@ -26,5 +26,6 @@ function clearImpressions (memberClient, args, msg) {
 
 module.exports = {
   name: 'clearimpressions',
+  usages: ['TEXT', 'GUILD_ONLY', 'DEBUG_ONLY'],
   execute: clearImpressions
 }

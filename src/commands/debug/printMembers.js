@@ -13,5 +13,6 @@ function printMembers (memberClient, args, msg) {
 
 module.exports = {
   name: 'printmembers',
+  usages: ['TEXT', 'GUILD_ONLY', 'DEBUG_ONLY'],
   execute: printMembers
 }

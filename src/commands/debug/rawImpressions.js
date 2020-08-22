@@ -22,5 +22,6 @@ function rawImpressions (memberClient, args, msg) {
 
 module.exports = {
   name: 'rawimpressions',
+  usages: ['TEXT', 'GUILD_ONLY', 'DEBUG_ONLY'],
   execute: rawImpressions
 }

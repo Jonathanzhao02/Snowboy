@@ -32,5 +32,6 @@ module.exports = {
   name: 'pause',
   form: 'pause',
   description: 'Tells Snowboy to pause the current song.',
+  usages: ['VOICE', 'TEXT', 'GUILD_ONLY', 'IN_VOICE'],
   execute: pause
 }

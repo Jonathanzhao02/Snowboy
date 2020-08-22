@@ -92,5 +92,6 @@ module.exports = {
   name: 'settings',
   form: 'settings <option name, or no arguments> <new value, or no arguments>',
   description: 'Lists every option (none), lists information about an option (option name), or sets the value of an option (option name, new value).',
+  usages: ['TEXT', 'GUILD_ONLY'],
   execute: settings
 }
