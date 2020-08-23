@@ -1,8 +1,6 @@
 const Common = require('../../bot-util/Common')
 const Clients = require('../../bot-util/Clients')
-const Commands = require('../../commands')
 const Emojis = require('../../config').Emojis
-const DEBUG_IDS = require('../../config').DEBUG_IDS
 const CommandRequest = require('../../structures/CommandRequest')
 const Fs = require('fs')
 
@@ -69,16 +67,6 @@ module.exports = function (client) {
       guildClient.sendMsg(
         msg.channel,
         `${Emojis.error} ***Please only send one command a second!***`
-      )
-      return
-    }
-
-    // If Snowboy is currently connected in the guild, and the GuildMember tries to run a restricted command without being in the active
-    // voice channel, notify the GuildMember and return
-    if (guildClient.connection && msg.member.voice.channelID !== guildClient.voiceChannel.id && Commands.restricted.get(commandName)) {
-      guildClient.sendMsg(
-        msg.channel,
-        `${Emojis.error} ***Sorry, you are not in my voice channel!***`
       )
       return
     }
