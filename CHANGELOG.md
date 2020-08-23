@@ -1,5 +1,31 @@
 # Changelog
 
+## v0.9.0 (PR #36)
+Major command changes, new command, and more!
+* COMMAND CHANGES
+  * Added new `report` command
+  * Refactored command `greet` => `greeting` and `greet.js` => `greeting.js`
+  * Moved `about` to `bi` to allow voice usage
+  * Added ability for commands to be executed in Snowboy's DMs
+
+* NEW ADDITIONS
+  * Added new `Usage` bitfield object to check command usages
+  * Deleted all specific command maps in favor of one general one and command `Usage` validation
+
+  * Created new `CommandContext` and `CommandRequest` objects
+    * `CommandContext` provides an interface for commands to access all required data and methods
+    * `CommandRequest` provides a way for commands to be checked for availability and executed
+    * All commands refactored accordingly to use contexts instead of client, args, and msg arguments
+
+  * Changed wording in `about` embed to reflect new changes
+
+* REFACTORING
+  * Refactored 'GuildClient#sendMsg' to take the channel first to allow channel binding
+  * Added new `first` property to `SongQueuer`
+  * Added `UserClient#sendReponse` and `UserClient#sendMsg`, and finally `UserClient#lastCalled`
+  * Fixed constructor names being the different class than actual class (i.e. GuildClient's constructor name was EventEmitter)
+  * Updated all packages
+
 ## v0.8.2 (PR #35)
 Hopefully last code cleanup, new commands, more.
 * Added new pokemon command
