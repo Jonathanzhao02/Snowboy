@@ -88,7 +88,7 @@ module.exports = function (client) {
   function ack (index, hotword, memberClient) {
     if (!memberClient.guildClient.connection) return
     memberClient.logger.info('Received hotword from %s', memberClient.member.displayName)
-    memberClient.sendResponse('hotword')
+    memberClient.sendResponse('hotword', memberClient.guildClient.boundTextChannel)
     memberClient.guildClient.startTimeout()
   }
 
