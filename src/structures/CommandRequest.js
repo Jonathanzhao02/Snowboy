@@ -48,7 +48,7 @@ CommandRequest.prototype.validate = function () {
   }
 
   if (usages.has(USAGE_FLAGS.GUILD_ONLY)) {
-    if (!this.context.type === 'GUILD') return _ => this.context.sendMsg(`${Emojis.error} ***This command can only be called in a guild!***`)
+    if (this.context.type !== 'GUILD') return _ => this.context.sendMsg(`${Emojis.error} ***This command can only be called in a guild!***`)
   }
 
   if (usages.has(USAGE_FLAGS.DEBUG_ONLY)) {

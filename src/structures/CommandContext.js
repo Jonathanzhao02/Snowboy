@@ -93,7 +93,7 @@ function CommandContext (client, command, args, src) {
     this.type = 'GUILD'
   } else if (client.constructor.name === 'UserClient') {
     this.userClient = client
-    this.sendMsg = client.sendMsg
+    this.sendMsg = client.sendMsg.bind(this.userClient)
     this.name = client.user.username
     this.id = client.user.id
     this.type = 'DM'

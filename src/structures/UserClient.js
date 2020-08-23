@@ -30,6 +30,12 @@ function UserClient (user) {
   this.user = user
 
   /**
+   * The timestamp of the last command execution.
+   * @type {Number}
+   */
+  this.lastCalled = Date.now() - 2000
+
+  /**
    * The UserSettings of this UserClient.
    * @type {import('./UserSettings')?}
    */

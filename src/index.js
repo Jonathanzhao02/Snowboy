@@ -18,6 +18,7 @@ if (process.argv.includes('-t') || process.argv.includes('--test')) {
  * TODO:
  * Allow user setting modification in DMs
  * Add command cooldown to DMs
- * Add mention checking to UserClient sendMsg
  * Add argument checking outside of commands
+ * Add commands to DMs, remove logbug
+ * Change logBug to a command
  */
