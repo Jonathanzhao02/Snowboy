@@ -109,6 +109,7 @@ function GuildClient (guild) {
 
 // Extend the EventEmitter
 GuildClient.prototype = Object.create(EventEmitter.prototype)
+GuildClient.prototype.constructor = GuildClient
 
 /**
  * Initializes all database-related values and adds the GuildClient to the guildClients Map.
@@ -126,12 +127,12 @@ GuildClient.prototype.init = async function () {
  *
  * Also takes into consideration the GuildSettings.
  *
- * @param {String[] | String | import('discord.js').MessageEmbed[] | import('discord.js').MessageEmbed} msg The message to send.
- * @param {Object?} opts The options to send the message with.
  * @param {import('discord.js').TextChannel} channel The TextChannel to send the message through.
+ * @param {String[] | String | import('discord.js').MessageEmbed} msg The message to send.
+ * @param {Object?} opts The options to send the message with.
  * @returns {Promise<import('discord.js').Message[] | import('discord.js').Message>} Returns a promise for the sent messages.
  */
-GuildClient.prototype.sendMsg = async function (msg, channel = this.boundTextChannel, opts) {
+GuildClient.prototype.sendMsg = async function (channel, msg, opts) {
   if (!channel) {
     this.logger.warn('Attempted to send %o, but no text channel found!', msg)
     return
@@ -162,6 +163,7 @@ GuildClient.prototype.startAloneTimeout = function () {
     if (this.voiceChannel?.members.size === 1) {
       this.logger.info('Leaving channel, only member remaining')
       this.sendMsg(
+        this.boundTextChannel,
         `${Emojis.sad} **I'm leaving, I'm all by myself!**`
       )
       this.disconnect()
@@ -182,6 +184,7 @@ GuildClient.prototype.cleanUp = function () {
     if (this.boundTextChannel && this.connection && !this.playing) {
       this.logger.debug('Leaving voice channel')
       this.sendMsg(
+        this.boundTextChannel,
         `${Emojis.happy} **It seems nobody needs me right now, so I'll be headed out. Call me when you do!**`
       )
       this.disconnect()
@@ -271,6 +274,7 @@ GuildClient.prototype.connect = async function (voiceChannel) {
     return connection
   } catch (error) {
     this.sendMsg(
+      this.boundTextChannel,
       `${Emojis.error} ***Could not connect! \\;(***`
     ).then(() => { throw error })
   }

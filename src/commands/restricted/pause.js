@@ -3,27 +3,15 @@ const { Emojis } = require('../../config')
 /**
  * Pauses the current song.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args Unused parameter.
- * @param {import('discord.js').Message?} msg The sent message.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function pause (memberClient, args, msg) {
-  const channel = msg?.channel
-  const logger = memberClient.logger
+function pause (context) {
+  const logger = context.logger
   logger.info('Received pause command')
-  if (!memberClient.guildClient.playing) {
-    logger.debug('Not playing anything')
-    memberClient.guildClient.sendMsg(
-      `${Emojis.error} ***Nothing currently playing!***`,
-      channel
-    )
-    return
-  }
   logger.debug('Pausing music')
-  memberClient.guildClient.guildPlayer.pause()
-  memberClient.guildClient.sendMsg(
-    `${Emojis.pause} ***Paused the music***`,
-    channel
+  context.guildClient.guildPlayer.pause()
+  context.sendMsg(
+    `${Emojis.pause} ***Paused the music***`
   )
   logger.debug('Successfully paused music')
 }
@@ -32,5 +20,6 @@ module.exports = {
   name: 'pause',
   form: 'pause',
   description: 'Tells Snowboy to pause the current song.',
+  usages: ['VOICE', 'TEXT', 'GUILD_ONLY', 'WITH_BOT', 'MUSIC_PLAYING'],
   execute: pause
 }

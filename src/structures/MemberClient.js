@@ -76,7 +76,7 @@ MemberClient.prototype.init = async function () {
  * @returns {Promise<import('discord.js').Message[] | import('discord.js').Message>} Returns a promise for the sent messages.
  */
 MemberClient.prototype.sendResponse = function (func, channel) {
-  return this.guildClient.sendMsg(this.userClient.getResponse(func), channel)
+  return this.guildClient.sendMsg(channel, this.userClient.getResponse(func))
 }
 
 /**

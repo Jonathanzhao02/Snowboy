@@ -1,17 +1,16 @@
 /**
  * Prints a guildClient to console.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args Unused parameter.
- * @param {import('discord.js').Message} msg Unused parameter.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function printGuild (memberClient, args, msg) {
-  const logger = memberClient.logger
+function printGuild (context) {
+  const logger = context.logger
   logger.info('Received print guild command')
-  console.log(memberClient.guildClient)
+  console.log(context.guildClient)
 }
 
 module.exports = {
   name: 'printguild',
+  usages: ['TEXT', 'GUILD_ONLY', 'DEBUG_ONLY'],
   execute: printGuild
 }

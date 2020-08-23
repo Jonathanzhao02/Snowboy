@@ -46,6 +46,7 @@ module.exports = function (Common) {
       Functions.forEachAsync(Common.botClient.guildClients, async (guildClient) => {
         if (guildClient) guildClient.logger.debug('Sending interrupt message')
         await guildClient.sendMsg(
+          guildClient.boundTextChannel,
           `${Emojis.joyful} ***Sorry, I'm going down for updates and maintenance! See you soon!***`
         )
       }).then(resolve)

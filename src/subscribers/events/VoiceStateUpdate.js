@@ -6,7 +6,7 @@ module.exports = function (client) {
     if (!oldPresence.channel) return
     const userId = newPresence.id
     const guildClient = client.guildClients.get(newPresence.guild.id)
-    const memberClient = guildClient.memberClients.get(userId)
+    const memberClient = guildClient?.memberClients.get(userId)
 
     // If bot is currently connected, the channel in question is the bot's channel, and a user has left or moved channels
     if (guildClient?.connection && oldPresence.channelID === guildClient?.voiceChannel.id &&
@@ -24,7 +24,10 @@ module.exports = function (client) {
 
       // If the bot has been moved
       if (userId === client.user.id && newPresence.channelID !== guildClient.voiceChannel.id) {
-        guildClient.sendMsg(`${Emojis.angry} **Don't move me from my home!**`)
+        guildClient.sendMsg(
+          guildClient.boundTextChannel,
+          `${Emojis.angry} **Don't move me from my home!**`
+        )
         newPresence.channel.leave()
       }
     }

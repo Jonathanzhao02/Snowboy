@@ -57,6 +57,7 @@ function SnowClient (memberClient, sensitivity) {
 }
 
 SnowClient.prototype = Object.create(EventEmitter.prototype)
+SnowClient.prototype.constructor = SnowClient
 
 /**
  * Triggered whenever a hotword is detected.

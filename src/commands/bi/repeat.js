@@ -4,18 +4,14 @@ const Strings = require('../../bot-util/Strings')
 /**
  * Repeats a message in chat.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args The message to repeat.
- * @param {import('discord.js').Message?} msg The sent message.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function repeat (memberClient, args, msg) {
-  const channel = msg?.channel
-  const logger = memberClient.logger
+function repeat (context) {
+  const logger = context.logger
   logger.info('Received repeat command')
-  const message = args.join(' ')
-  memberClient.guildClient.sendMsg(
-    `${Emojis.loop} *\u{201c}${Strings.beautify(message)}\u{201d}* \n   ***${('       \u{2013}  ' + memberClient.member.displayName)}***`,
-    channel
+  const message = context.args.join(' ')
+  context.sendMsg(
+    `${Emojis.loop} *\u{201c}${Strings.beautify(message)}\u{201d}* \n   ***${('       \u{2013}  ' + context.name)}***`
   )
 }
 
@@ -23,5 +19,6 @@ module.exports = {
   name: 'repeat',
   form: 'repeat <message>',
   description: 'Tells Snowboy to repeat a message.',
+  usages: ['VOICE', 'TEXT'],
   execute: repeat
 }

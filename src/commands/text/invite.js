@@ -5,12 +5,10 @@ const Discord = require('discord.js')
 /**
  * Sends an invite link for Snowboy.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args Unused parameter.
- * @param {Discord.Message} msg The sent message.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function invite (memberClient, args, msg) {
-  const logger = memberClient.logger
+function invite (context) {
+  const logger = context.logger
   logger.info('Received invite command')
   Common.botClient.generateInvite([
     Discord.Permissions.FLAGS.CONNECT,
@@ -23,9 +21,8 @@ function invite (memberClient, args, msg) {
     Discord.Permissions.FLAGS.READ_MESSAGE_HISTORY,
     Discord.Permissions.FLAGS.ADD_REACTIONS
   ]).then(link => {
-    memberClient.guildClient.sendMsg(
-      Embeds.createInviteEmbed(link),
-      msg.channel
+    context.sendMsg(
+      Embeds.createInviteEmbed(link)
     )
   })
 }
@@ -34,5 +31,6 @@ module.exports = {
   name: 'invite',
   form: 'invite',
   description: 'Gives you an invite link for Snowboy.',
+  usages: ['TEXT'],
   execute: invite
 }

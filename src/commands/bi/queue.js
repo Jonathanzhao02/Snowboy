@@ -1,33 +1,22 @@
 const Embeds = require('../../bot-util/Embeds')
-const { Emojis } = require('../../config')
 
 /**
  * Sends the help embed about Snowboy to a user.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args The specific command to ask about.
- * @param {import('discord.js').Message?} msg The sent message.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function queue (memberClient, args, msg) {
-  const channel = msg?.channel
-  const logger = memberClient.logger
+function queue (context) {
+  const logger = context.logger
   logger.info('Received queue command')
-  if (memberClient.guildClient.playing) {
-    memberClient.guildClient.sendMsg(
-      Embeds.createQueueEmbed(memberClient.guildClient.guildPlayer.songQueuer),
-      channel
-    )
-  } else {
-    memberClient.guildClient.sendMsg(
-      `${Emojis.error} ***Nothing currently playing!***`,
-      channel
-    )
-  }
+  context.sendMsg(
+    Embeds.createQueueEmbed(context.guildClient.guildPlayer.songQueuer)
+  )
 }
 
 module.exports = {
   name: 'queue',
   form: 'queue',
   description: 'Lists the current queue.',
+  usages: ['VOICE', 'TEXT', 'GUILD_ONLY', 'MUSIC_PLAYING'],
   execute: queue
 }

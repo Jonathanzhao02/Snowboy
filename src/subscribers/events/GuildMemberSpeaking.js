@@ -3,6 +3,7 @@ const Emojis = require('../../config').Emojis
 const CONFIDENCE_THRESHOLD = require('../../config').CONFIDENCE_THRESHOLD
 const Commands = require('../../commands')
 const SnowClient = require('../../structures/SnowClient')
+const CommandRequest = require('../../structures/CommandRequest')
 
 module.exports = function (client) {
   /**
@@ -26,10 +27,12 @@ module.exports = function (client) {
       newClient.on('hotword', ack)
       newClient.on('result', parse)
       newClient.on('busy', (memberClient) => guildClient.sendMsg(
+        guildClient.boundTextChannel,
         `***I'm still working on your last request, <@${memberClient.id}>!***`
       ))
       newClient.on('error', msg => {
         guildClient.sendMsg(
+          guildClient.boundTextChannel,
           `${Emojis.error} ***Error:*** \`${msg}\``
         )
       })
@@ -57,6 +60,7 @@ module.exports = function (client) {
       memberClient.logger.debug('Rejected voice command')
       memberClient.logger.debug(result)
       memberClient.guildClient.sendMsg(
+        memberClient.guildClient.boundTextChannel,
         `${Emojis.unknown} ***Sorry, I didn't catch that...***`
       )
       return
@@ -68,20 +72,7 @@ module.exports = function (client) {
     memberClient.logger.debug('Understood command as %s and arguments as %o', commandName, args)
 
     // Checks all relevant command maps
-    if (Commands.bi.get(commandName)) {
-      Commands.bi.get(commandName).execute(memberClient, args)
-    } else if (Commands.restricted.get(commandName)) {
-      Commands.restricted.get(commandName).execute(memberClient, args)
-    } else if (Commands.voice.get(commandName)) {
-      Commands.voice.get(commandName).execute(memberClient, args)
-    } else if (Commands.easteregg.get(commandName)) {
-      Commands.easteregg.get(commandName).execute(memberClient, args)
-    } else {
-      memberClient.guildClient.sendMsg(
-        `${Emojis.confused} ***Sorry, I don't understand*** "\`${result.text}\`"`
-      )
-      memberClient.logger.warn('No command found for %s!', commandName)
-    }
+    new CommandRequest(memberClient, commandName, args, memberClient.member.voice).execute()
   }
 
   /**
@@ -97,7 +88,7 @@ module.exports = function (client) {
   function ack (index, hotword, memberClient) {
     if (!memberClient.guildClient.connection) return
     memberClient.logger.info('Received hotword from %s', memberClient.member.displayName)
-    memberClient.sendResponse('hotword')
+    memberClient.sendResponse('hotword', memberClient.guildClient.boundTextChannel)
     memberClient.guildClient.startTimeout()
   }
 

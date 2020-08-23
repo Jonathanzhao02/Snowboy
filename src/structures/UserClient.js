@@ -30,6 +30,12 @@ function UserClient (user) {
   this.user = user
 
   /**
+   * The timestamp of the last command execution.
+   * @type {Number}
+   */
+  this.lastCalled = Date.now() - 2000
+
+  /**
    * The UserSettings of this UserClient.
    * @type {import('./UserSettings')?}
    */
@@ -91,6 +97,32 @@ UserClient.prototype.updateImpression = function (value) {
  */
 UserClient.prototype.setImpression = function (value) {
   this.updateImpression(value - this.impression)
+}
+
+/**
+ * Sends the response of Snowboy to a User's command according to their impression.
+ *
+ * @param {String} func The name of the called command.
+ * @param {import('discord.js').TextChannel?} channel The TextChannel to send the response through.
+ * @returns {Promise<import('discord.js').Message[] | import('discord.js').Message>} Returns a promise for the sent messages.
+ */
+UserClient.prototype.sendResponse = function (func) {
+  return this.sendMsg(this.getResponse(func))
+}
+
+/**
+ * Sends message directly to a User.
+ *
+ * @param {String | String[] | import('discord.js').MessageEmbed} msg The message to send.
+ * @param {Object?} opts The options to send the message with.
+ * @returns {Promise<import('discord.js').Message[] | import('discord.js').Message>?} Returns a promise for the sent messages.
+ */
+UserClient.prototype.sendMsg = async function (msg, opts) {
+  try {
+    return await this.user.send(msg, opts)
+  } catch (error) {
+    this.logger.info('Could not send message, likely blocked.')
+  }
 }
 
 module.exports = UserClient

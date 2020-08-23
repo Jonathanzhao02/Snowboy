@@ -5,39 +5,33 @@ const Gsearch = require('../../web-apis/Gsearch')
 /**
  * Searches up and prints the top result of a search query.
  *
- * @param {import('../../structures/MemberClient')} memberClient The memberClient of the member who requested this command.
- * @param {String[]} args The search query.
- * @param {import('discord.js').Message?} msg The sent message.
+ * @param {import('../../structures/CommandContext')} context The command context.
  */
-function search (memberClient, args, msg) {
-  const channel = msg?.channel
-  const logger = memberClient.logger
+function search (context) {
+  const logger = context.logger
   logger.info('Received search command')
-  if (!args || args.length === 0) {
+  if (!context.args || context.args.length === 0) {
     logger.debug('No query found')
-    memberClient.guildClient.sendMsg(
-      `${Emojis.error} ***I need something to search up!***`,
-      channel
+    context.sendMsg(
+      `${Emojis.error} ***I need something to search up!***`
     )
     return
   }
 
-  const query = args.join(' ')
-  memberClient.guildClient.sendMsg(
-    `${Emojis.search} ***Searching*** \`${query}\``,
-    channel
+  const query = context.args.join(' ')
+  context.sendMsg(
+    `${Emojis.search} ***Searching*** \`${query}\``
   )
 
   logger.debug('Searching up %s', query)
   Gsearch.search(query).then(result => {
     logger.debug('Received result')
     logger.debug(result)
-    memberClient.guildClient.sendMsg(
+    context.sendMsg(
       Embeds.createSearchEmbed(
         result,
-        memberClient.member.displayName
-      ),
-      channel
+        context.name
+      )
     )
   })
 }
@@ -46,5 +40,6 @@ module.exports = {
   name: 'search',
   form: 'search <search terms>',
   description: 'Searches up and tells you the first result of a query.',
+  usages: ['VOICE', 'TEXT'],
   execute: search
 }
