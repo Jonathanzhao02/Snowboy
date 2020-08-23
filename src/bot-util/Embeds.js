@@ -117,7 +117,7 @@ function createAboutEmbed () {
     '**There is currently no support server for Snowboy. This will be updated if one is created.**')
     .addField('For Developers', 'Snowboy was built using NodeJS/Javascript. ' +
     'The different libraries and APIs used for Snowboy include Discord.js, __Wit.ai__, __Snowboy__, Keyv and a few Google Cloud APIs. ' +
-    'I\'d highly recommend you to check out the underlined ones, they\'re both excellent, open-source ways to use speech recognition.')
+    'I\'d highly recommend you to check out the underlined ones; they\'re both excellent, open-source ways to use speech recognition.')
     .setImage(Common.botClient.user.displayAvatarURL({ size: 2048, format: 'png' }))
 }
 
