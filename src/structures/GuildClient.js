@@ -184,6 +184,7 @@ GuildClient.prototype.cleanUp = function () {
     if (this.boundTextChannel && this.connection && !this.playing) {
       this.logger.debug('Leaving voice channel')
       this.sendMsg(
+        this.boundTextChannel,
         `${Emojis.happy} **It seems nobody needs me right now, so I'll be headed out. Call me when you do!**`
       )
       this.disconnect()
@@ -273,6 +274,7 @@ GuildClient.prototype.connect = async function (voiceChannel) {
     return connection
   } catch (error) {
     this.sendMsg(
+      this.boundTextChannel,
       `${Emojis.error} ***Could not connect! \\;(***`
     ).then(() => { throw error })
   }
