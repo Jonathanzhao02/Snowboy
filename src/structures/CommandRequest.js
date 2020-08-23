@@ -52,7 +52,7 @@ CommandRequest.prototype.validate = function () {
   }
 
   if (usages.has(USAGE_FLAGS.IN_VOICE)) {
-    if (!this.context.guildClient.connection || !this.context.voice.channelID === this.context.guildClient.voiceChannel.id) return _ => this.context.sendMsg(`${Emojis.error} ***You are not in a channel with me!***`)
+    if (!this.context.guildClient.connection || !this.context.voice.channelID === this.context.guildClient.voiceChannel.id) return _ => this.context.sendMsg(`${Emojis.error} ***You are not in a voice channel with me!***`)
   }
 
   return command.execute

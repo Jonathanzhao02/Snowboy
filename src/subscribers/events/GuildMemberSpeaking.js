@@ -72,7 +72,7 @@ module.exports = function (client) {
     memberClient.logger.debug('Understood command as %s and arguments as %o', commandName, args)
 
     // Checks all relevant command maps
-    new CommandRequest(memberClient, commandName, args, memberClient.member.voice)
+    new CommandRequest(memberClient, commandName, args, memberClient.member.voice).execute()
     /* if (Commands.bi.get(commandName)) {
       Commands.bi.get(commandName).execute(memberClient, args)
     } else if (Commands.restricted.get(commandName)) {
