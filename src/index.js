@@ -1,7 +1,7 @@
 const Discord = require('discord.js')
 const client = new Discord.Client()
 
-const { logger } = require('./loaders')(client)
+const logger = require('./loaders')(client)
 require('./subscribers')(client, logger)
 
 const Admin = require('./snowboy-web-admin')

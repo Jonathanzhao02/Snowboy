@@ -1,5 +1,14 @@
-const Common = require('../bot-util/Common')
 const http = require('https')
+let cache
+
+/**
+ * Sets the cache to use for any API responses.
+ *
+ * @param {import('flat-cache')} cache The cache to use.
+ */
+function setCache (cch) {
+  cache = cch
+}
 
 /**
  * Returns endpoint and query from a PokeApi URL.
@@ -22,7 +31,7 @@ function processEndpoints (url) {
 function search (query, endpoint) {
   const key = endpoint + ':' + query
   return new Promise((resolve, reject) => {
-    if (Common.pokeApiCache.getKey(endpoint + ':' + query)) return resolve(Common.pokeApiCache.getKey(key), key)
+    if (cache?.getKey(endpoint + ':' + query)) return resolve(cache.getKey(key), key)
     const method = 'GET'
     const host = 'pokeapi.co'
     const path = `/api/v2/${endpoint}/`
@@ -50,7 +59,7 @@ function search (query, endpoint) {
         if (resp.statusCode !== 200) reject(new Error(`Invalid status code ${resp.statusCode}`))
         else {
           const obj = JSON.parse(message)
-          Common.pokeApiCache.setKey(key, obj)
+          cache?.setKey(key, obj) // eslint-disable-line no-unused-expressions
           resolve(obj, key)
         }
       })
@@ -74,7 +83,6 @@ function getNextEvos (chain, name) {
     const numberOfEvolutions = evoData.evolves_to.length
 
     for (let i = 0; i < numberOfEvolutions; i++) {
-
       if (evoData.species.name === name) {
         evoData.evolves_to.forEach(val => {
           evoChain.push(val.species.name)
@@ -115,4 +123,7 @@ async function get (query) {
   return pokemonConstruct
 }
 
-exports.get = get
+module.exports = {
+  get: get,
+  setCache: setCache
+}

@@ -1,17 +1,17 @@
 const heapdump = require('heapdump')
 const Functions = require('../bot-util/Functions')
-const { Emojis } = require('../config')
+const { Emojis, Paths } = require('../config')
 
-module.exports = function (Common) {
+module.exports = function (bot, cache, logger) {
   // On uncaught exception
   process.on('uncaughtException', error => {
     console.log('UNCAUGHT EXCEPTION: Exiting')
     console.log(error)
-    heapdump.writeSnapshot(Common.defaultLogdir + `/${new Date().toISOString()}_ERR.heapdump`, (err, filename) => {
-      Common.logger.error('Uncaught exception')
-      Common.logger.error(error)
+    heapdump.writeSnapshot(Paths.defaultLogdir + `/${new Date().toISOString()}_ERR.heapdump`, (err, filename) => {
+      logger.error('Uncaught exception')
+      logger.error(error)
       if (err) process.exit(1)
-      Common.logger.debug('Heapdump written to %s', filename)
+      logger.debug('Heapdump written to %s', filename)
       process.exit(1)
     })
   })
@@ -21,12 +21,12 @@ module.exports = function (Common) {
     console.log('UNHANDLED REJECTION: Exiting')
     console.log(error)
     console.log(promise)
-    heapdump.writeSnapshot(Common.defaultLogdir + `/${new Date().toISOString()}_REJ.heapdump`, (err, filename) => {
-      Common.logger.error('Unhandled promise rejection')
-      Common.logger.error(promise)
-      Common.logger.error(error)
+    heapdump.writeSnapshot(Paths.defaultLogdir + `/${new Date().toISOString()}_REJ.heapdump`, (err, filename) => {
+      logger.error('Unhandled promise rejection')
+      logger.error(promise)
+      logger.error(error)
       if (err) process.exit(1)
-      Common.logger.debug('Heapdump written to %s', filename)
+      logger.debug('Heapdump written to %s', filename)
       process.exit(1)
     })
   })
@@ -34,16 +34,16 @@ module.exports = function (Common) {
   // On process termination (exits normally)
   process.on('SIGTERM', signal => {
     console.log('Received SIGTERM signal')
-    Common.logger.info(`Process ${process.pid} received a SIGTERM signal`)
+    logger.info(`Process ${process.pid} received a SIGTERM signal`)
     process.exit(0)
   })
 
   // On process interrupt
   process.on('SIGINT', signal => {
     console.log('Received SIGINT signal')
-    Common.logger.info(`Process ${process.pid} has been interrupted`)
+    logger.info(`Process ${process.pid} has been interrupted`)
     const promise = new Promise((resolve, reject) => {
-      Functions.forEachAsync(Common.botClient.guildClients, async (guildClient) => {
+      Functions.forEachAsync(bot.guildClients, async (guildClient) => {
         if (guildClient) guildClient.logger.debug('Sending interrupt message')
         await guildClient.sendMsg(
           guildClient.boundTextChannel,
@@ -51,7 +51,7 @@ module.exports = function (Common) {
         )
       }).then(resolve)
 
-      if (Common.botClient.guildClients.size === 0) resolve()
+      if (bot.guildClients.size === 0) resolve()
     })
 
     promise.then(() => {
@@ -61,7 +61,7 @@ module.exports = function (Common) {
 
   // On process exit
   process.on('exit', () => {
-    Common.pokeApiCache.save()
-    Common.botClient.destroy()
+    cache.save()
+    bot.destroy()
   })
 }
