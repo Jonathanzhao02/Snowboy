@@ -112,7 +112,7 @@ function createAboutEmbed () {
     .setTitle('__**About The Bot**__')
     .addField('Description', 'Snowboy is a voice-recognition bot built primarily to play music. ' +
     'It can also be considered an Alexa of sorts, as it has a variety of other functions for users (you!) to play around with.')
-    .addField('Contact', 'To report bugs or any other inquiries, please go ahead and use the %bugreport command. ' +
+    .addField('Contact', 'To report bugs or anything else you\'d like me to know, please go ahead and use the %report command. ' +
     'Please keep in mind that reports should be kept to one message, or Snowboy will not log it in its entirety. ' +
     '**There is currently no support server for Snowboy. This will be updated if one is created.**')
     .addField('For Developers', 'Snowboy was built using NodeJS/Javascript. ' +

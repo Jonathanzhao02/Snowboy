@@ -2,11 +2,11 @@ const Common = require('../../bot-util/Common')
 const Fs = require('fs')
 
 /**
- * Logs a bug report.
+ * Logs a report.
  *
  * @param {import('../../structures/CommandContext')} context The command context.
  */
-function bugReport (context) {
+function report (context) {
   const logger = context.logger
   logger.info('Received stats command')
   if (Date.now() - context.userClient.lastReport < 86400000) {
@@ -25,9 +25,9 @@ function bugReport (context) {
 }
 
 module.exports = {
-  name: 'bugreport',
-  form: 'bugreport',
-  description: 'Sends Snowboy a bug report. Please keep it to one message! Usable once every 24 hours.',
+  name: 'report',
+  form: 'report',
+  description: 'Sends Snowboy a report. Please keep it to one message! Usable once every 24 hours.',
   usages: ['TEXT'],
-  execute: bugReport
+  execute: report
 }
