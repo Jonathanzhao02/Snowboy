@@ -163,6 +163,7 @@ GuildClient.prototype.startAloneTimeout = function () {
     if (this.voiceChannel?.members.size === 1) {
       this.logger.info('Leaving channel, only member remaining')
       this.sendMsg(
+        this.boundTextChannel,
         `${Emojis.sad} **I'm leaving, I'm all by myself!**`
       )
       this.disconnect()

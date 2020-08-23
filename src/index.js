@@ -18,9 +18,6 @@ if (process.argv.includes('-t') || process.argv.includes('--test')) {
  * TODO:
  * Allow user setting modification in DMs
  * Add command cooldown to DMs
- * Add usage checking
  * Add mention checking to UserClient sendMsg
- * Add check voice connection to deafen/undeafen and similar commands (in voice, not necessarily with snowboy)
  * Add argument checking outside of commands
- * Add PLAYING flag to usages (check music is playing)
  */

@@ -36,7 +36,7 @@ CommandRequest.prototype.execute = function () {
  * @returns {Function} Returns the command execution.
  */
 CommandRequest.prototype.validate = function () {
-  const command = Commands.all.get(this.context.command)
+  const command = Commands.get(this.context.command)
 
   if (!command) return _ => this.context.sendMsg(`${Emojis.error} ***Command not found: \`${this.context.command}\`***`)
   const usages = command.usages
