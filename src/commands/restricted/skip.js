@@ -8,13 +8,6 @@ const { Emojis } = require('../../config')
 function skip (context) {
   const logger = context.logger
   logger.info('Received skip command')
-  if (!context.guildClient.playing) {
-    logger.debug('Not playing anything')
-    context.sendMsg(
-      `${Emojis.error} ***Nothing currently playing!***`
-    )
-    return
-  }
   logger.debug('Skipping song')
   context.guildClient.guildPlayer.end()
   context.guildClient.sendMsg(
@@ -27,6 +20,6 @@ module.exports = {
   name: 'skip',
   form: 'skip',
   description: 'Tells Snowboy to skip the current song.',
-  usages: ['VOICE', 'TEXT', 'GUILD_ONLY', 'IN_VOICE'],
+  usages: ['VOICE', 'TEXT', 'GUILD_ONLY', 'WITH_BOT', 'MUSIC_PLAYING'],
   execute: skip
 }

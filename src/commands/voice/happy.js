@@ -16,6 +16,6 @@ function compliment (context) {
 
 module.exports = {
   name: 'compliment',
-  usages: ['VOICE', 'GUILD_ONLY', 'IN_VOICE'],
+  usages: ['VOICE', 'GUILD_ONLY', 'WITH_BOT'],
   execute: compliment
 }

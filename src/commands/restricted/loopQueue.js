@@ -8,13 +8,7 @@ const { Emojis } = require('../../config')
 function loopQueue (context) {
   const logger = context.logger
   logger.info('Received loopqueue command')
-  if (!context.guildClient.playing) {
-    logger.debug('Not playing anything')
-    context.sendMsg(
-      `${Emojis.error} ***Nothing currently playing!***`
-    )
-    return
-  }
+
   if (context.guildClient.loopState === 2) {
     logger.debug('Stopping queue loop')
     context.guildClient.loopState = 0
@@ -32,6 +26,6 @@ module.exports = {
   name: 'loopqueue',
   form: 'loopqueue',
   description: 'Tells Snowboy to loop the current queue.',
-  usages: ['VOICE', 'TEXT', 'GUILD_ONLY', 'IN_VOICE'],
+  usages: ['VOICE', 'TEXT', 'GUILD_ONLY', 'WITH_BOT', 'MUSIC_PLAYING'],
   execute: loopQueue
 }

@@ -8,16 +8,10 @@ const { Emojis } = require('../../config')
 function deafen (context) {
   const logger = context.logger
   logger.info('Setting deafen state of %s to `true`', context.name)
-  if (context.voice) {
-    context.voice.setDeaf(true)
-    context.sendMsg(
-      `**${Emojis.mute} Deafened <@${context.id}>**`
-    )
-  } else {
-    context.sendMsg(
-      `${Emojis.error} **You are not connected to a voice channel!**`
-    )
-  }
+  context.memberClient.member.voice.setDeaf(true)
+  context.sendMsg(
+    `**${Emojis.mute} Deafened <@${context.id}>**`
+  )
 }
 
 module.exports = {
@@ -25,6 +19,6 @@ module.exports = {
   aliases: ['mute'],
   form: 'deafen',
   description: 'Server deafens the requester.',
-  usages: ['VOICE', 'TEXT', 'GUILD_ONLY'],
+  usages: ['VOICE', 'TEXT', 'GUILD_ONLY', 'IN_VOICE'],
   execute: deafen
 }

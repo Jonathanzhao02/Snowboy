@@ -16,6 +16,6 @@ function nevermind (context) {
 
 module.exports = {
   name: 'nevermind',
-  usages: ['VOICE', 'GUILD_ONLY', 'IN_VOICE'],
+  usages: ['VOICE', 'GUILD_ONLY', 'WITH_BOT'],
   execute: nevermind
 }

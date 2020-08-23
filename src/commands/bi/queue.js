@@ -1,5 +1,4 @@
 const Embeds = require('../../bot-util/Embeds')
-const { Emojis } = require('../../config')
 
 /**
  * Sends the help embed about Snowboy to a user.
@@ -9,21 +8,15 @@ const { Emojis } = require('../../config')
 function queue (context) {
   const logger = context.logger
   logger.info('Received queue command')
-  if (context.guildClient.playing) {
-    context.sendMsg(
-      Embeds.createQueueEmbed(context.guildClient.guildPlayer.songQueuer)
-    )
-  } else {
-    context.sendMsg(
-      `${Emojis.error} ***Nothing currently playing!***`
-    )
-  }
+  context.sendMsg(
+    Embeds.createQueueEmbed(context.guildClient.guildPlayer.songQueuer)
+  )
 }
 
 module.exports = {
   name: 'queue',
   form: 'queue',
   description: 'Lists the current queue.',
-  usages: ['VOICE', 'TEXT', 'GUILD_ONLY'],
+  usages: ['VOICE', 'TEXT', 'GUILD_ONLY', 'MUSIC_PLAYING'],
   execute: queue
 }

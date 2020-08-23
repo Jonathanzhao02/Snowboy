@@ -16,6 +16,6 @@ function gross (context) {
 
 module.exports = {
   name: 'gross',
-  usages: ['VOICE', 'GUILD_ONLY', 'IN_VOICE'],
+  usages: ['VOICE', 'GUILD_ONLY', 'WITH_BOT'],
   execute: gross
 }

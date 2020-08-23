@@ -9,14 +9,6 @@ const Responses = require('../../bot-util/Responses')
 function join (context) {
   const logger = context.logger
   logger.info('Received join command')
-  // If the user is not connected to a VoiceChannel, notify and return
-  if (!context.memberClient.member.voice.channel) {
-    logger.trace('Member not connected')
-    context.sendMsg(
-      `${Emojis.error} ***You are not connected to a voice channel!***`
-    )
-    return
-  }
 
   // If already connected, notify and return
   if (context.guildClient.connection) {
@@ -47,6 +39,6 @@ module.exports = {
   name: 'join',
   form: 'join',
   description: 'Tells Snowboy to join the requester\'s voice channel.',
-  usages: ['TEXT', 'GUILD_ONLY'],
+  usages: ['TEXT', 'GUILD_ONLY', 'IN_VOICE'],
   execute: join
 }

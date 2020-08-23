@@ -17,6 +17,6 @@ function greet (context) {
 
 module.exports = {
   name: 'greet',
-  usages: ['VOICE', 'GUILD_ONLY', 'IN_VOICE'],
+  usages: ['VOICE', 'GUILD_ONLY', 'WITH_BOT'],
   execute: greet
 }

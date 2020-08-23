@@ -3,7 +3,9 @@ const FLAGS = {
   TEXT: 1, // usable through text cmd
   GUILD_ONLY: 2, // only usable in guilds
   DEBUG_ONLY: 3, // only usable by debuggers
-  IN_VOICE: 4 // only usable while in the same voice channel as Snowboy
+  WITH_BOT: 4, // only usable while in the same voice channel as Snowboy, should imply IN_VOICE
+  IN_VOICE: 5, // only usable while connected, through voice or text
+  MUSIC_PLAYING: 6 // only usable while music is playing
 }
 
 /**

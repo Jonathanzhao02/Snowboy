@@ -46,6 +46,14 @@ function SongQueuer (player) {
   Object.defineProperty(this, 'connection', {
     get: () => this.player.connection
   })
+
+  /**
+   * The first song in the queue.
+   * @type {Object}
+   */
+  Object.defineProperty(this, 'first', {
+    get: () => this[0]
+  })
 }
 
 SongQueuer.prototype = Object.create(Array.prototype)

@@ -18,6 +18,6 @@ function chungus (context) {
 
 module.exports = {
   name: 'chungus',
-  usages: ['VOICE', 'TEXT', 'GUILD_ONLY'],
+  usages: ['VOICE', 'TEXT'],
   execute: chungus
 }

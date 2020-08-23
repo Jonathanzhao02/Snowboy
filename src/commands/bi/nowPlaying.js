@@ -1,5 +1,4 @@
 const Embeds = require('../../bot-util/Embeds')
-const { Emojis } = require('../../config')
 
 /**
  * Sends the help embed about Snowboy to a user.
@@ -9,22 +8,16 @@ const { Emojis } = require('../../config')
 function nowPlaying (context) {
   const logger = context.logger
   logger.info('Received now playing command')
-  const video = context.guildClient.guildPlayer.songQueuer[0]
-  if (video && context.guildClient.playing) {
-    context.sendMsg(
-      Embeds.createVideoEmbed(video)
-    )
-  } else {
-    context.sendMsg(
-      `${Emojis.error} ***Nothing currently playing!***`
-    )
-  }
+  const video = context.guildClient.guildPlayer.songQueuer.first
+  context.sendMsg(
+    Embeds.createVideoEmbed(video)
+  )
 }
 
 module.exports = {
   name: 'nowplaying',
   form: 'nowplaying',
   description: 'Lists out what\'s currently playing.',
-  usages: ['VOICE', 'TEXT', 'GUILD_ONLY'],
+  usages: ['VOICE', 'TEXT', 'GUILD_ONLY', 'MUSIC_PLAYING'],
   execute: nowPlaying
 }

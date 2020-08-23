@@ -8,13 +8,6 @@ const { Emojis } = require('../../config')
 function resume (context) {
   const logger = context.logger
   logger.info('Received resume command')
-  if (!context.guildClient.playing) {
-    logger.debug('Not playing anything')
-    context.sendMsg(
-      `${Emojis.error} ***Nothing currently playing!***`
-    )
-    return
-  }
   logger.debug('Resuming music')
   context.guildClient.guildPlayer.resume()
   context.sendMsg(
@@ -27,6 +20,6 @@ module.exports = {
   name: 'resume',
   form: 'resume',
   description: 'Tells Snowboy to resume the current song.',
-  usages: ['VOICE', 'TEXT', 'GUILD_ONLY', 'IN_VOICE'],
+  usages: ['VOICE', 'TEXT', 'GUILD_ONLY', 'WITH_BOT', 'MUSIC_PLAYING'],
   execute: resume
 }

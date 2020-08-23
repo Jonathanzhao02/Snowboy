@@ -8,13 +8,6 @@ const { Emojis } = require('../../config')
 function pause (context) {
   const logger = context.logger
   logger.info('Received pause command')
-  if (!context.guildClient.playing) {
-    logger.debug('Not playing anything')
-    context.sendMsg(
-      `${Emojis.error} ***Nothing currently playing!***`
-    )
-    return
-  }
   logger.debug('Pausing music')
   context.guildClient.guildPlayer.pause()
   context.sendMsg(
@@ -27,6 +20,6 @@ module.exports = {
   name: 'pause',
   form: 'pause',
   description: 'Tells Snowboy to pause the current song.',
-  usages: ['VOICE', 'TEXT', 'GUILD_ONLY', 'IN_VOICE'],
+  usages: ['VOICE', 'TEXT', 'GUILD_ONLY', 'WITH_BOT', 'MUSIC_PLAYING'],
   execute: pause
 }

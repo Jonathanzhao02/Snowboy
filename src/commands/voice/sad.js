@@ -16,6 +16,6 @@ function insult (context) {
 
 module.exports = {
   name: 'insult',
-  usages: ['VOICE', 'GUILD_ONLY', 'IN_VOICE'],
+  usages: ['VOICE', 'GUILD_ONLY', 'WITH_BOT'],
   execute: insult
 }

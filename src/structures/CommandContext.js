@@ -1,18 +1,4 @@
 /**
- * Needs:
- * Logger (Pino)
- * Channel (msg.channel / guildClient.boundTextChannel)
- * Message (sent msg) < check for existence to check if text command
- * GuildClient (memberClient.guildClient) < check for existence to check if guild command
- * MemberClient (requester)
- * UserClient (requester / memberClient.userClient)
- * sendMsg() (guildClient.sendMsg / userClient.sendMsg)
- * VoiceState (member.voice) < check for existence to check if voice command
- * Command (sent command)
- * Args (sent args)
- */
-
-/**
  * Provides necessary context for command execution.
  *
  * @param {import('./UserClient') | import('./MemberClient')} client The client the command originated from.
@@ -73,6 +59,12 @@ function CommandContext (client, command, args, src) {
      * @type {import('./UserClient')?}
      */
     this.userClient = client.userClient
+
+    /**
+     * The VoiceState of the calling memberClient.
+     * @type {import('discord.js').VoiceState}
+     */
+    this.voiceState = client.member.voice
 
     /**
      * The method to send messages through.

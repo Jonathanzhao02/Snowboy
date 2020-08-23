@@ -18,12 +18,16 @@ function CommandRequest (client, command, args, src) {
    * @type {CommandContext}
    */
   this.context = new CommandContext(client, command, args, src)
+}
 
-  /**
-   * The command execution.
-   * @type {Function?}
-   */
-  this.execute = this.validate()?.bind(this, this.context)
+/**
+ * Executes the command after validation.
+ * @throws {Error} Throws an error if no command execution was found.
+ */
+CommandRequest.prototype.execute = function () {
+  const execution = this.validate()
+  if (!execution) throw new Error('No command execution body!')
+  execution(this.context)
 }
 
 /**
@@ -43,16 +47,24 @@ CommandRequest.prototype.validate = function () {
     if (!this.context.msg) return _ => {}
   }
 
-  if (usages.has(USAGE_FLAGS.DEBUG_ONLY)) {
-    if (!DEBUG_IDS.includes(this.context.id)) return _ => {}
-  }
-
   if (usages.has(USAGE_FLAGS.GUILD_ONLY)) {
     if (!this.context.type === 'GUILD') return _ => this.context.sendMsg(`${Emojis.error} ***This command can only be called in a guild!***`)
   }
 
+  if (usages.has(USAGE_FLAGS.DEBUG_ONLY)) {
+    if (!DEBUG_IDS.includes(this.context.id)) return _ => {}
+  }
+
+  if (usages.has(USAGE_FLAGS.WITH_BOT)) {
+    if (!this.context.guildClient.connection || this.context.memberClient.member.voice.channelID !== this.context.guildClient.voiceChannel.id) return _ => this.context.sendMsg(`${Emojis.error} ***You are not in a voice channel with me!***`)
+  }
+
   if (usages.has(USAGE_FLAGS.IN_VOICE)) {
-    if (!this.context.guildClient.connection || !this.context.voice.channelID === this.context.guildClient.voiceChannel.id) return _ => this.context.sendMsg(`${Emojis.error} ***You are not in a voice channel with me!***`)
+    if (!this.context.memberClient.member.voice.channelID) return _ => this.context.sendMsg(`${Emojis.error} ***You are not in a voice channel!***`)
+  }
+
+  if (usages.has(USAGE_FLAGS.MUSIC_PLAYING)) {
+    if (!this.context.guildClient.guildPlayer.songQueuer.playing) return _ => this.context.sendMsg(`${Emojis.error} ***Nothing currently playing!***`)
   }
 
   return command.execute
