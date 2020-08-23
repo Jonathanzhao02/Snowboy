@@ -19,5 +19,4 @@ if (process.argv.includes('-t') || process.argv.includes('--test')) {
  * Allow user setting modification in DMs
  * Add argument checking outside of commands
  * Add command cooldowns
- * Remove Common completely
  */
