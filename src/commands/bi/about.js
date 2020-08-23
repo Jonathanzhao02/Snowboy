@@ -9,7 +9,7 @@ function about (context) {
   const logger = context.logger
   logger.info('Received about command')
   context.sendMsg(
-    Embeds.createAboutEmbed()
+    Embeds.createAboutEmbed(context.bot)
   )
 }
 

@@ -2,7 +2,7 @@ const Clients = require('../../bot-util/Clients')
 const Config = require('../../config')
 const CommandRequest = require('../../structures/CommandRequest')
 
-module.exports = function (client) {
+module.exports = function (client, logger) {
   /**
    * Handles commands in a Guild.
    *
@@ -81,7 +81,7 @@ module.exports = function (client) {
   async function onMessage (msg) {
     // If it is an automated message of some sort, return
     if (msg.author.bot || msg.system) return
-    const { userClient, guildClient, memberClient } = await Clients.createClientsFromMember(msg.member || msg.author)
+    const { userClient, guildClient, memberClient } = await Clients.createClientsFromMember(msg.member || msg.author, client, logger)
 
     if (msg.channel.type === 'dm') {
       handleDMCommands(msg, userClient)

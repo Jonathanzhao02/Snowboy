@@ -1,11 +1,10 @@
 const Clients = require('../../bot-util/Clients')
 const Emojis = require('../../config').Emojis
 const CONFIDENCE_THRESHOLD = require('../../config').CONFIDENCE_THRESHOLD
-const Commands = require('../../commands')
 const SnowClient = require('../../structures/SnowClient')
 const CommandRequest = require('../../structures/CommandRequest')
 
-module.exports = function (client) {
+module.exports = function (client, logger) {
   /**
    * Handles creation of new members or new SnowClients for untracked users
    * if voice commands are enabled.
@@ -15,7 +14,7 @@ module.exports = function (client) {
    */
   async function onSpeaking (member, speaking) {
     if (!member || speaking.equals(0) || member.id === client.user.id) return
-    const { userClient, guildClient, memberClient } = await Clients.createClientsFromMember(member)
+    const { userClient, guildClient, memberClient } = await Clients.createClientsFromMember(member, client, logger)
     if (!guildClient.connection || member.voice.channelID !== guildClient.voiceChannel.id || !guildClient.settings.voice) return
     const childLogger = guildClient.logger
 

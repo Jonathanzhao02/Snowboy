@@ -1,34 +1,6 @@
 const UserClient = require('../structures/UserClient')
 const GuildClient = require('../structures/GuildClient')
 const MemberClient = require('../structures/MemberClient')
-const Common = require('./Common')
-
-/**
- * Gets userClient, guildClient, and memberClient from a GuildMember, if they exist.
- *
- * @param {import('discord.js').GuildMember} member The GuildMember to fetch the clients for.
- * @returns {Object} Returns an object containing all existing clients.
- */
-function getClientsFromMember (member) {
-  Common.logger.debug('Fetching clients for %s', member.displayName)
-  // Get the userClient
-  const userClient = Common.botClient.userClients.get(member.id)
-  if (!userClient) Common.logger.warn('No userClient found for %s!', member.displayName)
-
-  // Get the guildClient
-  const guildClient = Common.botClient.guildClients.get(member.guild.id)
-  if (!guildClient) Common.logger.warn('No guildClient found for %s!', member.guild.name)
-
-  // Get the memberClient
-  const memberClient = guildClient.memberClients.get(userClient.id)
-  if (!memberClient) Common.logger.warn('No memberClient found for %s!', member.displayName)
-
-  return {
-    userClient: userClient,
-    guildClient: guildClient,
-    memberClient: memberClient
-  }
-}
 
 /**
  * Creates or fetches existing clients for a GuildMember/User object.
@@ -37,14 +9,15 @@ function getClientsFromMember (member) {
  * Otherwise, returns the userClient, guildClient, and memberClient.
  *
  * @param {import('discord.js').GuildMember | import('discord.js').User} member The member to fetch all information from.
+ * @param {import('discord.js').Client} bot The bot's client.
+ * @param {import('pino')} logger The logger to use for each client.
  * @returns {Object} Returns an Object containing all three clients.
  */
-async function createClientsFromMember (member) {
-  Common.logger.debug('Fetching clients for %s', member.displayName || member.username)
+async function createClientsFromMember (member, bot, logger) {
   // Create a new userConstruct if the User is not currently tracked, loading settings from database
-  let userClient = Common.botClient.userClients.get(member.id)
+  let userClient = bot.userClients.get(member.id)
   if (!userClient) {
-    userClient = new UserClient(member.user ? member.user : member)
+    userClient = new UserClient(member.user ? member.user : member, logger)
     await userClient.init()
   }
 
@@ -52,9 +25,9 @@ async function createClientsFromMember (member) {
   if (!member.guild) return { userClient: userClient }
 
   // Create a new guildConstruct if the Guild is not currently tracked, loading settings from database
-  let guildClient = Common.botClient.guildClients.get(member.guild.id)
+  let guildClient = bot.guildClients.get(member.guild.id)
   if (!guildClient) {
-    guildClient = new GuildClient(member.guild)
+    guildClient = new GuildClient(member.guild, logger)
     await guildClient.init()
   }
 
@@ -73,6 +46,5 @@ async function createClientsFromMember (member) {
 }
 
 module.exports = {
-  getClientsFromMember: getClientsFromMember,
   createClientsFromMember: createClientsFromMember
 }

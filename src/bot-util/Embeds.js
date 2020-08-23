@@ -3,7 +3,6 @@ const Discord = require('discord.js')
 const GuildSettings = require('../structures/GuildSettings')
 const UserSettings = require('../structures/UserSettings')
 const { Emojis } = require('../config')
-const Common = require('./Common')
 const Strings = require('./Strings')
 
 /**
@@ -104,21 +103,22 @@ function createPokemonEmbed (pokemon) {
 /**
  * Creates an embed detailing the bot.
  *
+ * @param {Discord.Client} bot The bot's client.
  * @returns {Discord.MessageEmbed} Returns a message embed detailing the bot.
  */
-function createAboutEmbed () {
+function createAboutEmbed (bot) {
   return new Discord.MessageEmbed()
     .setColor('#fffafa')
     .setTitle('__**About The Bot**__')
     .addField('Description', 'Snowboy is a voice-recognition bot built primarily to play music. ' +
     'It can also be considered an Alexa of sorts, as it has a variety of other functions for users (you!) to play around with.')
-    .addField('Contact', 'To report bugs or anything else you\'d like me to know, please go ahead and use the %report command. ' +
+    .addField('Contact', 'To report bugs or anything else you\'d like me to know, please go ahead and use the `report` command. ' +
     'Please keep in mind that reports should be kept to one message, or Snowboy will not log it in its entirety. ' +
     '**There is currently no support server for Snowboy. This will be updated if one is created.**')
     .addField('For Developers', 'Snowboy was built using NodeJS/Javascript. ' +
     'The different libraries and APIs used for Snowboy include Discord.js, __Wit.ai__, __Snowboy__, Keyv and a few Google Cloud APIs. ' +
     'I\'d highly recommend you to check out the underlined ones; they\'re both excellent, open-source ways to use speech recognition.')
-    .setImage(Common.botClient.user.displayAvatarURL({ size: 2048, format: 'png' }))
+    .setImage(bot.user.displayAvatarURL({ size: 2048, format: 'png' }))
 }
 
 /**
@@ -168,14 +168,15 @@ function createHelpEmbed (commands, command) {
 /**
  * Creates an embed detailing the bot's stats.
  *
+ * @param {Discord.Client} bot The bot's client.
  * @returns {Discord.MessageEmbed} Returns a message embed detailing the bot's stats.
  */
-function createStatsEmbed () {
-  const servers = Common.botClient.guilds.cache.size
+function createStatsEmbed (bot) {
+  const servers = bot.guilds.cache.size
 
-  const secs = Math.floor(Common.botClient.uptime / 1000) % 60
-  const mins = Math.floor(Common.botClient.uptime / 60000) % 60
-  const hrs = Math.floor(Common.botClient.uptime / 3600000)
+  const secs = Math.floor(bot.uptime / 1000) % 60
+  const mins = Math.floor(bot.uptime / 60000) % 60
+  const hrs = Math.floor(bot.uptime / 3600000)
 
   return new Discord.MessageEmbed()
     .setColor('#fffafa')
@@ -188,13 +189,14 @@ function createStatsEmbed () {
  * Creates an embed detailing the bot's invite link.
  *
  * @param {String} link The invite link.
+ * @param {Discord.Client} bot The bot's client.
  * @returns {Discord.MessageEmbed} Returns a message embed detailing the bot's invite link.
  */
-function createInviteEmbed (link) {
+function createInviteEmbed (link, bot) {
   return new Discord.MessageEmbed()
     .setColor('#32cd32')
     .setTitle(`${Emojis.invite} Invite me here!`)
-    .setAuthor('Snowboy', Common.botClient.user.displayAvatarURL({ size: 512, format: 'png' }), link)
+    .setAuthor('Snowboy', bot.user.displayAvatarURL({ size: 512, format: 'png' }), link)
     .setURL(link)
 }
 

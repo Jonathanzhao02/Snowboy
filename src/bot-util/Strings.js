@@ -1,9 +1,9 @@
-const Common = require('./Common')
+const { Paths } = require('../config')
 const Levenshtein = require('fastest-levenshtein')
 const Fs = require('fs')
 const Functions = require('./Functions')
 const CsvParse = require('csv-parse/lib/sync')
-const Pokemon = CsvParse(Fs.readFileSync(Common.defaultResdir + '/pokemon.csv').toString('utf-8')).map(val => val[1])
+const Pokemon = CsvParse(Fs.readFileSync(Paths.defaultResdir + '/pokemon.csv').toString('utf-8')).map(val => val[1])
 
 /**
  * Function to asynchronously replace mentions in a message.

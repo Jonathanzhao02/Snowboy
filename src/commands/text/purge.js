@@ -1,6 +1,4 @@
-const Common = require('../../bot-util/Common')
 const { Emojis } = require('../../config')
-
 const Discord = require('discord.js')
 
 /**
@@ -36,7 +34,7 @@ function purge (context, total, snowflake) {
 
     total = 0
   }
-  let filter = m => m.author.id === Common.botClient.user.id && m.deletable && !m.deleted
+  let filter = m => m.author.id === context.bot.user.id && m.deletable && !m.deleted
   let mmbr
   logger.debug('Received args: %o', context.args)
 
@@ -44,7 +42,7 @@ function purge (context, total, snowflake) {
     switch (context.args[0]) {
       // Include commands in the deletion
       case 'true':
-        filter = m => (m.author.id === Common.botClient.user.id || m.content.startsWith(guildClient.settings.prefix)) && m.deletable && !m.deleted
+        filter = m => (m.author.id === context.bot.user.id || m.content.startsWith(guildClient.settings.prefix)) && m.deletable && !m.deleted
         break
       // Delete all messages
       case 'all':

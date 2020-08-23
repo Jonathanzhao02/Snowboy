@@ -5,7 +5,7 @@ let dashboard
 /**
  * Starts the ipc server for dashboard communication.
  */
-function start () {
+function start (bot, logger) {
   dashboard = spawn('node', [process.env.DASHBOARD_PATH, process.env.LOG_PATH])
   dashboard.stdout.on('data', data => {
     console.log(data.toString())
@@ -13,7 +13,7 @@ function start () {
     const args = message.split(/ +/)
     const commandName = args.shift()
     if (commands.get(commandName)) {
-      commands.get(commandName).execute(args)
+      commands.get(commandName).execute(args, bot, logger)
     }
   })
   dashboard.stderr.on('data', data => {

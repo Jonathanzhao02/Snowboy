@@ -1,9 +1,7 @@
-const Common = require('../../bot-util/Common')
-
-module.exports = function (client) {
+module.exports = function (client, logger) {
   // Sends greeting message when joining a new guild
   client.on('guildCreate', guild => {
-    Common.logger.info('Joined new guild: %s : %s', guild.id, guild.name)
+    logger.info('Joined new guild: %s : %s', guild.id, guild.name)
     let channel = guild.systemChannel
     guild.channels.forEach(c => {
       if (c.type === 'text' && !channel) channel = c

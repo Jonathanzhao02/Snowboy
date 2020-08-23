@@ -1,4 +1,4 @@
-const Common = require('../../bot-util/Common')
+const { Paths } = require('../../config')
 const Fs = require('fs')
 
 /**
@@ -15,7 +15,7 @@ function report (context) {
   } else {
     logger.info('Accepting bug report')
     context.userClient.lastReport = Date.now()
-    const file = Fs.createWriteStream(Common.defaultLogdir + `/${context.msg.createdAt.toISOString()}_${context.msg.createdTimestamp}_REPORT.txt`)
+    const file = Fs.createWriteStream(Paths.defaultLogdir + `/${context.msg.createdAt.toISOString()}_${context.msg.createdTimestamp}_REPORT.txt`)
     file.write(context.args.join(' '))
     file.write('\n')
     file.write(`${context.msg.author.username}#${context.msg.author.discriminator}`)

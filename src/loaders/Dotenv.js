@@ -1,4 +1,4 @@
-module.exports = function (Common) {
-  const env = require('dotenv').config({ path: Common.defaultEnvdir + '/.env' })
+module.exports = function () {
+  const env = require('dotenv').config({ path: require('../config').Paths.defaultEnvdir + '/.env' })
   if (env.error) throw env.error
 }

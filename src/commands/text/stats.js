@@ -9,7 +9,7 @@ function stats (context) {
   const logger = context.logger
   logger.info('Received stats command')
   context.sendMsg(
-    Embeds.createStatsEmbed()
+    Embeds.createStatsEmbed(context.bot)
   )
 }
 

@@ -1,3 +1,17 @@
+const path = require('path')
+
+// Dir for logging
+const defaultLogdir = path.resolve(__dirname, '../logs')
+
+// Dir for databases
+const defaultDbdir = path.resolve(__dirname, '../db')
+
+// Dir for resources
+const defaultResdir = path.resolve(__dirname, './resources')
+
+// Dir for .env
+const defaultEnvdir = path.resolve(__dirname, '../')
+
 // Default bot prefix is '%'
 const DEFAULT_BOT_PREFIX = '%'
 
@@ -107,6 +121,12 @@ module.exports = {
   CONFIDENCE_THRESHOLD: CONFIDENCE_THRESHOLD,
   DEBUG_IDS: DEBUG_IDS,
   MAX_SONGS: MAX_SONGS,
+  Paths: {
+    defaultLogdir: defaultLogdir,
+    defaultDbdir: defaultDbdir,
+    defaultEnvdir: defaultEnvdir,
+    defaultResdir: defaultResdir
+  },
   Timeouts: {
     GUILD_TIMEOUT: GUILD_TIMEOUT,
     MEMBER_TIMEOUT: MEMBER_TIMEOUT,

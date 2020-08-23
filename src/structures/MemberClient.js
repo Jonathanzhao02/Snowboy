@@ -1,4 +1,3 @@
-const Common = require('../bot-util/Common')
 const { Timeouts } = require('../config')
 
 /**
@@ -32,7 +31,7 @@ function MemberClient (member, guildClient) {
    * The UserClient associated with this MemberClient.
    * @type {import('./UserClient')}
    */
-  this.userClient = Common.botClient.userClients.get(member.id)
+  this.userClient = member.client.userClients.get(member.id)
 
   /**
    * The GuildClient associated with this Member Client.
@@ -94,8 +93,8 @@ MemberClient.prototype.stopListening = function () {
 MemberClient.prototype.startTimeout = function () {
   this.logger.debug('Starting timeout')
   this.lastCalled = Date.now()
-  if (this.timeoutId) Common.botClient.clearTimeout(this.timeoutId)
-  this.timeoutId = Common.botClient.setTimeout(() => { this.cleanUp() }, Timeouts.MEMBER_TIMEOUT + 500)
+  if (this.timeoutId) this.member.client.clearTimeout(this.timeoutId)
+  this.timeoutId = this.member.client.setTimeout(() => { this.cleanUp() }, Timeouts.MEMBER_TIMEOUT + 500)
 }
 
 /**

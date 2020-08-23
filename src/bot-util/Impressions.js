@@ -1,5 +1,4 @@
 const { ImpressionThresholds, Emojis } = require('../config')
-const Common = require('./Common')
 const random = require('./Functions').random
 const Keyv = require('./Keyv')
 
@@ -113,11 +112,11 @@ function format (msg, args) {
  */
 function getResponse (func, impression, args, useImpressions) {
   const relation = convertToRelation(useImpressions ? impression : 0)
-  if (!replies.get(func)) Common.logger.warn('No replies for %s!', func)
+  if (!replies.get(func)) throw new Error('No replies for func: ' + func)
   const replyCands = replies.get(func)[relation]
   const replyEmoji = replyEmojis.get(func)[relation]
-  if (!replyCands) Common.logger.warn('No index for %d!', relation)
-  if (!replyEmoji) Common.logger.warn('No emoji index for %d!', relation)
+  if (!replyCands) throw new Error('No index for relation: ' + relation)
+  if (!replyEmoji) throw new Error('No emoji index for relation: ' + relation)
   return `${replyEmoji} **${format(replyCands[random(replyCands.length)], args)}**`
 }
 
@@ -132,7 +131,6 @@ function getResponse (func, impression, args, useImpressions) {
  */
 function updateImpression (id, client, value, useImpressions) {
   if (useImpressions === false) return
-  Common.logger.info('Attempting to update impressions for %s', id)
   if (client.impression + value > ImpressionThresholds.MAX_IMPRESSION || client.impression + value < ImpressionThresholds.MIN_IMPRESSION) return
   client.impression += value
   Keyv.setImpression(id, client.impression)
