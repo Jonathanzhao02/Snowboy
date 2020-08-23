@@ -3,6 +3,7 @@ const Clients = require('../../bot-util/Clients')
 const Commands = require('../../commands')
 const Emojis = require('../../config').Emojis
 const DEBUG_IDS = require('../../config').DEBUG_IDS
+const CommandRequest = require('../../structures/CommandRequest')
 const Fs = require('fs')
 
 module.exports = function (client) {
@@ -83,7 +84,8 @@ module.exports = function (client) {
     }
 
     // Check all relevant command maps for the current command name, and execute it
-    if (Commands.bi.get(commandName)) {
+    new CommandRequest(memberClient, commandName, args, msg).execute()
+    /* if (Commands.bi.get(commandName)) {
       Commands.bi.get(commandName).execute(memberClient, args, msg)
     } else if (Commands.restricted.get(commandName)) {
       Commands.restricted.get(commandName).execute(memberClient, args, msg)
@@ -98,7 +100,7 @@ module.exports = function (client) {
         msg.channel,
         `${Emojis.confused} ***Sorry, I don't understand.***`
       )
-    }
+    } */
 
     guildClient.startTimeout()
     memberClient.startTimeout()

@@ -1,5 +1,6 @@
 const Fs = require('fs')
 const Path = require('path')
+const Usage = require('../bot-util/Usage')
 
 /**
  * bi: Usable in voice or text
@@ -26,6 +27,7 @@ commands.forEach((obj, index) => {
   const cmds = Fs.readdirSync(Path.resolve(__dirname, obj.path)).filter(file => file.endsWith('.js'))
   cmds.forEach(file => {
     const command = require(`${obj.path}/${file}`)
+    command.usages = new Usage(Usage.from(command.usages))
     if (command.aliases) {
       command.aliases.forEach(alias => {
         if (obj.map.get(alias) || allCommands.get(alias)) { throw new Error(`Collision between ${alias}!`) }

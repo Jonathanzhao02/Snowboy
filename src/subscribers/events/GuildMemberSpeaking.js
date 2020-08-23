@@ -3,6 +3,7 @@ const Emojis = require('../../config').Emojis
 const CONFIDENCE_THRESHOLD = require('../../config').CONFIDENCE_THRESHOLD
 const Commands = require('../../commands')
 const SnowClient = require('../../structures/SnowClient')
+const CommandRequest = require('../../structures/CommandRequest')
 
 module.exports = function (client) {
   /**
@@ -71,7 +72,8 @@ module.exports = function (client) {
     memberClient.logger.debug('Understood command as %s and arguments as %o', commandName, args)
 
     // Checks all relevant command maps
-    if (Commands.bi.get(commandName)) {
+    new CommandRequest(memberClient, commandName, args, memberClient.member.voice)
+    /* if (Commands.bi.get(commandName)) {
       Commands.bi.get(commandName).execute(memberClient, args)
     } else if (Commands.restricted.get(commandName)) {
       Commands.restricted.get(commandName).execute(memberClient, args)
@@ -85,7 +87,7 @@ module.exports = function (client) {
         `${Emojis.confused} ***Sorry, I don't understand*** "\`${result.text}\`"`
       )
       memberClient.logger.warn('No command found for %s!', commandName)
-    }
+    } */
   }
 
   /**
