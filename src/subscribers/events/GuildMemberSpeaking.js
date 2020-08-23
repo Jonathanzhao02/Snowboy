@@ -73,21 +73,6 @@ module.exports = function (client) {
 
     // Checks all relevant command maps
     new CommandRequest(memberClient, commandName, args, memberClient.member.voice).execute()
-    /* if (Commands.bi.get(commandName)) {
-      Commands.bi.get(commandName).execute(memberClient, args)
-    } else if (Commands.restricted.get(commandName)) {
-      Commands.restricted.get(commandName).execute(memberClient, args)
-    } else if (Commands.voice.get(commandName)) {
-      Commands.voice.get(commandName).execute(memberClient, args)
-    } else if (Commands.easteregg.get(commandName)) {
-      Commands.easteregg.get(commandName).execute(memberClient, args)
-    } else {
-      memberClient.guildClient.sendMsg(
-        memberClient.guildClient.boundTextChannel,
-        `${Emojis.confused} ***Sorry, I don't understand*** "\`${result.text}\`"`
-      )
-      memberClient.logger.warn('No command found for %s!', commandName)
-    } */
   }
 
   /**

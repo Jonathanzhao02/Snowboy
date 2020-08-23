@@ -85,23 +85,6 @@ module.exports = function (client) {
 
     // Check all relevant command maps for the current command name, and execute it
     new CommandRequest(memberClient, commandName, args, msg).execute()
-    /* if (Commands.bi.get(commandName)) {
-      Commands.bi.get(commandName).execute(memberClient, args, msg)
-    } else if (Commands.restricted.get(commandName)) {
-      Commands.restricted.get(commandName).execute(memberClient, args, msg)
-    } else if (Commands.text.get(commandName)) {
-      Commands.text.get(commandName).execute(memberClient, args, msg)
-    } else if (DEBUG_IDS.includes(memberClient.id) && Commands.debug.get(commandName)) {
-      Commands.debug.get(commandName).execute(memberClient, args, msg)
-    } else if (Commands.easteregg.get(commandName)) {
-      Commands.easteregg.get(commandName).execute(memberClient, args, msg)
-    } else {
-      guildClient.sendMsg(
-        msg.channel,
-        `${Emojis.confused} ***Sorry, I don't understand.***`
-      )
-    } */
-
     guildClient.startTimeout()
     memberClient.startTimeout()
   }
