@@ -11,7 +11,7 @@ const { Emojis } = require('../../config')
 function pokemon (context) {
   const logger = context.logger
   logger.info('Received pokemon command')
-  const name = context.args.join(' ')
+  const name = context.args.join()
   const query = Strings.closestPokemon(name).toLowerCase()
   context.sendMsg(
     query === name ? `${Emojis.search} ***Searching*** \`${query}\`` : `${Emojis.confused} ***I think you meant*** \`${query}\`...`

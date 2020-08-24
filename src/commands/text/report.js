@@ -16,7 +16,7 @@ function report (context) {
     logger.info('Accepting bug report')
     context.userClient.lastReport = Date.now()
     const file = Fs.createWriteStream(Paths.defaultLogdir + `/${context.msg.createdAt.toISOString()}_${context.msg.createdTimestamp}_REPORT.txt`)
-    file.write(context.args.join(' '))
+    file.write(context.args.join())
     file.write('\n')
     file.write(`${context.msg.author.username}#${context.msg.author.discriminator}`)
     file.close()

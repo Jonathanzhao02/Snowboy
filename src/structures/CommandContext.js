@@ -1,3 +1,5 @@
+const CommandArguments = require('./CommandArguments')
+
 /**
  * Provides necessary context for command execution.
  *
@@ -113,9 +115,9 @@ function CommandContext (client, command, args, src) {
 
   /**
    * The command arguments.
-   * @type {String[]}
+   * @type {CommandArguments}
    */
-  this.args = args
+  this.args = new CommandArguments(args, src.mentions)
 
   /**
    * The logger.

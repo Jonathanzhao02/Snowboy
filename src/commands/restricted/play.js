@@ -10,7 +10,7 @@ function play (context) {
   logger.info('Received play command')
 
   // If no query, notify and return
-  if (!context.args || context.args.length === 0) {
+  if (context.args.empty) {
     logger.debug('No query found')
     context.sendMsg(
       `${Emojis.error} ***I need something to play!***`
@@ -18,7 +18,7 @@ function play (context) {
     return
   }
 
-  const query = context.args.join(' ')
+  const query = context.args.join()
   logger.debug('Searching up %s', query)
   context.guildClient.guildPlayer.songQueuer.search(query, context.name, context.channel)
 }

@@ -37,10 +37,9 @@ function purge (context, total, snowflake, limit) {
   }
   let filter = m => m.author.id === context.bot.user.id && m.deletable && !m.deleted
   let mmbr
-  logger.debug('Received args: %o', context.args)
-
-  if (context.args[0]) {
-    switch (context.args[0]) {
+  if (context.args.length === 1 || context.args.length === 2) {
+    const first = context.args.first
+    switch (first) {
       // Include commands in the deletion
       case 'true':
         filter = m => (m.author.id === context.bot.user.id || m.content.startsWith(guildClient.settings.prefix)) && m.deletable && !m.deleted
@@ -67,24 +66,20 @@ function purge (context, total, snowflake, limit) {
         break
       // Delete the messages of the mentioned user
       default:
-        if (!isNaN(context.args[0])) break
-        if (context.msg.mentions && context.msg.mentions.members) mmbr = context.msg.mentions.members.first()
+        mmbr = context.args.extractMemberMention()
         if (!mmbr) {
-          logger.debug('Rejected user due to invalid user: %s', context.args[0])
+          logger.debug('Rejected user due to invalid user')
           context.sendMsg(
-            `${Emojis.error} ***Could not find user \`${context.args[0]}\`***`
+            `${Emojis.error} ***Could not find user!***`
           )
           return
         } else {
           filter = m => m.author.id === mmbr.id && m.deletable && !m.deleted
         }
-        context.args.shift()
         break
     }
-  }
 
-  if (!isNaN(context.args[0]) && !limit) {
-    limit = Number(context.args[0])
+    limit = context.args.extractNumerical()
   }
 
   // Flag that the purge command is already active
@@ -114,7 +109,7 @@ function purge (context, total, snowflake, limit) {
         context.sendMsg(
           [
             `${Emojis.checkmark} **Successfully finished purging, <@${context.id}>!**`,
-            `${Emojis.trash} **Deleted \`${total}\` messages ${mmbr ? `from user \`${mmbr.displayName}\`` : ''}!**`
+            `${Emojis.trash} **Deleted \`${total}\` messages${mmbr ? ` from user \`${mmbr.displayName}\`` : ''}!**`
           ]
         )
       }
