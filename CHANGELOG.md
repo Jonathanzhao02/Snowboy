@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.9.1 (PR #37)
+Purged Common, new CommandArguments object
+* Completely refactored Common out of every file where it sank its dirty little teeth
+* Added new CommandArguments object for command argument parsing
+* Migrated all commands to use new CommandArguments object to simplify argument passing
+
 ## v0.9.0 (PR #36)
 Major command changes, new command, and more!
 * COMMAND CHANGES
