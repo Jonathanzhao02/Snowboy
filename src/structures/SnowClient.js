@@ -1,8 +1,7 @@
 const { Models, Detector } = require('snowboy')
 const { EventEmitter } = require('events')
 const Wit = require('../web-apis/Wit')
-const { Timeouts } = require('../config')
-const Common = require('../bot-util/Common')
+const { Timeouts, Paths } = require('../config')
 
 /**
  * Uses Snowboy and Wit.ai for hotword speech detection, triggering a callback whenever it finishes.
@@ -37,7 +36,7 @@ function SnowClient (memberClient, sensitivity) {
 
   const models = new Models()
   models.add({
-    file: Common.defaultResdir + '/snowboy.umdl',
+    file: Paths.defaultResdir + '/snowboy.umdl',
     sensitivity: sensitivity ? '0.45' : sensitivity,
     hotwords: 'snowboy'
   })
@@ -47,7 +46,7 @@ function SnowClient (memberClient, sensitivity) {
    * @type {Detector}
    */
   this.detector = new Detector({
-    resource: Common.defaultResdir + '/common.res',
+    resource: Paths.defaultResdir + '/common.res',
     models: models,
     audioGain: 2.0,
     language: 'en-US'
@@ -105,9 +104,9 @@ SnowClient.prototype.hotword = function (index, hotword, buffer) {
   })
 
   // Every 50ms, check if the query time has been exceeded or enough silence has elapsed, and finish if it has
-  const intervalID = Common.botClient.setInterval(() => {
+  const intervalID = this.memberClient.member.client.setInterval(() => {
     if (Date.now() - this.lastChunkTime > Timeouts.SILENCE_QUERY_TIME || Date.now() - initialTime > Timeouts.MAX_QUERY_TIME) {
-      Common.botClient.clearInterval(intervalID)
+      this.memberClient.member.client.clearInterval(intervalID)
       flag.emit('finish')
       this.stream.removeListener('data', dataListener)
       this.triggered = false

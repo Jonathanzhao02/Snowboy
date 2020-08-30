@@ -20,7 +20,7 @@ function settings (context) {
   logger.debug('Received args')
   logger.debug(context.args)
   // If no arguments, print the settings embed with all values
-  if (context.args.length === 0) {
+  if (context.args.empty) {
     logger.debug('Printing settings')
     context.sendMsg(
       Embeds.createSettingsEmbed(guildClient.settings, context.userClient.settings)
@@ -40,7 +40,7 @@ function settings (context) {
   // Setting option is for guilds
   if (GuildSettings.descriptions[settingName]) {
     // If only passed in an option name, return information about that option
-    if (context.args.length === 0) {
+    if (context.args.empty) {
       logger.debug('Printing info about %s', settingName)
       context.sendMsg(
         GuildSettings.descriptions[settingName](guildClient.settings)
@@ -63,7 +63,7 @@ function settings (context) {
     )
   // Setting option is for users
   } else {
-    if (context.args.length === 0) {
+    if (context.args.empty) {
       logger.debug('Printing info about %s', settingName)
       context.sendMsg(
         UserSettings.descriptions[settingName](context.userClient.settings)

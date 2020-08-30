@@ -1,5 +1,3 @@
-const Common = require('../../bot-util/Common')
-
 /**
  * Prints the raw impression of a user.
  *
@@ -13,7 +11,7 @@ function rawImpression (context) {
 
   if (context.msg.mentions && context.msg.mentions.members.length > 0) {
     member = context.msg.mentions.members.array()[0]
-    userClient = Common.botClient.userClients.get(member.id)
+    userClient = context.bot.userClients.get(member.id)
   }
 
   context.sendMsg(

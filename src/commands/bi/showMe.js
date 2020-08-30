@@ -11,7 +11,7 @@ const Imgsearch = require('g-i-s')
 function showMe (context) {
   const logger = context.logger
   logger.info('Received showme command')
-  if (!context.args || context.args.length === 0) {
+  if (context.args.empty) {
     logger.debug('No query found')
     context.sendMsg(
       `${Emojis.error} ***I need something to search up!***`
@@ -19,7 +19,7 @@ function showMe (context) {
     return
   }
 
-  const query = context.args.join(' ')
+  const query = context.args.join()
   context.sendMsg(
     `${Emojis.search} ***Searching*** \`${query}\``
   )

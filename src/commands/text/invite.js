@@ -1,5 +1,4 @@
 const Embeds = require('../../bot-util/Embeds')
-const Common = require('../../bot-util/Common')
 const Discord = require('discord.js')
 
 /**
@@ -10,7 +9,7 @@ const Discord = require('discord.js')
 function invite (context) {
   const logger = context.logger
   logger.info('Received invite command')
-  Common.botClient.generateInvite([
+  context.bot.generateInvite([
     Discord.Permissions.FLAGS.CONNECT,
     Discord.Permissions.FLAGS.SPEAK,
     Discord.Permissions.FLAGS.DEAFEN_MEMBERS,
@@ -22,7 +21,7 @@ function invite (context) {
     Discord.Permissions.FLAGS.ADD_REACTIONS
   ]).then(link => {
     context.sendMsg(
-      Embeds.createInviteEmbed(link)
+      Embeds.createInviteEmbed(link, context.bot)
     )
   })
 }

@@ -8,21 +8,15 @@ const { Emojis, Timeouts } = require('../../config')
 async function poll (context) {
   const logger = context.logger
   logger.info('Received poll command')
-  let channel = context.channel
-  const mentionedChannel = context.msg.mentions.channels.first()
-  if (mentionedChannel && mentionedChannel.toString() === context.args[0]) {
-    channel = mentionedChannel
-    context.args.shift()
-  }
-  let duration = Timeouts.POLL_TIME
-  if (!isNaN(context.args[0])) duration = Math.min(Math.floor(context.args.shift() * 1000), Timeouts.MAX_POLL_TIME)
-  if (!context.args[0]) {
+  const channel = context.args.extractChannelMention(1) || context.channel
+  const duration = Math.min(Math.floor(context.args.extractNumerical(1) * 1000), Timeouts.MAX_POLL_TIME) || Timeouts.POLL_TIME
+  if (context.args.empty) {
     context.sendMsg(
       `${Emojis.error} ***No prompt provided!***`
     )
     return
   }
-  const pollPrompt = context.args.join(' ')
+  const pollPrompt = context.args.join()
   const message = await context.guildClient.sendMsg(
     channel,
     `**POLL:** *${pollPrompt}*`

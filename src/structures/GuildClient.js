@@ -1,5 +1,4 @@
 const GuildSettings = require('./GuildSettings')
-const Common = require('../bot-util/Common')
 const Functions = require('../bot-util/Functions')
 const Strings = require('../bot-util/Strings')
 const { Timeouts, Emojis } = require('../config')
@@ -10,9 +9,10 @@ const GuildPlayer = require('./GuildPlayer')
  * Wrapper object for a Guild so the bot is more easily able to access related resources.
  *
  * @param {import('discord.js').Guild} guild The Guild this GuildClient is tracking.
+ * @param {import('pino')} logger The logger to derive from.
  */
-function GuildClient (guild) {
-  Common.logger.info('Creating new GuildClient for %s', guild.name)
+function GuildClient (guild, logger) {
+  logger.info('Creating new GuildClient for %s', guild.name)
 
   /**
    * The Guild's ID.
@@ -84,7 +84,7 @@ function GuildClient (guild) {
    * The logger used for logging.
    * @type {import('pino')}
    */
-  this.logger = Common.logger.child({ guild: guild.id, name: guild.name })
+  this.logger = logger.child({ guild: guild.id, name: guild.name })
 
   /**
    * The playback manager for this GuildClient.
@@ -119,7 +119,7 @@ GuildClient.prototype.init = async function () {
   this.logger.debug('Loading settings')
   this.settings = await GuildSettings.load(this.id)
   this.logger.debug('Read settings as %o', this.settings)
-  Common.botClient.guildClients.set(this.guild.id, this)
+  this.guild.me.client.guildClients.set(this.guild.id, this)
 }
 
 /**
@@ -149,8 +149,8 @@ GuildClient.prototype.sendMsg = async function (channel, msg, opts) {
 GuildClient.prototype.startTimeout = function () {
   this.logger.info('Starting expiration timer')
   this.lastCalled = Date.now()
-  if (this.timeoutId) Common.botClient.clearTimeout(this.timeoutId)
-  this.timeoutId = Common.botClient.setTimeout(() => { this.cleanUp() }, Timeouts.GUILD_TIMEOUT + 500)
+  if (this.timeoutId) this.guild.me.client.clearTimeout(this.timeoutId)
+  this.timeoutId = this.guild.me.client.setTimeout(() => { this.cleanUp() }, Timeouts.GUILD_TIMEOUT + 500)
 }
 
 /**
@@ -158,7 +158,7 @@ GuildClient.prototype.startTimeout = function () {
  */
 GuildClient.prototype.startAloneTimeout = function () {
   this.logger.info('Starting alone timer')
-  Common.botClient.setTimeout(() => {
+  this.guild.me.client.setTimeout(() => {
     // Check again that the channel exists and is empty before leaving
     if (this.voiceChannel?.members.size === 1) {
       this.logger.info('Leaving channel, only member remaining')
@@ -190,7 +190,7 @@ GuildClient.prototype.cleanUp = function () {
       this.disconnect()
     } else if (!this.activePoll) {
       this.logger.debug('Deleting guildClient')
-      Common.botClient.guildClients.delete(this.guild.id)
+      this.guild.me.client.guildClients.delete(this.guild.id)
     }
   }
 }

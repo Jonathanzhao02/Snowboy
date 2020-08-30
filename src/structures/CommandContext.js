@@ -1,3 +1,5 @@
+const CommandArguments = require('./CommandArguments')
+
 /**
  * Provides necessary context for command execution.
  *
@@ -56,13 +58,13 @@ function CommandContext (client, command, args, src) {
 
     /**
      * The calling userClient.
-     * @type {import('./UserClient')?}
+     * @type {import('./UserClient')}
      */
     this.userClient = client.userClient
 
     /**
      * The VoiceState of the calling memberClient.
-     * @type {import('discord.js').VoiceState}
+     * @type {import('discord.js').VoiceState?}
      */
     this.voiceState = client.member.voice
 
@@ -75,18 +77,6 @@ function CommandContext (client, command, args, src) {
     this.sendMsg = this.guildClient.sendMsg.bind(this.guildClient, this.channel)
 
     /**
-     * The name of the requester.
-     * @type {String}
-     */
-    this.name = client.member.displayName
-
-    /**
-     * The ID of the requester.
-     * @type {String}
-     */
-    this.id = client.member.id
-
-    /**
      * Whether the command is from a guild or a DM.
      * @type {'GUILD' | 'DM'}
      */
@@ -94,12 +84,28 @@ function CommandContext (client, command, args, src) {
   } else if (client.constructor.name === 'UserClient') {
     this.userClient = client
     this.sendMsg = client.sendMsg.bind(this.userClient)
-    this.name = client.user.username
-    this.id = client.user.id
     this.type = 'DM'
   } else {
     throw new Error('Invalid client data type: ' + client.constructor.name)
   }
+
+  /**
+   * The bot's client.
+   * @type {import('discord.js').Client}
+   */
+  this.bot = this.userClient.user.client
+
+  /**
+   * The name of the requester.
+   * @type {String}
+   */
+  this.name = this.userClient.user.username
+
+  /**
+   * The ID of the requester.
+   * @type {String}
+   */
+  this.id = this.userClient.id
 
   /**
    * The command name.
@@ -109,9 +115,9 @@ function CommandContext (client, command, args, src) {
 
   /**
    * The command arguments.
-   * @type {String[]}
+   * @type {CommandArguments}
    */
-  this.args = args
+  this.args = new CommandArguments(args, src.mentions)
 
   /**
    * The logger.

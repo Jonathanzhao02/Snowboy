@@ -1,5 +1,4 @@
 const UserSettings = require('./UserSettings')
-const Common = require('../bot-util/Common')
 const Keyv = require('../bot-util/Keyv')
 const Impressions = require('../bot-util/Impressions')
 
@@ -7,9 +6,10 @@ const Impressions = require('../bot-util/Impressions')
  * Wrapper object for a User so that the bot can easily access all necessary resources.
  *
  * @param {import('discord.js').User} user The User this UserClient is tracking.
+ * @param {import('pino')} logger The logger to derive from.
  */
-function UserClient (user) {
-  Common.logger.info('Creating user construct for %s', user.username)
+function UserClient (user, logger) {
+  logger.info('Creating user construct for %s', user.username)
 
   /**
    * The ID of the User associated with this UserClient.
@@ -51,7 +51,7 @@ function UserClient (user) {
    * The logger used for logging.
    * @type {import('pino')}
    */
-  this.logger = Common.logger.child({ user: user.id, name: user.username })
+  this.logger = logger.child({ user: user.id, name: user.username })
 
   this.logger.debug(this)
 }
@@ -68,7 +68,7 @@ UserClient.prototype.init = async function () {
   this.logger.debug('Loading impression')
   this.impression = await Keyv.getImpression(this.id) || 0
   this.logger.debug('Read impression as %d', this.impression)
-  Common.botClient.userClients.set(this.id, this)
+  this.user.client.userClients.set(this.id, this)
 }
 
 /**

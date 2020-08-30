@@ -10,7 +10,7 @@ const Gsearch = require('../../web-apis/Gsearch')
 function search (context) {
   const logger = context.logger
   logger.info('Received search command')
-  if (!context.args || context.args.length === 0) {
+  if (context.args.empty) {
     logger.debug('No query found')
     context.sendMsg(
       `${Emojis.error} ***I need something to search up!***`
@@ -18,7 +18,7 @@ function search (context) {
     return
   }
 
-  const query = context.args.join(' ')
+  const query = context.args.join()
   context.sendMsg(
     `${Emojis.search} ***Searching*** \`${query}\``
   )

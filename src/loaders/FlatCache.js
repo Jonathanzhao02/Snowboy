@@ -1,5 +1,6 @@
+const { Paths } = require('../config')
 const FlatCache = require('flat-cache')
 
-module.exports = function (Common) {
-  Common.set('pokeApiCache', FlatCache.load(Common.defaultDbdir + '/flat.cache'))
+module.exports = function () {
+  return FlatCache.load(Paths.defaultDbdir + '/flat.cache')
 }

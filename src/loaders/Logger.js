@@ -1,12 +1,13 @@
+const { Paths } = require('../config')
 const Pino = require('pino')
 const Fs = require('fs')
 
-module.exports = function (Common) {
+module.exports = function () {
   // Create logger
-  const defaultLogpath = Common.defaultLogdir + '/latest.log'
+  const defaultLogpath = Paths.defaultLogdir + '/latest.log'
 
-  if (!Fs.existsSync(Common.defaultLogdir)) {
-    Fs.mkdirSync(Common.defaultLogdir)
+  if (!Fs.existsSync(Paths.defaultLogdir)) {
+    Fs.mkdirSync(Paths.defaultLogdir)
   }
 
   // Delete existing log
@@ -38,5 +39,5 @@ module.exports = function (Common) {
     logger.level = 'silent'
   }
 
-  Common.set('logger', logger)
+  return logger
 }

@@ -1,4 +1,4 @@
-module.exports = function (client, Common) {
+module.exports = function (client) {
   client.guildClients = new Map() // to keep track of individual active guilds
   client.userClients = new Map() // to keep track of individual user bug reports
 
@@ -6,6 +6,4 @@ module.exports = function (client, Common) {
   client.on('error', error => {
     throw error
   })
-
-  Common.set('botClient', client)
 }

@@ -9,7 +9,7 @@ const Strings = require('../../bot-util/Strings')
 function repeat (context) {
   const logger = context.logger
   logger.info('Received repeat command')
-  const message = context.args.join(' ')
+  const message = context.args.join()
   context.sendMsg(
     `${Emojis.loop} *\u{201c}${Strings.beautify(message)}\u{201d}* \n   ***${('       \u{2013}  ' + context.name)}***`
   )

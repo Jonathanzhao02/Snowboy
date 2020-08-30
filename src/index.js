@@ -1,11 +1,11 @@
 const Discord = require('discord.js')
 const client = new Discord.Client()
 
-require('./loaders')(client)
-require('./subscribers')(client)
+const logger = require('./loaders')(client)
+require('./subscribers')(client, logger)
 
 const Admin = require('./snowboy-web-admin')
-Admin.start()
+Admin.start(client, logger)
 
 // Switch between testing bot and (future) production bot
 if (process.argv.includes('-t') || process.argv.includes('--test')) {

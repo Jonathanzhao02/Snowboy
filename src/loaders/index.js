@@ -1,20 +1,16 @@
 const Discord = require('./Discord')
 const Logger = require('./Logger')
-const Keyv = require('./Keyv')
 const FlatCache = require('./FlatCache')
 const WebApis = require('./WebApis')
 const Process = require('./Process')
-const Paths = require('./Paths')
 const Dotenv = require('./Dotenv')
-const Common = require('../bot-util/Common')
 
 module.exports = function (client) {
-  Paths(Common)
-  Dotenv(Common)
-  Discord(client, Common)
-  Logger(Common)
-  Keyv(Common)
-  FlatCache(Common)
-  Process(Common)
-  WebApis()
+  Dotenv()
+  const logger = Logger()
+  const cache = FlatCache()
+  Process(client, cache, logger)
+  WebApis(cache)
+  Discord(client)
+  return logger
 }
