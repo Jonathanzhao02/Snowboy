@@ -22,7 +22,7 @@ This should run the bot.
 Some command line arguments can be passed in, such as `-t` or `--testing` to use the testing bot account.
 
 There are a few environmental variables/keys/tokens which need to be set for the bot to run properly.
-Please contact me directly and I will share details privately with you.
+Most of these can be acquired for completely free and should not incur any fees from testing. These should be created in a .env file.
 
 ## Contributing
 Just read CONTRIBUTING.md real quick.
