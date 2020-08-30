@@ -1,6 +1,5 @@
 # SnowBoy
 Welcome to the Snowboy Discord bot repository!
-If you were not invited, please kindly leave, it's a private repo!
 
 ## About
 Snowboy is a voice-activated Discord bot built with discord.js.
@@ -26,4 +25,4 @@ There are a few environmental variables/keys/tokens which need to be set for the
 Please contact me directly and I will share details privately with you.
 
 ## Contributing
-Just read CONTRIBUTING.md real quick. Right now, it's private, so again, if I didn't invite you, kindly leave.
+Just read CONTRIBUTING.md real quick.
