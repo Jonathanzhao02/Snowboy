@@ -1,6 +1,6 @@
 {
-  "name": "discordtest",
-  "version": "1.0.0",
+  "name": "snowboy",
+  "version": "0.9.1",
   "description": "Testing with discordjs",
   "main": "./src/index.js",
   "private": true,
