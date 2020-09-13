@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Testing with discordjs",
   "main": "./src/index.js",
+  "private": true,
   "scripts": {
     "test": "mocha --recursive"
   },
