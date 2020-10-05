@@ -8,10 +8,11 @@ const Functions = require('../../bot-util/Functions')
  */
 function bingus (context) {
   const logger = context.logger
-  const result = Functions.random(2)
   let count = 1
   let repeats = 0
-  if (!context.args.empty) count = context.args.extractNumerical()
+  let result = Functions.random(2)
+  if (context.args.containsNumerical()) count = context.args.extractNumerical()
+  if (!context.args.empty) result = context.args.pop() === 'love'
   logger.info('Received bingus command')
   const intervalID = context.bot.setInterval(_ => {
     context.sendMsg(
