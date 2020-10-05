@@ -26,6 +26,7 @@ function showMe (context) {
   logger.debug('Searching up %s', query)
   Imgsearch(query, async (error, results) => {
     if (error) throw error
+    results = Functions.shuffle(results)
 
     while (results.length > 0) {
       const result = results.shift()

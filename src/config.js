@@ -43,7 +43,7 @@ const POLL_TIME = 30000
 const MAX_POLL_TIME = 1800000
 
 // Threshold of how confident Snowboy should be in an intent before accepting it
-const CONFIDENCE_THRESHOLD = 0.7
+const CONFIDENCE_THRESHOLD = 0.6
 
 // Maximum time for a voice query command
 const MAX_QUERY_TIME = 8000
@@ -117,6 +117,10 @@ const EMOJIS = {
   n: '🇳'
 }
 
+// Miscellaneous config constants
+const LOVE_BINGUS = 'https://tenor.com/view/bingus-cat-hairless-love-bingus-bingus-club-gif-18607003'
+const HATE_BINGUS = 'https://tenor.com/view/bingus-stupid-bingus-toxicbabes-gif-18572626'
+
 module.exports = {
   CONFIDENCE_THRESHOLD: CONFIDENCE_THRESHOLD,
   DEBUG_IDS: DEBUG_IDS,
@@ -161,5 +165,9 @@ module.exports = {
     MAX_IMPRESSION: MAX_IMPRESSION,
     MIN_IMPRESSION: MIN_IMPRESSION
   },
-  Emojis: EMOJIS
+  Emojis: EMOJIS,
+  Misc: {
+    LOVE_BINGUS: LOVE_BINGUS,
+    HATE_BINGUS: HATE_BINGUS
+  }
 }

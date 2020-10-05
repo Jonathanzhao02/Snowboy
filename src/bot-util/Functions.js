@@ -13,6 +13,22 @@ function random (bound) {
 }
 
 /**
+ * Shuffles an array.
+ *
+ * @param {Array} a The Array to shuffle.
+ * @returns {Array} Returns the shuffled array.
+ */
+function shuffle (a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    const temp = a[i]
+    a[i] = a[j]
+    a[j] = temp
+  }
+  return a
+}
+
+/**
  * Function to asynchronously iterate over an array.
  *
  * @param {Array | Map} ar The Array to be iterated over.
@@ -95,6 +111,7 @@ function checkVoicePermissions (channel) {
 
 module.exports = {
   random: random,
+  shuffle: shuffle,
   forEachAsync: forEachAsync,
   validateURL: validateURL,
   checkTextPermissions: checkTextPermissions,
