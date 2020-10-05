@@ -12,6 +12,9 @@ const defaultResdir = path.resolve(__dirname, './resources')
 // Dir for .env
 const defaultEnvdir = path.resolve(__dirname, '../')
 
+// If voice commands are activated at all
+const USE_VOICE = false
+
 // Default bot prefix is '%'
 const DEFAULT_BOT_PREFIX = '%'
 
@@ -125,6 +128,7 @@ module.exports = {
   CONFIDENCE_THRESHOLD: CONFIDENCE_THRESHOLD,
   DEBUG_IDS: DEBUG_IDS,
   MAX_SONGS: MAX_SONGS,
+  USE_VOICE,
   Paths: {
     defaultLogdir: defaultLogdir,
     defaultDbdir: defaultDbdir,

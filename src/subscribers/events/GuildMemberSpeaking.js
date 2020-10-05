@@ -1,6 +1,5 @@
 const Clients = require('../../bot-util/Clients')
-const Emojis = require('../../config').Emojis
-const CONFIDENCE_THRESHOLD = require('../../config').CONFIDENCE_THRESHOLD
+const { CONFIDENCE_THRESHOLD, USE_VOICE, Emojis } = require('../../config')
 const SnowClient = require('../../structures/SnowClient')
 const CommandRequest = require('../../structures/CommandRequest')
 
@@ -16,6 +15,7 @@ module.exports = function (client, logger) {
     if (!member || speaking.equals(0) || member.id === client.user.id) return
     const { userClient, guildClient, memberClient } = await Clients.createClientsFromMember(member, client, logger)
     if (!guildClient.connection || member.voice.channelID !== guildClient.voiceChannel.id || !guildClient.settings.voice) return
+    if (!USE_VOICE) return
     const childLogger = guildClient.logger
 
     // If the member is not being listened to, create a new SnowClient and process the audio
