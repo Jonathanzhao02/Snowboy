@@ -11,7 +11,8 @@ function bingus (context) {
   let count = 1
   let repeats = 0
   let result = Functions.random(2)
-  if (context.args.containsNumerical()) count = context.args.extractNumerical()
+  let index = -1
+  if ((index = context.args.findNumerical()) > -1) count = Number(context.args.extract(index))
   if (!context.args.empty) result = context.args.pop() === 'love'
   logger.info('Received bingus command')
   const intervalID = context.bot.setInterval(_ => {

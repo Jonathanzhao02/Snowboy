@@ -75,11 +75,11 @@ CommandArguments.prototype.extractNumerical = function (max = this.data.length) 
  * Checks if a numerical argument exists.
  *
  * @param {Number} max The exclusive maximum argument position to read to.
- * @returns {boolean} Returns whether it exists.
+ * @returns {Number} Returns the index if it exists, -1 if it doesn't.
  */
-CommandArguments.prototype.containsNumerical = function (max = this.data.length) {
+CommandArguments.prototype.findNumerical = function (max = this.data.length) {
   const index = this.data.findIndex((val, i) => i < max && !isNaN(val))
-  return index !== -1
+  return index
 }
 
 /**
@@ -111,12 +111,12 @@ CommandArguments.prototype.extractChannelMention = function (max = this.data.len
  * Checks if a channel mention exists.
  *
  * @param {Number} max The exclusive maximum argument position to read to.
- * @returns {boolean} Returns whether it exists.
+ * @returns {Number} Returns the index if it exists, -1 if it doesn't.
  */
-CommandArguments.prototype.containsChannelMention = function (max = this.data.length) {
-  if (!this.mentions) return false
+CommandArguments.prototype.findChannelMention = function (max = this.data.length) {
+  if (!this.mentions) return -1
   const index = this.data.findIndex((val, index) => index < max && this.mentions.channels.find(chan => chan.toString() === val))
-  return index !== -1
+  return index
 }
 
 /**
@@ -152,12 +152,12 @@ CommandArguments.prototype.extractMemberMention = function (max = this.data.leng
  * Checks if a member mention exists.
  *
  * @param {Number} max The exclusive maximum argument position to read to.
- * @returns {boolean} Returns whether it exists.
+ * @returns {Number} Returns the index if it exists, -1 if it doesn't.
  */
-CommandArguments.prototype.containsMemberMention = function (max = this.data.length) {
-  if (!this.mentions) return false
+CommandArguments.prototype.findMemberMention = function (max = this.data.length) {
+  if (!this.mentions) return -1
   const index = this.data.findIndex((val, index) => index < max && this.mentions.members.find(memb => memb.toString() === val || memb.toString() === val.replace('!', '')))
-  return index !== -1
+  return index
 }
 
 /**
@@ -189,12 +189,12 @@ CommandArguments.prototype.extractUserMention = function (max = this.data.length
  * Checks if a user mention exists.
  *
  * @param {Number} max The exclusive maximum argument position to read to.
- * @returns {boolean} Returns whether it exists.
+ * @returns {Number} Returns the index if it exists, -1 if it doesn't.
  */
-CommandArguments.prototype.containsUserMention = function (max = this.data.length) {
-  if (!this.mentions) return false
+CommandArguments.prototype.findUserMention = function (max = this.data.length) {
+  if (!this.mentions) return -1
   const index = this.data.findIndex((val, index) => index < max && this.mentions.users.find(usr => usr.toString() === val))
-  return index !== -1
+  return index
 }
 
 /**
@@ -234,10 +234,20 @@ CommandArguments.prototype.get = function (index) {
 }
 
 /**
+ * Extracts the specified index from the arguments.
+ *
+ * @param {Number} index The index to fetch.
+ * @returns {String} Extracts the positional argument.
+ */
+CommandArguments.prototype.extract = function (index) {
+  return this.data.splice(index, 1)
+}
+
+/**
  * Returns the first argument that meets the condition, if it exists.
  *
  * @param {Function} filter The filter to apply.
- * @returns {Number} Returns the first numerical argument.
+ * @returns {Number} Returns the first argument matching the filter.
  */
 CommandArguments.prototype.where = function (filter) {
   return this.data.find(filter)
